@@ -1,0 +1,131 @@
+{
+  "identifier" : "4050A1E8",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "24.99",
+      "familyShareable" : false,
+      "internalID" : "B1F2C3D4-5E6A-47B8-9C0D-1E2F3A4B5C6D",
+      "localizations" : [
+        {
+          "description" : "All PRO features forever. Pay once.",
+          "displayName" : "eNDS PRO Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "iNDSPROLifetime",
+      "referenceName" : "eNDS PRO Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "CPJ98JGHA8",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21600001",
+      "localizations" : [],
+      "name" : "eNDS PRO",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6800000001",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Remove ads & unlock all PRO features.",
+              "displayName" : "eNDS PRO Weekly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "iNDSPRO",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "eNDS PRO Weekly",
+          "subscriptionGroupID" : "21600001",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "12.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6800000002",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Remove ads & unlock all PRO features.",
+              "displayName" : "eNDS PRO Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "iNDSPROYearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "eNDS PRO Yearly",
+          "subscriptionGroupID" : "21600001",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

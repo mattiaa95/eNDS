@@ -1,0 +1,175 @@
+import Foundation
+import SwiftUI
+
+@MainActor
+final class ROMListViewModel: ObservableObject {
+    enum SortOption: String, CaseIterable, Identifiable {
+        case name = "Name"
+        case dateAdded = "Added"
+        case lastPlayed = "Played"
+        case size = "Size"
+
+        var id: String { rawValue }
+
+        /// Localized label for the sort control. Separate from `rawValue`,
+        /// which is the persistence key and must stay English.
+        var displayName: LocalizedStringKey {
+            switch self {
+            case .name: return "Name"
+            case .dateAdded: return "Added"
+            case .lastPlayed: return "Played"
+            case .size: return "Size"
+            }
+        }
+    }
+
+    /// Library layout. Only grid/classic per spec — no separate "list" mode.
+    enum ViewMode: String {
+        case grid
+        case classic
+
+        var next: ViewMode { self == .grid ? .classic : .grid }
+        var iconName: String { self == .grid ? "square.grid.2x2" : "rectangle.grid.1x2" }
+    }
+
+    @Published private(set) var romFiles: [ROMFile] = []
+    @Published private(set) var filteredROMs: [ROMFile] = []
+    @Published var searchQuery = "" {
+        didSet { applyFiltersAndSort() }
+    }
+    @Published var sortOption: SortOption = .name {
+        didSet { applyFiltersAndSort() }
+    }
+    @Published var importErrorMessage: String?
+    @Published var biosInstalled = BIOSManager.biosInstalled
+
+    // Persisted like iGBA's own `romViewMode` — a computed wrapper around
+    // `@AppStorage` so toggling it still publishes through `objectWillChange`.
+    @AppStorage("romViewMode") private var viewModeRaw: String = ViewMode.grid.rawValue
+    var viewMode: ViewMode {
+        get { ViewMode(rawValue: viewModeRaw) ?? .grid }
+        set {
+            objectWillChange.send()
+            viewModeRaw = newValue.rawValue
+        }
+    }
+
+    /// Most recently played ROM, if any — powers the "Continue" row above the
+    /// grid/classic content.
+    var continuePlayingROM: ROMFile? {
+        romFiles
+            .filter { $0.lastPlayedDate != nil }
+            .max { ($0.lastPlayedDate ?? .distantPast) < ($1.lastPlayedDate ?? .distantPast) }
+    }
+
+    init() {
+        reload()
+    }
+
+    func reload() {
+        do {
+            romFiles = try ROMStorageManager.listROMs()
+            biosInstalled = BIOSManager.biosInstalled
+            applyFiltersAndSort()
+        } catch {
+            debugLog("Failed to load ROM library: \(error.localizedDescription)")
+            importErrorMessage = error.localizedDescription
+        }
+    }
+
+    /// Imports every URL (any mix of `.nds`/`.zip`/`.7z`/`.sav`), reloading
+    /// once at the end. Per-URL hard failures (thrown errors) and per-entry
+    /// soft failures inside an archive (e.g. one duplicate among five ROMs)
+    /// are both merged into `importErrorMessage` rather than aborting the batch.
+    @discardableResult
+    func importFiles(from urls: [URL], replaceExisting: Bool = false) -> ROMImportResult {
+        var aggregate = ROMImportResult()
+        var messages: [String] = []
+
+        for url in urls {
+            do {
+                let result = try ROMStorageManager.importAny(from: url, replaceExisting: replaceExisting)
+                aggregate.importedROMURLs += result.importedROMURLs
+                aggregate.importedSaveURLs += result.importedSaveURLs
+                aggregate.failureMessages += result.failureMessages
+                messages += result.failureMessages
+            } catch {
+                messages.append(error.localizedDescription)
+                debugLog("Import failed for \(url.lastPathComponent): \(error.localizedDescription)")
+            }
+        }
+
+        reload()
+        importErrorMessage = messages.isEmpty ? nil : messages.joined(separator: "\n")
+        return aggregate
+    }
+
+    func toggleFavorite(_ rom: ROMFile) {
+        UserDefaults.standard.set(!rom.isFavorite, forKey: "\(rom.filename)_isFavorite")
+        INDSHaptics.light()
+        // Deliberately NOT reload(): `isFavorite` reads straight from
+        // UserDefaults, so the in-memory ROMFiles are already current. A full
+        // reload would re-open and re-parse every ROM's header and banner from
+        // disk, on the main actor — two file reads per game before the star
+        // even flips. Re-sorting is all this needs.
+        applyFiltersAndSort()
+    }
+
+    func rename(_ rom: ROMFile, toBaseName newBaseName: String) {
+        do {
+            try ROMStorageManager.renameROM(rom, toBaseName: newBaseName)
+            reload()
+        } catch {
+            debugLog("Failed to rename ROM \(rom.filename): \(error.localizedDescription)")
+            importErrorMessage = error.localizedDescription
+        }
+    }
+
+    func delete(_ rom: ROMFile, alsoDeleteSaveData: Bool) {
+        do {
+            try ROMStorageManager.deleteROM(rom, alsoDeleteSaveData: alsoDeleteSaveData)
+            reload()
+        } catch {
+            debugLog("Failed to delete ROM \(rom.filename): \(error.localizedDescription)")
+            importErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func applyFiltersAndSort() {
+        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        filteredROMs = romFiles.filter { rom in
+            query.isEmpty
+                || rom.filename.lowercased().contains(query)
+                || rom.displayName.lowercased().contains(query)
+                || rom.gameCode.lowercased().contains(query)
+        }
+
+        switch sortOption {
+        case .name:
+            filteredROMs.sort { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
+        case .dateAdded:
+            filteredROMs.sort { $0.creationDate > $1.creationDate }
+        case .lastPlayed:
+            filteredROMs.sort { lhs, rhs in
+                switch (lhs.lastPlayedDate, rhs.lastPlayedDate) {
+                case let (l?, r?): return l > r
+                case (.some, nil): return true
+                case (nil, .some): return false
+                case (nil, nil): return lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
+                }
+            }
+        case .size:
+            filteredROMs.sort { ($0.fileSize ?? 0) > ($1.fileSize ?? 0) }
+        }
+
+        // Favourites float to the top of whichever sort is active. Until now
+        // the star was stored and drawn but changed nothing — you could mark a
+        // game and it stayed exactly where it was, which makes the feature look
+        // broken rather than absent. A stable partition keeps the chosen sort
+        // intact inside each group.
+        let favourites = filteredROMs.filter(\.isFavorite)
+        if !favourites.isEmpty {
+            filteredROMs = favourites + filteredROMs.filter { !$0.isFavorite }
+        }
+    }
+}

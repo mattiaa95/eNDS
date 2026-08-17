@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  eNDS privacy manifest.
+
+	  Written from scratch for this app rather than copied from a sibling: a
+	  stale manifest carried over between apps is how a sibling app ended up declaring a
+	  tracking domain it does not use. Everything below was verified against
+	  this codebase.
+
+	  No tracking, no tracking domains, and no collected data types: eNDS has no
+	  analytics, no advertising SDK and no server of its own. The only
+	  required-reason APIs it touches are UserDefaults (settings, entitlement
+	  cache, per-game profiles) and file timestamps (the library's "date added"
+	  and the save-state slot dates), both on files the app itself owns.
+	-->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<!-- Settings, PRO entitlement cache, per-game profiles, honeymoon
+			     start date. Read and written only by this app. -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+		<dict>
+			<!-- Creation date of imported ROMs (library "Added" sort) and
+			     modification dates of save states and the battery-save backup.
+			     Files inside the app's own container, never elsewhere. -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

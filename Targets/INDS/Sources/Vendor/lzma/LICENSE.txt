@@ -1,0 +1,29 @@
+LZMA SDK (7-Zip "C" sources) -- Copyright (C) 1999-2024 Igor Pavlov.
+
+Source: https://github.com/ip7z/7zip (official 7-Zip repository), tag 24.09.
+Files vendored here are an unmodified, byte-for-byte copy of the .7z
+*decoder*-side subset of that repository's `C/` directory: just enough to
+open a .7z archive and extract entries (7zArcIn.c/7zDec.c + the LZMA/LZMA2
+decompressors + the BCJ2/Bra/Delta filter decoders they can dispatch to +
+their supporting Alloc/Buf/Crc/File/Stream/CpuArch plumbing). No encoder,
+no CLI (`Util/7z/7zMain.c` was read only as a reference for the
+SzArEx_Open/SzArEx_Extract call sequence, never copied), no unrelated
+codecs (PPMd is compiled out by default via `Z7_PPMD_SUPPORT`; AES, LZFSE,
+ZSTD, BWT/RAR support were never included).
+
+License
+-------
+Per this repository's own `DOC/License.txt`: "Some files are public domain
+files, if public domain status is stated in source file." Every file
+vendored in this directory carries exactly that statement in its own
+top-of-file comment, e.g.:
+
+    /* LzmaDec.c -- LZMA Decoder
+    2023-04-07 : Igor Pavlov : Public domain */
+
+None of the LGPL-licensed, BSD-licensed (LZFSE/ZSTD/XXH64) or unRAR-
+restricted files from the wider 7-Zip project are part of this subset.
+
+Used by (see ../../Model/NDS7zExtractor.swift and Sz7zShim.c/.h): read-only
+.7z archive extraction for ROM import, mirroring how ../minizip is used for
+.zip import.
