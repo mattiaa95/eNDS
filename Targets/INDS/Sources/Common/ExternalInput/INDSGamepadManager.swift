@@ -35,6 +35,78 @@
 
 import GameController
 
+/// Where a controller's physical elements actually live.
+///
+/// iOS only gives a controller an `extendedGamepad` when it fits that profile
+/// exactly; anything it cannot classify has none. An 8BitDo FlipPad wired over
+/// USB-C is one of those, and code that reads only `extendedGamepad` wires
+/// nothing at all for it — the pad connects, the touch controls disappear, and
+/// no button does anything. (Reported against iGBA, fixed there first; this is
+/// the same bug and the same fix.)
+///
+/// So every element is resolved twice: the typed property first, so nothing
+/// changes for the pads that already worked, then by name off
+/// `physicalInputProfile`, which every controller has whatever class iOS picked
+/// for it. Both the gameplay path and the mapping screen resolve through here,
+/// so a row that lights up is a button the game will actually read.
+enum INDSControllerElements {
+
+    /// The physical inputs the mapping store knows, in display order.
+    static let physicalKeys = ["A", "B", "X", "Y", "L1", "R1", "L2", "R2", "Options"]
+
+    static func button(_ key: String, on controller: GCController) -> GCControllerButtonInput? {
+        let gamepad = controller.extendedGamepad
+        let profile = controller.physicalInputProfile
+
+        switch key {
+        case "A":       return gamepad?.buttonA       ?? profile.buttons[GCButtonElementName.a.rawValue]
+        case "B":       return gamepad?.buttonB       ?? profile.buttons[GCButtonElementName.b.rawValue]
+        case "X":       return gamepad?.buttonX       ?? profile.buttons[GCButtonElementName.x.rawValue]
+        case "Y":       return gamepad?.buttonY       ?? profile.buttons[GCButtonElementName.y.rawValue]
+        case "L1":      return gamepad?.leftShoulder  ?? profile.buttons[GCButtonElementName.leftShoulder.rawValue]
+        case "R1":      return gamepad?.rightShoulder ?? profile.buttons[GCButtonElementName.rightShoulder.rawValue]
+        case "L2":      return gamepad?.leftTrigger   ?? profile.buttons[GCButtonElementName.leftTrigger.rawValue]
+        case "R2":      return gamepad?.rightTrigger  ?? profile.buttons[GCButtonElementName.rightTrigger.rawValue]
+        case "Options": return gamepad?.buttonOptions ?? profile.buttons[GCButtonElementName.options.rawValue]
+        default:        return nil
+        }
+    }
+
+    /// Every button this controller actually has, paired with its mapping key.
+    static func buttons(on controller: GCController) -> [(key: String, button: GCControllerButtonInput)] {
+        physicalKeys.compactMap { key in
+            button(key, on: controller).map { (key, $0) }
+        }
+    }
+
+    static func directionPad(on controller: GCController) -> GCControllerDirectionPad? {
+        controller.extendedGamepad?.dpad
+            ?? controller.physicalInputProfile.dpads[GCDirectionPadElementName.directionPad.rawValue]
+    }
+
+    static func thumbstick(on controller: GCController) -> GCControllerDirectionPad? {
+        if let stick = controller.extendedGamepad?.leftThumbstick { return stick }
+
+        let profile = controller.physicalInputProfile
+        if let stick = profile.dpads[GCDirectionPadElementName.leftThumbstick.rawValue] { return stick }
+
+        // iOS 26 added a generic name for devices with a single stick and no
+        // left/right distinction — the same devices that get no extendedGamepad.
+        // It resolves to nil on a normal pad, so this costs those nothing.
+        if #available(iOS 26.0, *) {
+            return profile.dpads[GCDirectionPadElementName.thumbstick.rawValue]
+        }
+        return nil
+    }
+
+    /// What iOS reports for this controller, for the mapping screen to show.
+    /// A pad whose buttons do nothing is otherwise a dead end for support.
+    static func detectedNames(on controller: GCController) -> [String] {
+        let profile = controller.physicalInputProfile
+        return (Array(profile.buttons.keys) + Array(profile.dpads.keys)).sorted()
+    }
+}
+
 protocol INDSGamepadManagerDelegate: AnyObject {
     func gamepadManager(_ manager: INDSGamepadManager, setButton button: INDSButton, pressed: Bool)
     func gamepadManager(_ manager: INDSGamepadManager, perform action: INDSControllerAppAction)
@@ -47,7 +119,12 @@ final class INDSGamepadManager {
     weak var delegate: INDSGamepadManagerDelegate?
 
     private(set) var current: GCController?
-    var isConnected: Bool { current != nil }
+
+    /// How many of the current pad's inputs could be wired. A controller that
+    /// drives nothing must not count as connected: hiding the on-screen
+    /// controls for one leaves no way to play at all.
+    private var wiredInputCount = 0
+    var isConnected: Bool { current != nil && wiredInputCount > 0 }
 
     private var observers: [NSObjectProtocol] = []
 
@@ -74,7 +151,7 @@ final class INDSGamepadManager {
         // (e.g. paired over Bluetooth before the app launched) — connect
         // notifications only fire for NEW connections, so this initial scan
         // is required, not just a nicety.
-        if let existing = GCController.controllers().first(where: { $0.extendedGamepad != nil }) {
+        if let existing = GCController.controllers().first {
             attach(existing)
         }
     }
@@ -87,11 +164,11 @@ final class INDSGamepadManager {
     // MARK: - Connect / disconnect
 
     private func attach(_ controller: GCController) {
-        guard current == nil, controller.extendedGamepad != nil else { return }
+        guard current == nil else { return }
         current = controller
         INDSControllerMappingStore.activateProfile(for: controller)
         configureHandlers(controller)
-        delegate?.gamepadManagerDidChangeConnection(self, connected: true)
+        delegate?.gamepadManagerDidChangeConnection(self, connected: isConnected)
     }
 
     private func handleDisconnect(of controller: GCController) {
@@ -103,21 +180,19 @@ final class INDSGamepadManager {
         // A second pad already connected while the first was active never
         // got a chance to attach (guarded above) — pick it up now instead of
         // leaving the app permanently controller-less until a fresh connect.
-        if let next = GCController.controllers().first(where: { $0.extendedGamepad != nil }) {
+        if let next = GCController.controllers().first(where: { $0 !== controller }) {
             attach(next)
         }
     }
 
     private func releaseAllInputs(_ controller: GCController) {
         controller.controllerPausedHandler = nil
-        if let gamepad = controller.extendedGamepad {
-            gamepad.dpad.valueChangedHandler = nil
-            gamepad.leftThumbstick.valueChangedHandler = nil
-            [gamepad.buttonA, gamepad.buttonB, gamepad.buttonX, gamepad.buttonY,
-             gamepad.leftShoulder, gamepad.rightShoulder,
-             gamepad.leftTrigger, gamepad.rightTrigger,
-             gamepad.buttonOptions].forEach { $0?.valueChangedHandler = nil }
+        INDSControllerElements.directionPad(on: controller)?.valueChangedHandler = nil
+        INDSControllerElements.thumbstick(on: controller)?.valueChangedHandler = nil
+        for (_, button) in INDSControllerElements.buttons(on: controller) {
+            button.valueChangedHandler = nil
         }
+        wiredInputCount = 0
 
         let held = dpadDirections.union(stickDirections)
         dpadDirections = []
@@ -133,29 +208,32 @@ final class INDSGamepadManager {
             self.delegate?.gamepadManager(self, perform: .pause)
         }
 
-        guard let gamepad = controller.extendedGamepad else { return }
+        wiredInputCount = 0
 
-        gamepad.dpad.valueChangedHandler = { [weak self] dpad, _, _ in
-            self?.setDpadDirections(Self.directions(from: dpad))
+        if let dpad = INDSControllerElements.directionPad(on: controller) {
+            wiredInputCount += 1
+            dpad.valueChangedHandler = { [weak self] dpad, _, _ in
+                self?.setDpadDirections(Self.directions(from: dpad))
+            }
         }
-        gamepad.leftThumbstick.valueChangedHandler = { [weak self] _, x, y in
-            self?.setStickDirections(Self.directions(fromStickX: x, y: y))
+        if let stick = INDSControllerElements.thumbstick(on: controller) {
+            wiredInputCount += 1
+            stick.valueChangedHandler = { [weak self] _, x, y in
+                self?.setStickDirections(Self.directions(fromStickX: x, y: y))
+            }
         }
 
-        bind(gamepad.buttonA, physicalKey: "A")
-        bind(gamepad.buttonB, physicalKey: "B")
-        bind(gamepad.buttonX, physicalKey: "X")
-        bind(gamepad.buttonY, physicalKey: "Y")
-        bind(gamepad.leftShoulder, physicalKey: "L1")
-        bind(gamepad.rightShoulder, physicalKey: "R1")
-        bind(gamepad.leftTrigger, physicalKey: "L2")
-        bind(gamepad.rightTrigger, physicalKey: "R2")
-        bind(gamepad.buttonOptions, physicalKey: "Options")
-    }
+        for (key, button) in INDSControllerElements.buttons(on: controller) {
+            wiredInputCount += 1
+            button.valueChangedHandler = { [weak self] _, _, pressed in
+                self?.handlePhysical(key, pressed: pressed)
+            }
+        }
 
-    private func bind(_ button: GCControllerButtonInput?, physicalKey: String) {
-        button?.valueChangedHandler = { [weak self] _, _, pressed in
-            self?.handlePhysical(physicalKey, pressed: pressed)
+        if wiredInputCount == 0 {
+            NSLog("[INDSGamepadManager] %@ exposes no input this app can read: %@",
+                  controller.vendorName ?? "controller",
+                  INDSControllerElements.detectedNames(on: controller).joined(separator: ", "))
         }
     }
 

@@ -12,6 +12,11 @@
 //  and pressing a button to set it reads better here than hunting across 9
 //  physical rows for wherever an app action might currently be hiding.
 //
+//  Which physical button a capture sees is resolved by INDSControllerElements,
+//  the same call the gameplay path uses — including for pads iOS does not give
+//  an extendedGamepad (an 8BitDo FlipPad over USB-C, for one), which used to
+//  read as "no controller connected" here and could not be remapped at all.
+//
 //  Capture only runs while a controller is connected (it needs a live button
 //  press to capture) — no controller connected shows a dedicated empty state
 //  instead of the row list, unlike iGBA's version (which stays editable with
@@ -30,7 +35,7 @@ import GameController
 struct ButtonMappingView: View {
 
     @State private var mapping: [String: Int] = INDSControllerMappingStore.activeMapping()
-    @State private var controller: GCController? = GCController.controllers().first { $0.extendedGamepad != nil }
+    @State private var controller: GCController? = GCController.controllers().first
     @State private var capturingTarget: INDSMappingTarget?
 
     private var rowTargets: [INDSMappingTarget] {
@@ -90,10 +95,20 @@ struct ButtonMappingView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(controller?.vendorName ?? NSLocalizedString("No controller connected", comment: "Controller mapping status row: no gamepad paired"))
                     .font(.subheadline.weight(.semibold))
-                if controller != nil {
+                if let controller {
                     Text("Tap a row below, then press the button you want to assign.")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    // A pad whose buttons do nothing is otherwise a dead end
+                    // for support: this is the one place a tester can read back
+                    // what iOS actually handed the app.
+                    DisclosureGroup("What eNDS detects") {
+                        Text(INDSControllerElements.detectedNames(on: controller).joined(separator: ", "))
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                            .foregroundColor(.secondary)
+                    }
+                    .font(.caption)
                 }
             }
         }
@@ -104,7 +119,7 @@ struct ButtonMappingView: View {
         ContentUnavailableView {
             Label("Connect a controller", systemImage: "gamecontroller")
         } description: {
-            Text("Pair a game controller in iOS Settings → Bluetooth, then come back here to customize its buttons.")
+            Text("Connect a game controller over Bluetooth or USB-C, then come back here to customize its buttons.")
         }
     }
 
@@ -145,10 +160,10 @@ struct ButtonMappingView: View {
     // MARK: - Capture
 
     private func beginCapture(for target: INDSMappingTarget) {
-        guard let gamepad = controller?.extendedGamepad else { return }
+        guard let controller else { return }
         capturingTarget = target
-        for (key, button) in physicalButtons(on: gamepad) {
-            button?.pressedChangedHandler = { _, _, pressed in
+        for (key, button) in INDSControllerElements.buttons(on: controller) {
+            button.pressedChangedHandler = { _, _, pressed in
                 guard pressed else { return }
                 DispatchQueue.main.async {
                     complete(capturedKey: key, target: target)
@@ -165,20 +180,10 @@ struct ButtonMappingView: View {
 
     private func endCapture() {
         capturingTarget = nil
-        guard let gamepad = controller?.extendedGamepad else { return }
-        for (_, button) in physicalButtons(on: gamepad) {
-            button?.pressedChangedHandler = nil
+        guard let controller else { return }
+        for (_, button) in INDSControllerElements.buttons(on: controller) {
+            button.pressedChangedHandler = nil
         }
-    }
-
-    private func physicalButtons(on gamepad: GCExtendedGamepad) -> [(String, GCControllerButtonInput?)] {
-        [
-            ("A", gamepad.buttonA), ("B", gamepad.buttonB),
-            ("X", gamepad.buttonX), ("Y", gamepad.buttonY),
-            ("L1", gamepad.leftShoulder), ("R1", gamepad.rightShoulder),
-            ("L2", gamepad.leftTrigger), ("R2", gamepad.rightTrigger),
-            ("Options", gamepad.buttonOptions),
-        ]
     }
 
     // MARK: - Store read/write
@@ -211,7 +216,7 @@ struct ButtonMappingView: View {
     }
 
     private func refreshController() {
-        let next = GCController.controllers().first { $0.extendedGamepad != nil }
+        let next = GCController.controllers().first
         if next !== controller {
             endCapture()
             controller = next

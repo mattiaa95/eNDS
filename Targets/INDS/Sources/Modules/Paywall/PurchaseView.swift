@@ -38,6 +38,8 @@
 //
 
 import SwiftUI
+import StoreKit
+import UIKit
 
 struct PurchaseView: View {
 
@@ -68,7 +70,9 @@ struct PurchaseView: View {
     /// ties the CTA back to whichever plan/lifetime row was just tapped.
     @State private var ctaPulse = false
 
-    private let allowCloseAfter: CGFloat = 1.0
+    // Sin espera: retener al usuario dentro del paywall es un patron
+    // oscuro (UCPD) y Apple exige poder salir. Antes eran hasta 5 s.
+    private let allowCloseAfter: CGFloat = 0.0
     var hasCooldown: Bool = true
 
     private let brandGradient = LinearGradient(
@@ -648,6 +652,8 @@ struct PurchaseView: View {
 
     private var footerSection: some View {
         VStack(spacing: 10) {
+            ManageSubscriptionRow()
+
             Button(action: {
                 purchaseModel.restorePurchases()
             }) {
@@ -798,4 +804,50 @@ private struct PurchaseErrorWrapper: Identifiable {
 
 #Preview {
     PurchaseView(isPresented: .constant(true))
+}
+
+struct ManageSubscriptionRow: View {
+
+    @State private var opening = false
+
+    var body: some View {
+        Button {
+            Task { await open() }
+        } label: {
+            HStack {
+                Label("Manage Subscription", systemImage: "creditcard")
+                if opening {
+                    Spacer()
+                    ProgressView()
+                }
+            }
+        }
+        .disabled(opening)
+    }
+
+    /// `showManageSubscriptions` lanza cuando no hay una cuenta de App Store
+    /// detrás (simulador, sesión caducada). Cancelar tiene que funcionar
+    /// igualmente, así que se cae al mismo destino por web en vez de dejar el
+    /// botón muerto.
+    @MainActor
+    private func open() async {
+        opening = true
+        defer { opening = false }
+
+        let scene = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }
+
+        if let scene {
+            do {
+                try await AppStore.showManageSubscriptions(in: scene)
+                return
+            } catch {
+                // Cae al enlace de abajo.
+            }
+        }
+        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+            await UIApplication.shared.open(url)
+        }
+    }
 }

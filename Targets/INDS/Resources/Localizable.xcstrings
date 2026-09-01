@@ -2746,55 +2746,61 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abrechnung: %@ pro %@. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt wird. Verwalten oder kündigen kannst du in den Einstellungen deines App-Store-Accounts."
+            "value": "Abrechnung: %@ pro %@. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt wird. Verwalten oder kündigen kannst du in den Einstellungen deines App-Store-Accounts. Die Zahlung wird bei der Kaufbestätigung von Ihrer Apple-ID abgebucht."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Se te cobrará %@ por %@. Se renueva automáticamente salvo que la canceles al menos 24 horas antes de que termine el periodo en curso. Puedes gestionarla o cancelarla en los ajustes de tu cuenta de App Store."
+            "value": "Se te cobrará %@ por %@. Se renueva automáticamente salvo que la canceles al menos 24 horas antes de que termine el periodo en curso. Puedes gestionarla o cancelarla en los ajustes de tu cuenta de App Store. El pago se carga a tu ID de Apple al confirmar la compra."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Facturé %@ par %@. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la période en cours. Vous pouvez gérer ou résilier dans les réglages de votre compte App Store."
+            "value": "Facturé %@ par %@. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la période en cours. Vous pouvez gérer ou résilier dans les réglages de votre compte App Store. Le paiement est débité de votre identifiant Apple lors de la confirmation de l'achat."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ti verrà addebitato %@ ogni %@. Si rinnova automaticamente se non la disdici almeno 24 ore prima della fine del periodo in corso. Puoi gestirla o disdirla nelle impostazioni del tuo account App Store."
+            "value": "Ti verrà addebitato %@ ogni %@. Si rinnova automaticamente se non la disdici almeno 24 ore prima della fine del periodo in corso. Puoi gestirla o disdirla nelle impostazioni del tuo account App Store. Il pagamento viene addebitato sul tuo ID Apple alla conferma dell'acquisto."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%2$@ごとに%1$@が請求されます。現在の期間が終了する24時間前までに解約しない限り、自動的に更新されます。App Storeのアカウント設定で管理・解約できます。"
+            "value": "%2$@ごとに%1$@が請求されます。現在の期間が終了する24時間前までに解約しない限り、自動的に更新されます。App Storeのアカウント設定で管理・解約できます。 購入の確認時に、支払いは Apple ID に請求されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "%2$@마다 %1$@이(가) 청구됩니다. 현재 기간 종료 24시간 전까지 해지하지 않으면 자동으로 갱신됩니다. App Store 계정 설정에서 관리하거나 해지할 수 있습니다."
+            "value": "%2$@마다 %1$@이(가) 청구됩니다. 현재 기간 종료 24시간 전까지 해지하지 않으면 자동으로 갱신됩니다. App Store 계정 설정에서 관리하거나 해지할 수 있습니다. 구매 확인 시 Apple ID로 요금이 청구됩니다."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cobrança de %@ por %@. Renova-se automaticamente exceto se cancelar até 24 horas antes do fim do período em curso. Pode gerir ou cancelar nas definições da sua conta App Store."
+            "value": "Cobrança de %@ por %@. Renova-se automaticamente exceto se cancelar até 24 horas antes do fim do período em curso. Pode gerir ou cancelar nas definições da sua conta App Store. O pagamento é cobrado em seu ID Apple na confirmação da compra."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Списание %@ за %@. Продлевается автоматически, если не отменить не менее чем за 24 часа до окончания текущего периода. Управлять подпиской или отменить её можно в настройках аккаунта App Store."
+            "value": "Списание %@ за %@. Продлевается автоматически, если не отменить не менее чем за 24 часа до окончания текущего периода. Управлять подпиской или отменить её можно в настройках аккаунта App Store. Оплата списывается с вашего Apple ID при подтверждении покупки."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每%2$@收取%1$@。除非在当前周期结束前至少24小时取消，否则将自动续订。您可以在 App Store 账户设置中管理或取消。"
+            "value": "每%2$@收取%1$@。除非在当前周期结束前至少24小时取消，否则将自动续订。您可以在 App Store 账户设置中管理或取消。 确认购买后，将从您的 Apple ID 中扣款。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Billed %@ per %@. Renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store account settings. Payment is charged to your Apple ID at confirmation of purchase."
           }
         }
       }
@@ -6642,61 +6648,61 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kostenlos testen — danach %@ / %@, verlängert sich automatisch. Jederzeit kündbar."
+            "value": "Kostenlos testen — danach %@ / %@, verlängert sich automatisch. Jederzeit kündbar. Die Zahlung wird bei der Kaufbestätigung von Ihrer Apple-ID abgebucht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "new",
-            "value": "Free trial — then %1$@ / %2$@, auto-renewing. Cancel anytime."
+            "value": "Free trial — then %1$@ / %2$@, auto-renewing. Cancel anytime. Payment is charged to your Apple ID at confirmation of purchase."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prueba gratis — después %@ / %@, con renovación automática. Cancela cuando quieras."
+            "value": "Prueba gratis — después %@ / %@, con renovación automática. Cancela cuando quieras. El pago se carga a tu ID de Apple al confirmar la compra."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Essai gratuit — ensuite %@ / %@, renouvellement automatique. Annulable à tout moment."
+            "value": "Essai gratuit — ensuite %@ / %@, renouvellement automatique. Annulable à tout moment. Le paiement est débité de votre identifiant Apple lors de la confirmation de l'achat."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prova gratuita — poi %@ / %@, con rinnovo automatico. Disdici quando vuoi."
+            "value": "Prova gratuita — poi %@ / %@, con rinnovo automatico. Disdici quando vuoi. Il pagamento viene addebitato sul tuo ID Apple alla conferma dell'acquisto."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "無料トライアル後は %@／%@、自動更新。いつでもキャンセル可能。"
+            "value": "無料トライアル後は %@／%@、自動更新。いつでもキャンセル可能。 購入の確認時に、支払いは Apple ID に請求されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 체험 후 %@ / %@, 자동 갱신. 언제든지 취소 가능."
+            "value": "무료 체험 후 %@ / %@, 자동 갱신. 언제든지 취소 가능. 구매 확인 시 Apple ID로 요금이 청구됩니다."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Teste grátis — depois %@ / %@, com renovação automática. Cancele quando quiser."
+            "value": "Teste grátis — depois %@ / %@, com renovação automática. Cancele quando quiser. O pagamento é cobrado em seu ID Apple na confirmação da compra."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Бесплатный период — затем %@ / %@, автопродление. Отмена в любой момент."
+            "value": "Бесплатный период — затем %@ / %@, автопродление. Отмена в любой момент. Оплата списывается с вашего Apple ID при подтверждении покупки."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "免费试用后 %@／%@，自动续订。可随时取消。"
+            "value": "免费试用后 %@／%@，自动续订。可随时取消。 确认购买后，将从您的 Apple ID 中扣款。"
           }
         }
       }
@@ -6770,58 +6776,65 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kostenlose Testphase, danach %@ / %@. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt wird. Verwalten oder kündigen kannst du in den Einstellungen deines App-Store-Accounts."
+            "value": "Die Zahlung wird bei der Kaufbestätigung von Ihrer Apple-ID abgebucht. Das Abonnement verlängert sich automatisch zum gleichen Preis und Zeitraum, es sei denn, Sie kündigen mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums und die Verlängerung wird innerhalb von 24 Stunden vor Ablauf in Rechnung gestellt. Sie können Ihr Abonnement jederzeit in den Einstellungen verwalten oder kündigen. Bei der Lifetime-Option handelt es sich um eine einmalige Zahlung, nicht um ein Abonnement: Sie verlängert sich nicht und wird nicht erneut berechnet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payment is charged to your Apple ID at confirmation of purchase. The subscription renews automatically for the same price and period unless you cancel at least 24 hours before the current period ends, and the renewal is charged within the 24 hours before it ends. Manage or cancel your subscription any time in Settings. The Lifetime option is a single payment, not a subscription: it does not renew and it is not charged again."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prueba gratis y después %@ / %@. Se renueva automáticamente salvo que la canceles al menos 24 horas antes de que termine el periodo en curso. Puedes gestionarla o cancelarla en los ajustes de tu cuenta de App Store."
+            "value": "El pago se carga a su ID de Apple al momento de la confirmación de la compra. La suscripción se renueva automáticamente por el mismo precio y período a menos que canceles al menos 24 horas antes de que finalice el período actual, y la renovación se cobra dentro de las 24 horas anteriores a que finalice. Administre o cancele su suscripción en cualquier momento en Configuración. La opción Vitalicia es un pago único, no una suscripción: no se renueva y no se vuelve a cobrar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Essai gratuit, puis %@ / %@. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la période en cours. Vous pouvez gérer ou résilier dans les réglages de votre compte App Store."
+            "value": "Le paiement est débité de votre identifiant Apple lors de la confirmation de l'achat. L'abonnement se renouvelle automatiquement pour le même prix et la même période, sauf si vous l'annulez au moins 24 heures avant la fin de la période en cours, et le renouvellement est facturé dans les 24 heures précédant la fin de la période. Gérez ou annulez votre abonnement à tout moment dans Paramètres. L'option Lifetime est un paiement unique, pas un abonnement : elle ne se renouvelle pas et elle n'est pas refacturée."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prova gratuita, poi %@ / %@. Si rinnova automaticamente se non la disdici almeno 24 ore prima della fine del periodo in corso. Puoi gestirla o disdirla nelle impostazioni del tuo account App Store."
+            "value": "Il pagamento viene addebitato sul tuo ID Apple alla conferma dell'acquisto. L'abbonamento si rinnova automaticamente per lo stesso prezzo e periodo, a meno che non lo annulli almeno 24 ore prima della fine del periodo corrente e il rinnovo viene addebitato entro le 24 ore prima della fine. Gestisci o annulla il tuo abbonamento in qualsiasi momento nelle Impostazioni. L'opzione Lifetime è un pagamento unico, non un abbonamento: non si rinnova e non viene addebitato nuovamente."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "無料トライアル後は%@ / %@です。現在の期間が終了する24時間前までに解約しない場合、自動的に更新されます。App Storeアカウントの設定から管理・解約できます。"
+            "value": "支払いは購入の確認時に Apple ID に請求されます。現在の期間が終了する少なくとも 24 時間前にキャンセルしない限り、サブスクリプションは同じ価格と期間で自動的に更新され、更新料金は終了の 24 時間以内に請求されます。設定でいつでもサブスクリプションを管理またはキャンセルできます。 ライフタイム オプションは、サブスクリプションではなく、1 回の支払いです。更新されず、再度請求されることはありません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 체험 후 %@ / %@입니다. 현재 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동으로 갱신됩니다. App Store 계정 설정에서 관리하거나 취소할 수 있습니다."
+            "value": "구매 확인 시 Apple ID로 요금이 청구됩니다. 현재 기간이 종료되기 최소 24시간 전에 취소하지 않으면 동일한 가격과 기간으로 구독이 자동으로 갱신되며, 종료되기 24시간 이내에 갱신 요금이 청구됩니다. 설정에서 언제든지 구독을 관리하거나 취소할 수 있습니다. 평생 옵션은 구독이 아닌 단일 결제입니다. 갱신되지 않으며 다시 청구되지 않습니다."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Período gratuito e depois %@ / %@. Renova-se automaticamente exceto se cancelar até 24 horas antes do fim do período em curso. Pode gerir ou cancelar nas definições da sua conta App Store."
+            "value": "O pagamento é cobrado em seu ID Apple na confirmação da compra. A assinatura é renovada automaticamente pelo mesmo preço e período, a menos que você cancele pelo menos 24 horas antes do término do período atual, e a renovação seja cobrada nas 24 horas anteriores ao seu término. Gerencie ou cancele sua assinatura a qualquer momento em Configurações. A opção Vitalícia é um pagamento único, não uma assinatura: não renova e não é cobrada novamente."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Бесплатный пробный период, затем %@ / %@. Продлевается автоматически, если не отменить не менее чем за 24 часа до окончания текущего периода. Управлять подпиской или отменить её можно в настройках аккаунта App Store."
+            "value": "Оплата списывается с вашего Apple ID при подтверждении покупки. Подписка продлевается автоматически по той же цене и на тот же период, если вы не отмените ее по крайней мере за 24 часа до окончания текущего периода, а плата за продление взимается в течение 24 часов до его окончания. Управляйте подпиской или отменяйте ее в любое время в настройках. Опция «Пожизненный» — это разовый платеж, а не подписка: она не продлевается и не взимается повторно."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "免费试用，之后为 %@ / %@。若未在当前周期结束前至少24小时取消，将自动续订。您可以在 App Store 账户设置中管理或取消。"
+            "value": "确认购买后，将从您的 Apple ID 中扣款。订阅将以相同的价格和期限自动续订，除非您在当前期限结束前至少 24 小时取消，并且续订费用将在当前期限结束前的 24 小时内收取。随时在“设置”中管理或取消您的订阅。 终身选项是一次付款，而不是订阅：它不会续订，也不会再次收费。"
           }
         }
-      }
+      },
+      "extractionState": "manual"
     },
     "GNU General Public License v3": {
       "localizations": {

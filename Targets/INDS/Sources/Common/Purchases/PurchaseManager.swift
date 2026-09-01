@@ -79,6 +79,10 @@ class PurchaseManager: ObservableObject {
         var verifiedIDs = Set<String>()
         var sawAnyTransaction = false
         for await result in Transaction.currentEntitlements {
+            // Un reembolso deja la transaccion en `currentEntitlements` con la fecha
+            // de revocacion puesta: sin esto, quien pidio la devolucion conserva Pro.
+            if case .verified(let revocationCheck) = result,
+               revocationCheck.revocationDate != nil { continue }
             sawAnyTransaction = true
             switch result {
             case .verified(let transaction):
