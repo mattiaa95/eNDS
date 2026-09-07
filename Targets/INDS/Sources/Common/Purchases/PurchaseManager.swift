@@ -24,7 +24,7 @@ class PurchaseManager: ObservableObject {
 
     init(entitlementManager: EntitlementManager) {
         self.entitlementManager = entitlementManager
-        self.productIds = ["iNDSPRO", "iNDSPROYearly", "iNDSPROLifetime"]
+        self.productIds = EntitlementManager.productIDs
 
         Task {
             await self.loadProducts()
@@ -49,21 +49,20 @@ class PurchaseManager: ObservableObject {
         }
     }
 
-    func purchase(_ product: Product) async throws {
+    /// Returns the raw StoreKit result so callers can tell `.pending`
+    /// (Ask to Buy) apart from a cancel — both used to be silent.
+    @discardableResult
+    func purchase(_ product: Product) async throws -> Product.PurchaseResult {
         let result = try await product.purchase()
-        switch result {
-        case .success(let verification):
+        if case .success(let verification) = result {
             switch verification {
             case .verified(let transaction):
                 await self.handlePurchasedTransaction(transaction)
             case .unverified(_, let error):
                 throw error
             }
-        case .userCancelled, .pending:
-            break
-        @unknown default:
-            break
         }
+        return result
     }
 
     func restorePurchases() async throws {
@@ -97,8 +96,10 @@ class PurchaseManager: ObservableObject {
         // Same rule as EntitlementManager.refreshEntitlements: an empty result
         // can mean "never paid" or "could not reach the App Store", and the two
         // must not be treated alike. Never revoke PRO on silence — only on a
-        // readable answer that genuinely lacks a live entitlement.
-        if !sawAnyTransaction && self.entitlementManager.hasPro {
+        // readable answer that genuinely lacks a live entitlement (a lapsed or
+        // refunded transaction that `latest(for:)` can still show us counts).
+        if !sawAnyTransaction && self.entitlementManager.hasPro,
+           await EntitlementManager.hasLapsedTransaction() == false {
             return
         }
 

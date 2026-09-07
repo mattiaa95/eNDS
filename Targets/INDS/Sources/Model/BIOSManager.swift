@@ -9,9 +9,9 @@ enum BIOSFileKind: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .bios7: return "ARM7 BIOS"
-        case .bios9: return "ARM9 BIOS"
-        case .firmware: return "Firmware"
+        case .bios7: return NSLocalizedString("ARM7 BIOS", comment: "BIOS file kind")
+        case .bios9: return NSLocalizedString("ARM9 BIOS", comment: "BIOS file kind")
+        case .firmware: return NSLocalizedString("Firmware", comment: "BIOS file kind")
         }
     }
 

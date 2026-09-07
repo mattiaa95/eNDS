@@ -101,8 +101,11 @@ enum NDS7zExtractor {
               let bytes = dataPtr else {
             return nil
         }
-        let buffer = Data(UnsafeBufferPointer(start: bytes, count: dataSize))
-        Sz7zArchive_FreeMemory(bytes)
+        // No copy: the shim's buffer is already the full decompressed entry
+        // (up to 512 MB); duplicating it would briefly double the peak and
+        // is exactly the sort of spike that gets a background import jetsammed.
+        let buffer = Data(bytesNoCopy: UnsafeMutableRawPointer(bytes), count: dataSize,
+                          deallocator: .custom { pointer, _ in Sz7zArchive_FreeMemory(pointer) })
 
         var destination = directory.appendingPathComponent(baseName)
         let stem = (baseName as NSString).deletingPathExtension

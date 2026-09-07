@@ -77,51 +77,71 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     /// live battery save, so it goes through the same "Already Exists / Replace?"
     /// alert the in-app picker uses. Someone double-tapping a `.sav` in Files to
     /// see what it is must not lose their progress for it.
+    @MainActor
     static func handleFileURL(_ url: URL) {
         let ext = url.pathExtension.lowercased()
         guard supportedExternalExtensions.contains(ext) else {
             debugLog("Ignoring unsupported external file: \(url.lastPathComponent)")
             return
         }
+        // SwiftUI's `onOpenURL` and `application(_:open:)` can both fire for
+        // one "Open in eNDS"; two concurrent imports of the same URL would
+        // race on the security scope and on the destination file.
+        guard inFlight.insert(url).inserted else { return }
 
         let isSave = (ext == "sav")
         Task.detached(priority: .userInitiated) {
-            do {
-                let outcome = try ROMStorageManager.importAny(from: url, replaceExisting: !isSave)
-                await MainActor.run {
-                    NotificationCenter.default.post(name: .romImported, object: nil)
-                    if !outcome.failureMessages.isEmpty {
-                        NotificationCenter.default.post(
-                            name: .romImportFailed,
-                            object: nil,
-                            userInfo: ["message": outcome.failureMessages.joined(separator: "\n")]
-                        )
-                    }
-                }
-            } catch ROMStorageError.duplicateFile {
-                // Only reachable for .sav (ROMs import with replaceExisting: true).
-                // Stage a copy in tmp: the security-scoped grant on `url` is tied
-                // to this open, and the user's answer can be seconds away.
-                let staged = FileManager.default.temporaryDirectory
-                    .appendingPathComponent(url.lastPathComponent)
-                try? FileManager.default.removeItem(at: staged)
-                guard (try? FileManager.default.copyItem(at: url, to: staged)) != nil else { return }
-                await MainActor.run {
-                    NotificationCenter.default.post(
-                        name: .romImportNeedsReplaceConfirm,
-                        object: nil,
-                        userInfo: ["url": staged]
-                    )
-                }
-            } catch {
-                debugLog("External ROM import failed: \(error.localizedDescription)")
-                await MainActor.run {
+            await importExternal(url, isSave: isSave)
+            await MainActor.run { _ = inFlight.remove(url) }
+        }
+    }
+
+    @MainActor private static var inFlight: Set<URL> = []
+
+    private static func importExternal(_ url: URL, isSave: Bool) async {
+        do {
+            let outcome = try ROMStorageManager.importAny(from: url, replaceExisting: !isSave)
+            await MainActor.run {
+                NotificationCenter.default.post(
+                    name: .romImported,
+                    object: nil,
+                    userInfo: ["filenames": outcome.importedROMURLs.map { $0.lastPathComponent }]
+                )
+                if !outcome.failureMessages.isEmpty {
                     NotificationCenter.default.post(
                         name: .romImportFailed,
                         object: nil,
-                        userInfo: ["message": error.localizedDescription]
+                        userInfo: ["message": outcome.failureMessages.joined(separator: "\n")]
                     )
                 }
+            }
+        } catch ROMStorageError.duplicateFile {
+            // Only reachable for .sav (ROMs import with replaceExisting: true).
+            // Stage a copy in tmp: the security-scoped grant on `url` is tied
+            // to this open, and the user's answer can be seconds away.
+            let staged = FileManager.default.temporaryDirectory
+                .appendingPathComponent(url.lastPathComponent)
+            try? FileManager.default.removeItem(at: staged)
+            // `importAny` already closed its own scope; reopen it for the copy.
+            let scoped = url.startAccessingSecurityScopedResource()
+            let copied = (try? FileManager.default.copyItem(at: url, to: staged)) != nil
+            if scoped { url.stopAccessingSecurityScopedResource() }
+            guard copied else { return }
+            await MainActor.run {
+                NotificationCenter.default.post(
+                    name: .romImportNeedsReplaceConfirm,
+                    object: nil,
+                    userInfo: ["url": staged]
+                )
+            }
+        } catch {
+            debugLog("External ROM import failed: \(error.localizedDescription)")
+            await MainActor.run {
+                NotificationCenter.default.post(
+                    name: .romImportFailed,
+                    object: nil,
+                    userInfo: ["message": error.localizedDescription]
+                )
             }
         }
     }

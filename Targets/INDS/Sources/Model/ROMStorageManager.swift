@@ -331,6 +331,12 @@ enum ROMStorageManager {
         if let saveURL = rom.saveFileURL {
             try? FileManager.default.removeItem(at: saveURL)
         }
+        // The `.sav.bak` safety net too: left behind, a later ROM imported
+        // under this name would be offered "Recover Cartridge Save" with
+        // *this* game's SRAM.
+        if let backupURL = INDSSaveBackup.backupURL(baseName: rom.baseName) {
+            try? FileManager.default.removeItem(at: backupURL)
+        }
         NDSSaveStatePaths.delete(baseName: rom.baseName)
         ROMIconStore.invalidate(baseName: rom.baseName)
         ThumbnailManager.invalidate(baseName: rom.baseName)
@@ -349,7 +355,11 @@ enum ROMStorageManager {
     @discardableResult
     static func renameROM(_ rom: ROMFile, toBaseName rawNewBaseName: String) throws -> URL {
         let newBaseName = rawNewBaseName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !newBaseName.isEmpty, !newBaseName.contains("/"), !newBaseName.contains(":") else {
+        // 240 bytes leaves room for the longest companion suffix (`.sav.bak`)
+        // under APFS's 255-byte name limit, so no derived file can ever fail
+        // to be written for a name the ROM itself accepted.
+        guard !newBaseName.isEmpty, !newBaseName.contains("/"), !newBaseName.contains(":"),
+              newBaseName.utf8.count <= 240 else {
             throw ROMStorageError.invalidName
         }
         guard newBaseName != rom.baseName else {
@@ -361,13 +371,39 @@ enum ROMStorageManager {
         if FileManager.default.fileExists(atPath: newROMURL.path) {
             throw ROMStorageError.duplicateFile(newFilename)
         }
+        // Save data already under the target name is a "Delete ROM Only"
+        // leftover, kept on purpose for a re-import — refuse rather than
+        // silently wipe it.
+        let newSaveURL = try savesDirectoryURL().appendingPathComponent(newBaseName).appendingPathExtension("sav")
+        if FileManager.default.fileExists(atPath: newSaveURL.path) {
+            throw ROMStorageError.duplicateFile(newSaveURL.lastPathComponent)
+        }
+        if NDSSaveStatePaths.hasAnySaveState(baseName: newBaseName) {
+            throw ROMStorageError.duplicateFile(newBaseName)
+        }
 
-        try FileManager.default.moveItem(at: rom.fileURL, to: newROMURL)
+        // The battery save moves first and for real: a rename that silently
+        // left the `.sav` behind under the old name would look like lost
+        // progress. If the ROM move then fails, put the save back.
+        let oldSaveURL = rom.saveFileURL
+        let hasSave = oldSaveURL.map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        if hasSave, let oldSaveURL {
+            try FileManager.default.moveItem(at: oldSaveURL, to: newSaveURL)
+        }
+        do {
+            try FileManager.default.moveItem(at: rom.fileURL, to: newROMURL)
+        } catch {
+            if hasSave, let oldSaveURL {
+                try? FileManager.default.moveItem(at: newSaveURL, to: oldSaveURL)
+            }
+            throw error
+        }
 
-        if let oldSaveURL = rom.saveFileURL, FileManager.default.fileExists(atPath: oldSaveURL.path) {
-            let newSaveURL = try savesDirectoryURL().appendingPathComponent(newBaseName).appendingPathExtension("sav")
-            try? FileManager.default.removeItem(at: newSaveURL)
-            try? FileManager.default.moveItem(at: oldSaveURL, to: newSaveURL)
+        if let oldBackup = INDSSaveBackup.backupURL(baseName: rom.baseName),
+           let newBackup = INDSSaveBackup.backupURL(baseName: newBaseName),
+           FileManager.default.fileExists(atPath: oldBackup.path) {
+            try? FileManager.default.removeItem(at: newBackup)
+            try? FileManager.default.moveItem(at: oldBackup, to: newBackup)
         }
         NDSSaveStatePaths.rename(fromBaseName: rom.baseName, toBaseName: newBaseName)
         ROMIconStore.rename(fromBaseName: rom.baseName, toBaseName: newBaseName)
@@ -389,12 +425,31 @@ enum ROMStorageManager {
 
     static func copyItem(from sourceURL: URL, to destinationURL: URL, replaceExisting: Bool) throws {
         let fileManager = FileManager.default
+        // Opening a file from our own Files folder ("On My iPhone/eNDS/ROMs")
+        // hands us source == destination (with a /private prefix). Removing
+        // the destination first would delete the only copy — nothing to do.
+        if sourceURL.standardizedFileURL.resolvingSymlinksInPath() == destinationURL.standardizedFileURL.resolvingSymlinksInPath() {
+            return
+        }
         if fileManager.fileExists(atPath: destinationURL.path) {
-            if replaceExisting {
-                try fileManager.removeItem(at: destinationURL)
-            } else {
+            guard replaceExisting else {
                 throw ROMStorageError.duplicateFile(destinationURL.lastPathComponent)
             }
+            // Copy beside the target and swap, never remove-then-copy: a copy
+            // that dies half-way (disk full, provider hiccup) must not leave
+            // the user with neither file — this is the "Replace?" path for
+            // battery saves. Dotfile so `listROMs` never lists the staging copy.
+            let staging = destinationURL.deletingLastPathComponent()
+                .appendingPathComponent(".\(destinationURL.lastPathComponent).importing")
+            try? fileManager.removeItem(at: staging)
+            do {
+                try fileManager.copyItem(at: sourceURL, to: staging)
+                _ = try fileManager.replaceItemAt(destinationURL, withItemAt: staging)
+            } catch {
+                try? fileManager.removeItem(at: staging)
+                throw error
+            }
+            return
         }
         try fileManager.copyItem(at: sourceURL, to: destinationURL)
     }

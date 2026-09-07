@@ -20,8 +20,8 @@ enum INDSConstants {
     /// The landing page's contact section, so "Support" lands on the email
     /// button rather than making the user hunt for it.
     static let supportURL = URL(string: "https://mattiaa95.github.io/#contact")!
-    static let privacyPolicyURL = URL(string: "https://igbaapp.wordpress.com/privacy-policy/")!
-    static let termsURL = URL(string: "https://igbaapp.wordpress.com/terms-conditions/")!
+    static let privacyPolicyURL = URL(string: "https://mattiaa95.github.io/privacy.html")!
+    static let termsURL = URL(string: "https://mattiaa95.github.io/terms.html")!
     static let sourceCodeURL = URL(string: "https://github.com/mattiaa95/eNDS")!
     static let melonDSURL = URL(string: "https://github.com/melonDS-emu/melonDS")!
 }

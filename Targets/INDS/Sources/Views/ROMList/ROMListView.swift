@@ -5,6 +5,10 @@ struct ROMListView: View {
     @EnvironmentObject private var viewModel: ROMListViewModel
     @ObservedObject private var entitlements = EntitlementManager.shared
     @State private var isImportingROM = false
+    /// True while a picked batch is being copied/extracted off the main
+    /// thread — drives the "Importing…" overlay so a big `.7z` doesn't look
+    /// like the picker silently did nothing.
+    @State private var importInProgress = false
     @State private var pendingDuplicateURL: URL?
     @State private var romToDelete: ROMFile?
     @State private var romToRename: ROMFile?
@@ -43,6 +47,14 @@ struct ROMListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .overlay(alignment: .top) {
                 importSuccessToast
+            }
+            .overlay {
+                if importInProgress {
+                    ProgressView("Importing…")
+                        .padding(20)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+                        .transition(.opacity)
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -122,8 +134,7 @@ struct ROMListView: View {
         )) {
             Button("Replace") {
                 if let pendingDuplicateURL {
-                    let outcome = viewModel.importFiles(from: [pendingDuplicateURL], replaceExisting: true)
-                    presentImportSuccess(filenames: outcome.importedROMURLs.map { $0.lastPathComponent })
+                    runImport([pendingDuplicateURL], replaceExisting: true)
                 }
                 pendingDuplicateURL = nil
             }
@@ -182,8 +193,15 @@ struct ROMListView: View {
         } message: {
             Text("\"ROM Only\" keeps its battery save and save states in case you re-import it later. \"ROM + Save Data\" removes everything for this game.")
         }
-        .onReceive(NotificationCenter.default.publisher(for: .romImported)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: .romImported)) { notification in
             viewModel.reload()
+            // "Open in eNDS" from Files/AirDrop: same toast + highlight as
+            // the in-app picker, otherwise the library just silently reloads.
+            presentImportSuccess(filenames: notification.userInfo?["filenames"] as? [String] ?? [])
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .romImportFailed)) { notification in
+            viewModel.importErrorMessage = notification.userInfo?["message"] as? String
+                ?? NSLocalizedString("The file could not be imported.", comment: "Import failure alert: fallback when the error carries no message")
         }
         .onReceive(NotificationCenter.default.publisher(for: .biosFilesChanged)) { _ in
             viewModel.reload()
@@ -201,6 +219,8 @@ struct ROMListView: View {
             }
             INDSWelcomeGate.hasSeenWelcome = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                // Two presentations on one view → SwiftUI drops one silently.
+                guard !showingSettings, !showingBIOSSetup else { return }
                 showingWelcome = true
             }
         }
@@ -434,25 +454,45 @@ struct ROMListView: View {
     private func handleROMImport(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
+            runImport(urls, replaceExisting: false)
+        case .failure(let error):
+            viewModel.importErrorMessage = error.localizedDescription
+        }
+    }
+
+    /// Copies/extracts `urls` off the main thread (a big `.7z` is LZMA-
+    /// decompressed in full and used to freeze the UI for seconds), then hops
+    /// back to update the library and show the toast / duplicate / error UI.
+    /// Same semantics as before: soft failures merge into one alert, a
+    /// duplicate `.nds`/`.sav` asks "Replace?" (last one wins if several).
+    private func runImport(_ urls: [URL], replaceExisting: Bool) {
+        withMotion(INDSMotion.gentle) { importInProgress = true }
+        Task.detached(priority: .userInitiated) {
             var importedFilenames: [String] = []
+            var messages: [String] = []
+            var duplicate: URL?
             for url in urls {
                 do {
-                    let outcome = try ROMStorageManager.importAny(from: url, replaceExisting: false)
+                    let outcome = try ROMStorageManager.importAny(from: url, replaceExisting: replaceExisting)
                     importedFilenames += outcome.importedROMURLs.map { $0.lastPathComponent }
-                    if !outcome.failureMessages.isEmpty {
-                        viewModel.importErrorMessage = outcome.failureMessages.joined(separator: "\n")
-                    }
+                    messages += outcome.failureMessages
                 } catch ROMStorageError.duplicateFile {
-                    pendingDuplicateURL = url
+                    duplicate = url
                 } catch {
-                    viewModel.importErrorMessage = error.localizedDescription
+                    messages.append(error.localizedDescription)
                     debugLog("ROM import failed: \(error.localizedDescription)")
                 }
             }
-            viewModel.reload()
-            presentImportSuccess(filenames: importedFilenames)
-        case .failure(let error):
-            viewModel.importErrorMessage = error.localizedDescription
+            let filenames = importedFilenames, failures = messages, dup = duplicate
+            await MainActor.run {
+                withMotion(INDSMotion.gentle) { importInProgress = false }
+                viewModel.reload()
+                if !failures.isEmpty {
+                    viewModel.importErrorMessage = failures.joined(separator: "\n")
+                }
+                if let dup { pendingDuplicateURL = dup }
+                presentImportSuccess(filenames: filenames)
+            }
         }
     }
 

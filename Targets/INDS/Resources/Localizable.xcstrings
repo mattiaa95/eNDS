@@ -64,7 +64,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "„Nur ROM“ bewahrt den Akkustand und die Spielstände auf, falls du das Spiel später erneut importieren möchtest. „ROM + Speicherdaten“ löscht alle Daten zu diesem Spiel."
+            "value": "„Nur ROM“ bewahrt den Spielstand des Moduls und die Spielstände auf, falls du das Spiel später erneut importieren möchtest. „ROM + Speicherdaten“ löscht alle Daten zu diesem Spiel."
           }
         },
         "es": {
@@ -76,13 +76,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L'option « ROM uniquement » conserve la sauvegarde de la batterie et les états de sauvegarde au cas où vous réimporteriez le jeu ultérieurement. L'option « ROM + données de sauvegarde » supprime tout ce qui concerne ce jeu."
+            "value": "L'option « ROM uniquement » conserve la sauvegarde de la cartouche et les états de sauvegarde au cas où vous réimporteriez le jeu ultérieurement. L'option « ROM + données de sauvegarde » supprime tout ce qui concerne ce jeu."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "L'opzione \"Solo ROM\" conserva la batteria e gli stati di salvataggio nel caso in cui si voglia reimportare il gioco in un secondo momento. L'opzione \"ROM + Dati di salvataggio\" elimina tutto ciò che riguarda questo gioco."
+            "value": "L'opzione \"Solo ROM\" conserva il salvataggio della cartuccia e gli stati di salvataggio nel caso in cui si voglia reimportare il gioco in un secondo momento. L'opzione \"ROM + Dati di salvataggio\" elimina tutto ciò che riguarda questo gioco."
           }
         },
         "ja": {
@@ -100,13 +100,13 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "A opção «Apenas ROM» mantém os dados de poupança de bateria e os estados guardados, caso queira reimportá-la mais tarde. A opção «ROM + Dados Guardados» elimina tudo relativo a este jogo."
+            "value": "A opção «Apenas ROM» mantém o jogo guardado do cartucho e os estados guardados, caso queira reimportá-la mais tarde. A opção «ROM + Dados Guardados» elimina tudo relativo a este jogo."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Вариант «Только ROM» сохраняет настройки энергосбережения и состояния сохранений на случай, если вы решите импортировать игру позже. Вариант «ROM + данные сохранения» удаляет все данные, связанные с этой игрой."
+            "value": "Вариант «Только ROM» сохраняет сохранение картриджа и сохранённые состояния на случай, если вы снова импортируете игру позже. Вариант «ROM + данные сохранения» удаляет все данные этой игры."
           }
         },
         "zh-Hans": {
@@ -1157,7 +1157,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Adiciona o teu primeiro jogo"
+            "value": "Adicione o seu primeiro jogo"
           }
         },
         "ru": {
@@ -1563,7 +1563,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "A aplicação entra em vigor na próxima vez que abrires um jogo. Também podes ajustar o volume a partir do menu de pausa enquanto jogas."
+            "value": "Entra em vigor na próxima vez que abrir um jogo. Também pode ajustar o volume a partir do menu de pausa enquanto joga."
           }
         },
         "ru": {
@@ -2340,7 +2340,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "BIOS-/Firmware-Dateien sind optional. eNDS kann mithilfe eines integrierten Kompatibilitäts-BIOS fast jedes Spiel starten und ausführen. Das Importieren echter Dumps von Ihrer eigenen Konsole kann die Kompatibilität für einige Spiele verbessern. eNDS enthält keine BIOS-Dateien und lädt diese auch nicht herunter."
+            "value": "BIOS-/Firmware-Dateien sind optional. eNDS kann mithilfe eines integrierten Kompatibilitäts-BIOS fast jedes Spiel starten und ausführen. Das Importieren echter Dumps von deiner eigenen Konsole kann die Kompatibilität für einige Spiele verbessern. eNDS enthält keine BIOS-Dateien und lädt diese auch nicht herunter."
           }
         },
         "es": {
@@ -2746,7 +2746,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abrechnung: %@ pro %@. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt wird. Verwalten oder kündigen kannst du in den Einstellungen deines App-Store-Accounts. Die Zahlung wird bei der Kaufbestätigung von Ihrer Apple-ID abgebucht."
+            "value": "Abrechnung: %@ pro %@. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt wird. Verwalten oder kündigen kannst du in den Einstellungen deines App-Store-Accounts. Die Zahlung wird bei der Kaufbestätigung von deiner Apple-ID abgebucht."
           }
         },
         "es": {
@@ -2782,7 +2782,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cobrança de %@ por %@. Renova-se automaticamente exceto se cancelar até 24 horas antes do fim do período em curso. Pode gerir ou cancelar nas definições da sua conta App Store. O pagamento é cobrado em seu ID Apple na confirmação da compra."
+            "value": "Cobrança de %@ por %@. Renova-se automaticamente exceto se cancelar até 24 horas antes do fim do período em curso. Pode gerir ou cancelar nas definições da sua conta App Store. O pagamento é cobrado no seu ID Apple na confirmação da compra."
           }
         },
         "ru": {
@@ -6120,64 +6120,6 @@
         }
       }
     },
-    "Everything, forever": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alles, für immer"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Todo, para siempre"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tout, pour toujours"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tutto, per sempre"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "すべてを、ずっと"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "모든 것을, 영원히"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tudo, para sempre"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Всё и навсегда"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "全部功能，永久有效"
-          }
-        }
-      }
-    },
     "Export Save": {
       "localizations": {
         "de": {
@@ -6648,7 +6590,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kostenlos testen — danach %@ / %@, verlängert sich automatisch. Jederzeit kündbar. Die Zahlung wird bei der Kaufbestätigung von Ihrer Apple-ID abgebucht."
+            "value": "Kostenlos testen — danach %@ / %@, verlängert sich automatisch. Jederzeit kündbar. Die Zahlung wird bei der Kaufbestätigung von deiner Apple-ID abgebucht."
           }
         },
         "en": {
@@ -6690,7 +6632,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Teste grátis — depois %@ / %@, com renovação automática. Cancele quando quiser. O pagamento é cobrado em seu ID Apple na confirmação da compra."
+            "value": "Teste grátis — depois %@ / %@, com renovação automática. Cancele quando quiser. O pagamento é cobrado no seu ID Apple na confirmação da compra."
           }
         },
         "ru": {
@@ -6776,61 +6718,61 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die Zahlung wird bei der Kaufbestätigung von Ihrer Apple-ID abgebucht. Das Abonnement verlängert sich automatisch zum gleichen Preis und Zeitraum, es sei denn, Sie kündigen mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums und die Verlängerung wird innerhalb von 24 Stunden vor Ablauf in Rechnung gestellt. Sie können Ihr Abonnement jederzeit in den Einstellungen verwalten oder kündigen. Bei der Lifetime-Option handelt es sich um eine einmalige Zahlung, nicht um ein Abonnement: Sie verlängert sich nicht und wird nicht erneut berechnet."
+            "value": "Kostenlos testen, danach %@ pro %@. Verlängert sich automatisch, sofern nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums gekündigt wird. Verwalten oder kündigen kannst du in den Einstellungen deines App-Store-Accounts. Die Zahlung wird bei der Kaufbestätigung von deiner Apple-ID abgebucht."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Payment is charged to your Apple ID at confirmation of purchase. The subscription renews automatically for the same price and period unless you cancel at least 24 hours before the current period ends, and the renewal is charged within the 24 hours before it ends. Manage or cancel your subscription any time in Settings. The Lifetime option is a single payment, not a subscription: it does not renew and it is not charged again."
+            "value": "Free trial, then %@ / %@. Renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store account settings. Payment is charged to your Apple ID at confirmation of purchase."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El pago se carga a su ID de Apple al momento de la confirmación de la compra. La suscripción se renueva automáticamente por el mismo precio y período a menos que canceles al menos 24 horas antes de que finalice el período actual, y la renovación se cobra dentro de las 24 horas anteriores a que finalice. Administre o cancele su suscripción en cualquier momento en Configuración. La opción Vitalicia es un pago único, no una suscripción: no se renueva y no se vuelve a cobrar."
+            "value": "Prueba gratis y después %@ por %@. Se renueva automáticamente salvo que la canceles al menos 24 horas antes de que termine el periodo en curso. Puedes gestionarla o cancelarla en los ajustes de tu cuenta de App Store. El pago se carga a tu ID de Apple al confirmar la compra."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le paiement est débité de votre identifiant Apple lors de la confirmation de l'achat. L'abonnement se renouvelle automatiquement pour le même prix et la même période, sauf si vous l'annulez au moins 24 heures avant la fin de la période en cours, et le renouvellement est facturé dans les 24 heures précédant la fin de la période. Gérez ou annulez votre abonnement à tout moment dans Paramètres. L'option Lifetime est un paiement unique, pas un abonnement : elle ne se renouvelle pas et elle n'est pas refacturée."
+            "value": "Essai gratuit, puis %@ par %@. Se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la période en cours. Vous pouvez gérer ou résilier dans les réglages de votre compte App Store. Le paiement est débité de votre identifiant Apple lors de la confirmation de l'achat."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Il pagamento viene addebitato sul tuo ID Apple alla conferma dell'acquisto. L'abbonamento si rinnova automaticamente per lo stesso prezzo e periodo, a meno che non lo annulli almeno 24 ore prima della fine del periodo corrente e il rinnovo viene addebitato entro le 24 ore prima della fine. Gestisci o annulla il tuo abbonamento in qualsiasi momento nelle Impostazioni. L'opzione Lifetime è un pagamento unico, non un abbonamento: non si rinnova e non viene addebitato nuovamente."
+            "value": "Prova gratuita, poi %@ ogni %@. Si rinnova automaticamente se non la disdici almeno 24 ore prima della fine del periodo in corso. Puoi gestirla o disdirla nelle impostazioni del tuo account App Store. Il pagamento viene addebitato sul tuo ID Apple alla conferma dell'acquisto."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "支払いは購入の確認時に Apple ID に請求されます。現在の期間が終了する少なくとも 24 時間前にキャンセルしない限り、サブスクリプションは同じ価格と期間で自動的に更新され、更新料金は終了の 24 時間以内に請求されます。設定でいつでもサブスクリプションを管理またはキャンセルできます。 ライフタイム オプションは、サブスクリプションではなく、1 回の支払いです。更新されず、再度請求されることはありません。"
+            "value": "無料トライアル後、%2$@ごとに%1$@が請求されます。現在の期間が終了する24時間前までに解約しない限り、自動的に更新されます。App Storeのアカウント設定で管理・解約できます。購入の確認時に、支払いは Apple ID に請求されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "구매 확인 시 Apple ID로 요금이 청구됩니다. 현재 기간이 종료되기 최소 24시간 전에 취소하지 않으면 동일한 가격과 기간으로 구독이 자동으로 갱신되며, 종료되기 24시간 이내에 갱신 요금이 청구됩니다. 설정에서 언제든지 구독을 관리하거나 취소할 수 있습니다. 평생 옵션은 구독이 아닌 단일 결제입니다. 갱신되지 않으며 다시 청구되지 않습니다."
+            "value": "무료 체험 후 %2$@마다 %1$@이(가) 청구됩니다. 현재 기간 종료 24시간 전까지 해지하지 않으면 자동으로 갱신됩니다. App Store 계정 설정에서 관리하거나 해지할 수 있습니다. 구매 확인 시 Apple ID로 요금이 청구됩니다."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "O pagamento é cobrado em seu ID Apple na confirmação da compra. A assinatura é renovada automaticamente pelo mesmo preço e período, a menos que você cancele pelo menos 24 horas antes do término do período atual, e a renovação seja cobrada nas 24 horas anteriores ao seu término. Gerencie ou cancele sua assinatura a qualquer momento em Configurações. A opção Vitalícia é um pagamento único, não uma assinatura: não renova e não é cobrada novamente."
+            "value": "Período experimental gratuito e depois %@ por %@. Renova-se automaticamente exceto se cancelar até 24 horas antes do fim do período em curso. Pode gerir ou cancelar nas definições da sua conta App Store. O pagamento é cobrado no seu ID Apple na confirmação da compra."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Оплата списывается с вашего Apple ID при подтверждении покупки. Подписка продлевается автоматически по той же цене и на тот же период, если вы не отмените ее по крайней мере за 24 часа до окончания текущего периода, а плата за продление взимается в течение 24 часов до его окончания. Управляйте подпиской или отменяйте ее в любое время в настройках. Опция «Пожизненный» — это разовый платеж, а не подписка: она не продлевается и не взимается повторно."
+            "value": "Бесплатный пробный период, затем %@ за %@. Продлевается автоматически, если не отменить не менее чем за 24 часа до окончания текущего периода. Управлять подпиской или отменить её можно в настройках аккаунта App Store. Оплата списывается с вашего Apple ID при подтверждении покупки."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "确认购买后，将从您的 Apple ID 中扣款。订阅将以相同的价格和期限自动续订，除非您在当前期限结束前至少 24 小时取消，并且续订费用将在当前期限结束前的 24 小时内收取。随时在“设置”中管理或取消您的订阅。 终身选项是一次付款，而不是订阅：它不会续订，也不会再次收费。"
+            "value": "免费试用后，每%2$@收取%1$@。除非在当前周期结束前至少24小时取消，否则将自动续订。您可以在 App Store 账户设置中管理或取消。确认购买后，将从您的 Apple ID 中扣款。"
           }
         }
       },
@@ -7382,7 +7324,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esplorerò prima io"
+            "value": "Prima do un'occhiata"
           }
         },
         "ja": {
@@ -7422,7 +7364,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sollte sich Ihr Gerät überhitzen, begrenzt eNDS die Geschwindigkeit automatisch auf 1x. Sollte sich das Gerät weiterhin überhitzen, senkt eNDS zudem die Bildwiederholfrequenz des Bildschirms, um die Abkühlung zu unterstützen."
+            "value": "Sollte sich dein Gerät überhitzen, begrenzt eNDS die Geschwindigkeit automatisch auf 1x. Sollte sich das Gerät weiterhin überhitzen, senkt eNDS zudem die Bildwiederholfrequenz des Bildschirms, um die Abkühlung zu unterstützen."
           }
         },
         "es": {
@@ -7956,7 +7898,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Manette"
+            "value": "Joystick"
           }
         },
         "it": {
@@ -8585,7 +8527,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lifetime – %@. Keine Abonnementgebühren, niemals."
+            "value": "Lebenslang – %@. Kein Abo, niemals."
           }
         },
         "es": {
@@ -8597,13 +8539,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lifetime — %@. Aucun abonnement, jamais."
+            "value": "À vie — %@. Aucun abonnement, jamais."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lifetime — %@. Nessun abbonamento, mai."
+            "value": "A vita — %@. Nessun abbonamento, mai."
           }
         },
         "ja": {
@@ -8621,7 +8563,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lifetime — %@. Sem qualquer assinatura, nunca."
+            "value": "Vitalício — %@. Sem qualquer subscrição, nunca."
           }
         },
         "ru": {
@@ -10039,37 +9981,37 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kein Spiel kommt an „%@“ heran"
+            "value": "Keine Spiele für „%@“ gefunden"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No hay ningún juego que se pueda comparar con «%@»"
+            "value": "No hay juegos que coincidan con «%@»"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun jeu ne vaut « %@ »"
+            "value": "Aucun jeu ne correspond à « %@ »"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessun gioco è paragonabile a “%@”"
+            "value": "Nessun gioco corrisponde a “%@”"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "『%@』に匹敵するゲームはない"
+            "value": "「%@」に一致するゲームはありません"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "“%@”에 필적할 만한 게임은 없습니다."
+            "value": "“%@”과(와) 일치하는 게임이 없습니다"
           }
         },
         "pt-PT": {
@@ -10087,7 +10029,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有哪款游戏能与《%@》相媲美"
+            "value": "没有与“%@”匹配的游戏"
           }
         }
       }
@@ -10452,7 +10394,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vale"
+            "value": "Aceptar"
           }
         },
         "fr": {
@@ -10796,7 +10738,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Einmalzahlung von %@ – und es gehört für immer Ihnen."
+            "value": "Einmalzahlung von %@ – und es gehört für immer dir."
           }
         },
         "es": {
@@ -11434,7 +11376,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Koppeln Sie einen Gamecontroller in den iOS-Einstellungen → Bluetooth und kehren Sie anschließend hierher zurück, um die Tasten anzupassen."
+            "value": "Kopple einen Gamecontroller in den iOS-Einstellungen → Bluetooth und komm anschließend hierher zurück, um die Tasten anzupassen."
           }
         },
         "es": {
@@ -11783,13 +11725,13 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abspielen"
+            "value": "Spielen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reproducir"
+            "value": "Jugar"
           }
         },
         "fr": {
@@ -11958,7 +11900,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Möchten Sie lieber einmalig bezahlen?"
+            "value": "Lieber einmalig bezahlen?"
           }
         },
         "es": {
@@ -12190,7 +12132,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Produkt nicht gefunden. Bitte versuchen Sie es später erneut."
+            "value": "Produkt nicht gefunden. Bitte versuche es später erneut."
           }
         },
         "es": {
@@ -12896,7 +12838,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Grabación de un fragmento"
+            "value": "Grabar clip"
           }
         },
         "fr": {
@@ -14050,7 +13992,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wiederherstellung fehlgeschlagen: %@. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."
+            "value": "Wiederherstellung fehlgeschlagen: %@. Überprüfe deine Internetverbindung und versuche es erneut."
           }
         },
         "es": {
@@ -14576,25 +14518,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "„Save Slot“ ist PRO"
+            "value": "Dieser Speicherplatz ist PRO"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "«Save Slot» es PRO"
+            "value": "Esta ranura es PRO"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "« Save Slot » est une version PRO"
+            "value": "Cet emplacement est PRO"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "\"Save Slot\" è PRO"
+            "value": "Questo slot è PRO"
           }
         },
         "ja": {
@@ -14612,7 +14554,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "O «Save Slot» é PRO"
+            "value": "Esta ranhura é PRO"
           }
         },
         "ru": {
@@ -14692,19 +14634,19 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Spielstände speichern"
+            "value": "Spielstände"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar estados"
+            "value": "Estados guardados"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enregistrer les états"
+            "value": "États de sauvegarde"
           }
         },
         "it": {
@@ -14808,25 +14750,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "In Slot „%d“ gespeichert"
+            "value": "In Speicherplatz %d gespeichert"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardado en la ranura%d"
+            "value": "Guardado en la ranura %d"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enregistré dans l'emplacement «%d »"
+            "value": "Enregistré dans l'emplacement %d"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Salvato nello slot%d"
+            "value": "Salvato nello slot %d"
           }
         },
         "ja": {
@@ -14961,7 +14903,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Linhas de varredura"
+            "value": "Linhas de varrimento"
           }
         },
         "ru": {
@@ -14984,25 +14926,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scanlines ist PRO"
+            "value": "Scanlinien ist PRO"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scanlines es PRO"
+            "value": "Líneas de exploración es PRO"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scanlines est une version PRO"
+            "value": "Les lignes de balayage sont PRO"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scanlines è PRO"
+            "value": "Linee di scansione è PRO"
           }
         },
         "ja": {
@@ -15020,7 +14962,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Scanlines é PRO"
+            "value": "Linhas de varrimento é PRO"
           }
         },
         "ru": {
@@ -16262,25 +16204,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth und Crisp sind immer kostenlos. Hol dir PRO, um den Scanlines-Filter freizuschalten."
+            "value": "Glatt und Scharf sind immer kostenlos. Hol dir PRO, um den Scanlinien-Filter freizuschalten."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth y Crisp son siempre gratis. Hazte PRO para desbloquear el filtro Scanlines."
+            "value": "Suave y Nítido son siempre gratis. Hazte PRO para desbloquear el filtro Líneas de exploración."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth et Crisp sont toujours gratuits. Passez PRO pour débloquer le filtre Scanlines."
+            "value": "Lisse et Net sont toujours gratuits. Passez PRO pour débloquer le filtre Lignes de balayage."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth e Crisp sono sempre gratuiti. Passa a PRO per sbloccare il filtro Scanlines."
+            "value": "Liscio e Nitido sono sempre gratuiti. Passa a PRO per sbloccare il filtro Linee di scansione."
           }
         },
         "ja": {
@@ -16298,7 +16240,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth e Crisp são sempre gratuitos. Torne-se PRO para desbloquear o filtro Scanlines."
+            "value": "Suave e Nítido são sempre gratuitos. Torne-se PRO para desbloquear o filtro Linhas de varrimento."
           }
         },
         "ru": {
@@ -16320,25 +16262,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth und Crisp sind immer kostenlos; Scanlines ist eine PRO-Funktion. Dies ist der Standard für Spiele ohne eigenen Filter — im Spiel jederzeit über das Pausenmenü änderbar."
+            "value": "Glatt und Scharf sind immer kostenlos; Scanlinien ist eine PRO-Funktion. Dies ist der Standard für Spiele ohne eigenen Filter — im Spiel jederzeit über das Pausenmenü änderbar."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth y Crisp son siempre gratis; Scanlines es una función PRO. Es el valor por defecto para juegos sin filtro propio — puedes cambiarlo en plena partida desde el menú de pausa."
+            "value": "Suave y Nítido son siempre gratis; Líneas de exploración es una función PRO. Es el valor por defecto para juegos sin filtro propio — puedes cambiarlo en plena partida desde el menú de pausa."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth et Crisp sont toujours gratuits ; Scanlines est une fonction PRO. C'est le réglage par défaut pour les jeux sans filtre propre — modifiable en jeu depuis le menu pause."
+            "value": "Lisse et Net sont toujours gratuits ; Lignes de balayage est une fonction PRO. C'est le réglage par défaut pour les jeux sans filtre propre — modifiable en jeu depuis le menu pause."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth e Crisp sono sempre gratuiti; Scanlines è una funzione PRO. È il valore predefinito per i giochi senza filtro proprio — modificabile in gioco dal menu di pausa."
+            "value": "Liscio e Nitido sono sempre gratuiti; Linee di scansione è una funzione PRO. È il valore predefinito per i giochi senza filtro proprio — modificabile in gioco dal menu di pausa."
           }
         },
         "ja": {
@@ -16356,7 +16298,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Smooth e Crisp são sempre gratuitos; Scanlines é uma função PRO. É a predefinição para jogos sem filtro próprio — pode mudá-la em jogo no menu de pausa."
+            "value": "Suave e Nítido são sempre gratuitos; Linhas de varrimento é uma função PRO. É a predefinição para jogos sem filtro próprio — pode mudá-la em jogo no menu de pausa."
           }
         },
         "ru": {
@@ -17193,7 +17135,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bildschirme wechseln"
+            "value": "Bildschirme tauschen"
           }
         },
         "es": {
@@ -17205,13 +17147,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Changer d'écran"
+            "value": "Inverser les écrans"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cambia schermata"
+            "value": "Scambia schermi"
           }
         },
         "ja": {
@@ -17425,7 +17367,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tippen Sie auf eine Zeile darunter und drücken Sie anschließend die Taste, die Sie zuweisen möchten."
+            "value": "Tippe auf eine Zeile darunter und drücke anschließend die Taste, die du zuweisen möchtest."
           }
         },
         "es": {
@@ -17775,7 +17717,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vielen Dank für Ihre Unterstützung!\nGenießen Sie das Erlebnis in vollen Zügen."
+            "value": "Vielen Dank für deine Unterstützung!\nGenieße das Erlebnis in vollen Zügen."
           }
         },
         "es": {
@@ -17793,7 +17735,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Grazie per il vostro sostegno!\nGodetevi appieno questa esperienza."
+            "value": "Grazie per il tuo supporto!\nGoditi l'esperienza completa."
           }
         },
         "ja": {
@@ -17811,7 +17753,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Obrigado pelo vosso apoio!\nAproveitem a experiência na íntegra."
+            "value": "Obrigado pelo seu apoio!\nAproveite a experiência completa."
           }
         },
         "ru": {
@@ -18449,7 +18391,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Estas são as predefinições utilizadas na próxima vez que abrires um jogo que ainda não tenha um layout próprio. Podes sempre alterar o layout durante o jogo a partir do menu de pausa ou do botão de layout do HUD — o eNDS guarda a tua escolha para cada jogo."
+            "value": "Estas são as predefinições utilizadas na próxima vez que abrir um jogo que ainda não tenha um layout próprio. Pode sempre alterar o layout durante o jogo a partir do menu de pausa ou do botão de layout do HUD — o eNDS guarda a sua escolha para cada jogo."
           }
         },
         "ru": {
@@ -18645,7 +18587,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diese Datei ist in Ihrer Bibliothek bereits vorhanden. Möchten Sie sie ersetzen?"
+            "value": "Diese Datei ist in deiner Bibliothek bereits vorhanden. Möchtest du sie ersetzen?"
           }
         },
         "es": {
@@ -18767,13 +18709,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esta asignación se guarda para este modelo de controlador y se recupera cada vez que se vuelve a conectar."
+            "value": "Esta asignación se guarda para este modelo de mando y se recupera cada vez que se vuelve a conectar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce mappage est mémorisé pour ce modèle de contrôleur et rétabli à chaque fois que celui-ci se reconnecte."
+            "value": "Ce mappage est mémorisé pour ce modèle de manette et rétabli à chaque fois que celle-ci se reconnecte."
           }
         },
         "it": {
@@ -18797,7 +18739,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esta atribuição é guardada para este modelo de controlador e restaurada sempre que este se voltar a ligar."
+            "value": "Esta atribuição é guardada para este modelo de comando e restaurada sempre que este se voltar a ligar."
           }
         },
         "ru": {
@@ -19226,7 +19168,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Versuchen Sie es mit einem anderen Titel oder Spielcode."
+            "value": "Versuche es mit einem anderen Titel oder Spielcode."
           }
         },
         "es": {
@@ -19454,60 +19396,118 @@
         }
       }
     },
-    "Unlock all features — no limits": {
+    "Unlock all PRO features": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alle Funktionen freischalten — ohne Limits"
+            "value": "Alle PRO-Funktionen freischalten"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloquea todo — sin límites"
+            "value": "Desbloquea todas las funciones PRO"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Débloquez tout — sans limites"
+            "value": "Débloquez toutes les fonctions PRO"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sblocca tutto — senza limiti"
+            "value": "Sblocca tutte le funzioni PRO"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "すべての機能を解放 — 制限なし"
+            "value": "すべてのPRO機能を解放"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "모든 기능 잠금 해제 — 제한 없음"
+            "value": "모든 PRO 기능 잠금 해제"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloqueie tudo — sem limites"
+            "value": "Desbloqueie todas as funcionalidades PRO"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Все функции — без ограничений"
+            "value": "Все функции PRO"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "解锁全部功能 — 没有限制"
+            "value": "解锁全部 PRO 功能"
+          }
+        }
+      }
+    },
+    "Lifetime unlock — nothing to manage": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einmalig freigeschaltet — nichts zu verwalten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloqueo de por vida — nada que gestionar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déblocage à vie — rien à gérer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sblocco a vita — niente da gestire"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "買い切りで解放済み — 管理は不要です"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "평생 잠금 해제 — 관리할 항목 없음"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloqueio vitalício — nada a gerir"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пожизненный доступ — управлять нечем"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久解锁 — 无需管理"
           }
         }
       }
@@ -19938,7 +19938,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu nous manques ! Ton abonnement a expiré.\nReviens pour débloquer à nouveau toutes les fonctionnalités."
+            "value": "Vous nous manquez ! Votre abonnement a expiré.\nRevenez et débloquez tout à nouveau."
           }
         },
         "it": {
@@ -19950,7 +19950,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "会いたいです！ご契約期間が終了しました。\nぜひ戻ってきて、すべてのコンテンツを再び利用できるようにしてください。"
+            "value": "お帰りをお待ちしています！サブスクリプションの期限が切れました。\n戻ってきて、すべてをもう一度解放しましょう。"
           }
         },
         "ko": {
@@ -19962,13 +19962,13 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Temos saudades tuas! A tua subscrição expirou.\nVolta e desbloqueia tudo novamente."
+            "value": "Temos saudades suas! A sua subscrição expirou.\nVolte e desbloqueie tudo novamente."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Мы скучаем по тебе! Срок твоей подписки истек.\nВернись и снова получи доступ ко всему контенту."
+            "value": "Мы скучали! Срок вашей подписки истёк.\nВернитесь и снова откройте всё."
           }
         },
         "zh-Hans": {
@@ -20164,7 +20164,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bienvenidos a eNDS"
+            "value": "Bienvenido a eNDS"
           }
         },
         "fr": {
@@ -20176,7 +20176,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Benvenuti su eNDS"
+            "value": "Benvenuto su eNDS"
           }
         },
         "ja": {
@@ -20235,7 +20235,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Benvenuti su eNDS PRO!"
+            "value": "Benvenuto su eNDS PRO!"
           }
         },
         "ja": {
@@ -20311,7 +20311,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quando está ativado, o eNDS guarda automaticamente um instantâneo sempre que sair de um jogo ou a aplicação passar para segundo plano, e oferece a possibilidade de retomar a partir desse ponto na próxima vez. O indicador de gravação mostra brevemente «Guardado automaticamente» no ecrã sempre que isso acontece; desative-o para guardar em silêncio.\n\nIsto é diferente do próprio ficheiro de gravação do jogo (.sav) — o sistema de gravação do jogo, que é gravado quando guardas dentro do próprio jogo, exatamente como num cartucho real. Os estados de gravação são instantâneos manuais que crias a qualquer momento a partir do menu de pausa e aos quais podes regressar instantaneamente, mesmo a meio de um nível; a gravação automática é apenas um estado de gravação que o eNDS mantém atualizado automaticamente por ti."
+            "value": "Quando está ativado, o eNDS guarda automaticamente um instantâneo sempre que sair de um jogo ou a aplicação passar para segundo plano, e oferece a possibilidade de retomar a partir desse ponto na próxima vez. O indicador de gravação mostra brevemente «Guardado automaticamente» no ecrã sempre que isso acontece; desative-o para guardar em silêncio.\n\nIsto é diferente do próprio ficheiro de gravação do jogo (.sav) — o sistema de gravação do jogo, que é gravado quando guarda dentro do próprio jogo, exatamente como num cartucho real. Os estados de gravação são instantâneos manuais que cria a qualquer momento a partir do menu de pausa e aos quais pode regressar instantaneamente, mesmo a meio de um nível; a gravação automática é apenas um estado de gravação que o eNDS mantém atualizado automaticamente por si."
           }
         },
         "ru": {
@@ -20775,7 +20775,7 @@
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "A tua forma de jogar"
+            "value": "A sua forma de jogar"
           }
         },
         "ru": {
@@ -21262,7 +21262,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "eNDS spielt Spieledateien ab, die Sie legal besitzen. Es sind keine Spiele im Lieferumfang enthalten."
+            "value": "eNDS spielt Spieledateien ab, die du legal besitzt. Es sind keine Spiele im Lieferumfang enthalten."
           }
         },
         "es": {
@@ -21668,55 +21668,55 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "v %@"
+            "value": "v%@"
           }
         }
       }
@@ -22138,19 +22138,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎨 Color de contraste"
+            "value": "🎨 Color de acento"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎨 Couleur d'accent"
+            "value": "🎨 Couleur d'accentuation"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎨 Colore di risalto"
+            "value": "🎨 Colore d'accento"
           }
         },
         "ja": {
@@ -22254,7 +22254,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "🎮 Avance"
+            "value": "🎮 Vista previa"
           }
         },
         "fr": {
@@ -22645,6 +22645,1458 @@
           "stringUnit": {
             "state": "translated",
             "value": "🖼️ 模拟"
+          }
+        }
+      }
+    },
+    "Everything included": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles inklusive"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo incluido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout inclus"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutto incluso"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべて込み"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 기능 포함"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tudo incluído"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё включено"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包含全部功能"
+          }
+        }
+      }
+    },
+    "Purchase pending approval. PRO will unlock once it is approved.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kauf wartet auf Genehmigung. PRO wird freigeschaltet, sobald er genehmigt ist."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra pendiente de aprobación. PRO se activará cuando se apruebe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Achat en attente d'approbation. PRO sera activé dès qu'il sera approuvé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acquisto in attesa di approvazione. PRO si attiverà una volta approvato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購入は承認待ちです。承認されるとPROが有効になります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "구매 승인 대기 중입니다. 승인되면 PRO가 활성화됩니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra pendente de aprovação. O PRO será ativado assim que for aprovado."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Покупка ожидает одобрения. PRO активируется после одобрения."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买待批准。批准后将解锁 PRO。"
+          }
+        }
+      }
+    },
+    "Couldn't save state: %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zustand konnte nicht gespeichert werden: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar el estado: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'enregistrer l'état : %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile salvare lo stato: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステートを保存できませんでした：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태를 저장할 수 없습니다: %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível guardar o estado: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось сохранить состояние: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法保存状态：%@"
+          }
+        }
+      }
+    },
+    "Couldn't load state: %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zustand konnte nicht geladen werden: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo cargar el estado: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de charger l'état : %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile caricare lo stato: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステートを読み込めませんでした：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태를 불러올 수 없습니다: %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar o estado: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось загрузить состояние: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法加载状态：%@"
+          }
+        }
+      }
+    },
+    "Connect a game controller over Bluetooth or USB-C, then come back here to customize its buttons.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbinde einen Game-Controller über Bluetooth oder USB-C und komm dann hierher zurück, um seine Tasten anzupassen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecta un mando por Bluetooth o USB-C y vuelve aquí para personalizar sus botones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connectez une manette en Bluetooth ou en USB-C, puis revenez ici pour personnaliser ses boutons."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collega un controller via Bluetooth o USB-C, poi torna qui per personalizzarne i pulsanti."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BluetoothまたはUSB-Cでゲームコントローラーを接続してから、ここに戻ってボタンをカスタマイズしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth 또는 USB-C로 게임 컨트롤러를 연결한 다음 여기로 돌아와 버튼을 사용자화하세요."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ligue um comando por Bluetooth ou USB-C e volte aqui para personalizar os botões."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключите геймпад по Bluetooth или USB-C, затем вернитесь сюда, чтобы настроить его кнопки."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过蓝牙或 USB-C 连接游戏手柄，然后回到这里自定义按键。"
+          }
+        }
+      }
+    },
+    "Manage Subscription": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abo verwalten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestionar suscripción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gérer l'abonnement"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestisci abbonamento"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サブスクリプションを管理"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "구독 관리"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerir subscrição"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Управление подпиской"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理订阅"
+          }
+        }
+      }
+    },
+    "Third-Party License Notices": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lizenzhinweise Dritter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisos de licencias de terceros"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mentions de licences tierces"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note sulle licenze di terze parti"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サードパーティのライセンス表示"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "서드파티 라이선스 고지"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisos de licenças de terceiros"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомления о сторонних лицензиях"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第三方许可声明"
+          }
+        }
+      }
+    },
+    "What eNDS detects": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was eNDS erkennt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué detecta eNDS"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce qu'eNDS détecte"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cosa rileva eNDS"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "eNDSが検出した内容"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "eNDS가 감지한 항목"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que o eNDS deteta"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что видит eNDS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "eNDS 检测到的内容"
+          }
+        }
+      }
+    },
+    "Importing…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importieren…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importando…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importation…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importazione…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読み込み中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가져오는 중…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A importar…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Импорт…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在导入…"
+          }
+        }
+      }
+    },
+    "Unable to read ROM data.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ROM-Daten konnten nicht gelesen werden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron leer los datos de la ROM."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de lire les données de la ROM."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile leggere i dati della ROM."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ROMデータを読み込めません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ROM 데이터를 읽을 수 없습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível ler os dados da ROM."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось прочитать данные ROM."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取 ROM 数据。"
+          }
+        }
+      }
+    },
+    "Unable to create Saves directory.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner für Speicherdaten konnte nicht erstellt werden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo crear la carpeta de guardados."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de créer le dossier des sauvegardes."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile creare la cartella dei salvataggi."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セーブ用フォルダを作成できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세이브 폴더를 만들 수 없습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível criar a pasta de gravações."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось создать папку сохранений."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建存档文件夹。"
+          }
+        }
+      }
+    },
+    "melonDS rejected this ROM header.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDS hat den Header dieser ROM abgelehnt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDS rechazó la cabecera de esta ROM."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDS a rejeté l'en-tête de cette ROM."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDS ha rifiutato l'intestazione di questa ROM."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDSがこのROMのヘッダーを拒否しました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDS가 이 ROM의 헤더를 거부했습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O melonDS rejeitou o cabeçalho desta ROM."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDS отклонил заголовок этой ROM."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "melonDS 拒绝了此 ROM 的文件头。"
+          }
+        }
+      }
+    },
+    "No ROM is currently loaded.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es ist keine ROM geladen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna ROM cargada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune ROM n'est chargée."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuna ROM caricata."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ROMが読み込まれていません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로드된 ROM이 없습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não há nenhuma ROM carregada."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ROM не загружена."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前未加载 ROM。"
+          }
+        }
+      }
+    },
+    "Unable to create save state directory.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner für Spielstände konnte nicht erstellt werden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo crear la carpeta de estados."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de créer le dossier des états de jeu."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile creare la cartella degli stati."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステート用フォルダを作成できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태 저장 폴더를 만들 수 없습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível criar a pasta de estados."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось создать папку состояний."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建状态文件夹。"
+          }
+        }
+      }
+    },
+    "Failed to create save state.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielstand konnte nicht erstellt werden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo crear el estado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de créer l'état de jeu."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile creare lo stato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステートを作成できませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태를 저장할 수 없습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível criar o estado."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось создать состояние."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建状态。"
+          }
+        }
+      }
+    },
+    "Failed to write save state file.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielstand-Datei konnte nicht geschrieben werden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo escribir el archivo de estado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'écrire le fichier d'état de jeu."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile scrivere il file dello stato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステートファイルを書き込めませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태 파일을 쓸 수 없습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível escrever o ficheiro de estado."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось записать файл состояния."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法写入状态文件。"
+          }
+        }
+      }
+    },
+    "Save state file not found or unreadable.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielstand-Datei nicht gefunden oder nicht lesbar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivo de estado no encontrado o ilegible."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichier d'état introuvable ou illisible."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File dello stato non trovato o illeggibile."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステートファイルが見つからないか読み込めません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태 파일을 찾을 수 없거나 읽을 수 없습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ficheiro de estado não encontrado ou ilegível."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файл состояния не найден или не читается."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到状态文件或无法读取。"
+          }
+        }
+      }
+    },
+    "Save state is invalid or incompatible.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielstand ist ungültig oder inkompatibel."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El estado no es válido o es incompatible."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'état de jeu est invalide ou incompatible."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo stato non è valido o è incompatibile."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステートが無効か互換性がありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태가 잘못되었거나 호환되지 않습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O estado é inválido ou incompatível."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Состояние повреждено или несовместимо."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态无效或不兼容。"
+          }
+        }
+      }
+    },
+    "ARM7 BIOS": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM7-BIOS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM7"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM7"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM7"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM7 BIOS"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM7 BIOS"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM7"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM7"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM7 BIOS"
+          }
+        }
+      }
+    },
+    "ARM9 BIOS": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM9-BIOS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM9"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM9"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM9"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM9 BIOS"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM9 BIOS"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM9"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIOS ARM9"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ARM9 BIOS"
+          }
+        }
+      }
+    },
+    "Firmware": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmware"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmware"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmware"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmware"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ファームウェア"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "펌웨어"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmware"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прошивка"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固件"
+          }
+        }
+      }
+    },
+    "Backup from %@": {
+      "comment": "Recover cartridge save: when the backup was taken",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung vom %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia del %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauvegarde du %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup del %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ のバックアップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 백업"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cópia de %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Резервная копия от %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的备份"
+          }
+        }
+      }
+    },
+    "This game is already open in another window.": {
+      "comment": "Emulator error: same ROM running in a second iPad window",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Spiel ist bereits in einem anderen Fenster geöffnet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este juego ya está abierto en otra ventana."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce jeu est déjà ouvert dans une autre fenêtre."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo gioco è già aperto in un'altra finestra."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このゲームは別のウィンドウで既に開いています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 게임은 이미 다른 창에서 열려 있습니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este jogo já está aberto noutra janela."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эта игра уже открыта в другом окне."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此游戏已在另一个窗口中打开。"
+          }
+        }
+      }
+    },
+    "Reset controller mapping?": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controller-Belegung zurücksetzen?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Restablecer la asignación del mando?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réinitialiser le mappage de la manette ?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ripristinare la mappatura del controller?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コントローラーの割り当てをリセットしますか？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "컨트롤러 매핑을 초기화할까요?"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repor o mapeamento do comando?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить раскладку контроллера?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置手柄映射？"
+          }
+        }
+      }
+    },
+    "Your custom buttons for this controller will be lost.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine eigene Tastenbelegung für diesen Controller geht verloren."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se perderán los botones personalizados de este mando."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos boutons personnalisés pour cette manette seront perdus."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I pulsanti personalizzati per questo controller andranno persi."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このコントローラーのカスタムボタン設定は失われます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 컨트롤러의 사용자 지정 버튼이 사라집니다."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os botões personalizados deste comando serão perdidos."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши пользовательские кнопки для этого контроллера будут потеряны."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此手柄的自定义按键将丢失。"
           }
         }
       }

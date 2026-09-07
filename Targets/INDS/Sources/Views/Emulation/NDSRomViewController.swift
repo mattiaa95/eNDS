@@ -115,6 +115,7 @@ final class NDSRomViewController: UIViewController {
     }
 
     deinit {
+        releaseROMSlot() // backstop; the quit/teardown paths already did
         // Every live UIImage built by ndsFramebufferImage ALIASES these buffers
         // (zero-copy by design). Drop the ones that could outlive us before the
         // memory goes away, or they become CGImages over freed pages: the
@@ -143,6 +144,8 @@ final class NDSRomViewController: UIViewController {
         }
         core.resumeEmulation()
         startDisplayLink()
+        startPeriodicAutosave()
+        exitBookkeepingDone = false
         UIApplication.shared.isIdleTimerDisabled = true
     }
 
@@ -151,6 +154,7 @@ final class NDSRomViewController: UIViewController {
         unregisterLifecycleObservers()
         INDSExternalDisplayController.shared.onConnectionChanged = nil
         stopDisplayLink()
+        stopPeriodicAutosave()
         UIApplication.shared.isIdleTimerDisabled = false
 
         // Volver a la biblioteca tras jugar es el momento de preguntar por una
@@ -163,10 +167,40 @@ final class NDSRomViewController: UIViewController {
             DispatchQueue.main.async { INDSReviewPrompt.askIfEarned() }
         }
         guard !didExplicitlyQuit else { return }
+        runExitBookkeeping()
+        // Pause, not stop: this also fires when a full-screen modal (the
+        // ReplayKit clip preview) covers us and we'll be back. The real
+        // teardown is `stopForTeardown()`.
+        core.pauseEmulation()
+    }
+
+    /// Set once the exit autosave/thumbnail ran for the current appearance,
+    /// so a pop that lands right after `viewDidDisappear` doesn't write the
+    /// same multi-megabyte state twice. Reset in `viewWillAppear`.
+    private var exitBookkeepingDone = false
+
+    private func runExitBookkeeping() {
+        guard !exitBookkeepingDone else { return }
+        exitBookkeepingDone = true
         clipRecorder.stopIfNeeded()
         autosaveIfNeeded()
         saveThumbnail()
-        core.pauseEmulation()
+    }
+
+    /// The SwiftUI pop — edge swipe-back or `dismiss()` — as opposed to the
+    /// pause menu's "Quit to Library". `viewDidDisappear` can't tell a pop
+    /// from a modal covering us, so it only pauses; without this the emu
+    /// thread and audio engine outlived the screen until ARC got round to
+    /// the controller, and re-opening the same ROM meanwhile could have two
+    /// cores writing one `.sav`. Called from
+    /// `NDSRomViewWrapper.dismantleUIViewController`.
+    func stopForTeardown() {
+        guard !didExplicitlyQuit else { return }
+        didExplicitlyQuit = true
+        stopDisplayLink() // before the thumbnail reads `topBuffer`
+        runExitBookkeeping()
+        core.stopEmulation()
+        releaseROMSlot()
     }
 
     /// The only warning iOS gives before it jetsams us — and jetsam is the one
@@ -196,6 +230,10 @@ final class NDSRomViewController: UIViewController {
     // MARK: - App lifecycle (background pause + autosave)
 
     private func registerLifecycleObservers() {
+        // viewWillAppear can fire twice with no viewDidDisappear in between
+        // (cancelled swipe-back); without this each background would autosave
+        // twice. removeObserver on a non-registered pair is a no-op.
+        unregisterLifecycleObservers()
         let center = NotificationCenter.default
         center.addObserver(self,
                             selector: #selector(handleDidEnterBackground),
@@ -430,7 +468,27 @@ final class NDSRomViewController: UIViewController {
     /// `allowAutoResume: false` is the recovery path: the whole point there is
     /// to boot from the cartridge save we just restored, so re-applying the
     /// auto state would immediately undo it.
+    /// Base names of ROMs with a live core anywhere in the process. iPad
+    /// multi-window (Stage Manager "New Window", drag-out) gives each window
+    /// its own `NDSRomViewController`; two cores on one game would both
+    /// flush the same `.sav` and autosave — last writer wins, silently.
+    private static var openROMs: Set<String> = []
+    private var registeredBaseName: String?
+
+    private func releaseROMSlot() {
+        if let name = registeredBaseName {
+            Self.openROMs.remove(name)
+            registeredBaseName = nil
+        }
+    }
+
     private func loadCore(allowAutoResume: Bool = true) {
+        let baseName = rom.baseName
+        guard registeredBaseName == baseName || !Self.openROMs.contains(baseName) else {
+            hudView.showError(NSLocalizedString("This game is already open in another window.", comment: "Emulator error: same ROM running in a second iPad window"))
+            revealGameContent()
+            return
+        }
         do {
             // New session: this game is allowed one fresh battery-save snapshot
             // before whatever state load comes next.
@@ -441,6 +499,8 @@ final class NDSRomViewController: UIViewController {
             // (unlike the clock below, which the core can be told at any time).
             INDSConsolePreferences.apply(to: core)
             try core.loadROM(atPath: rom.fileURL.path, biosDirectory: biosDirectory.path)
+            Self.openROMs.insert(baseName)
+            registeredBaseName = baseName
             applyPerGameProfileIfNeeded()
             applyCheats()
             applyConsoleClock()
@@ -1095,9 +1155,10 @@ final class NDSRomViewController: UIViewController {
         case .recoverCartridgeSave:
             dismiss(animated: true) { [weak self] in
                 self?.recoverCartridgeSave()
+                // Resets the HUD pause icon; the second `dismiss` that used to
+                // do this raced the first one and could leave it stuck on ⏸.
+                self?.resumeFromPause()
             }
-            pauseMenuController = nil
-            dismiss(animated: true) { [weak self] in self?.resumeFromPause() }
             pauseMenuController = nil
         }
     }
@@ -1142,6 +1203,7 @@ final class NDSRomViewController: UIViewController {
         saveThumbnail()
         core.stopEmulation()
         stopDisplayLink()
+        releaseROMSlot()
         // Short fade instead of the screens just vanishing under the pop
         // transition — mirrors the entry fade in `revealGameContent()`.
         guard dualScreenView.alpha > 0 else {
@@ -1163,6 +1225,7 @@ final class NDSRomViewController: UIViewController {
             hudView.showToast(String(format: NSLocalizedString("Saved to Slot %d", comment: ""), slot + 1))
         } catch {
             debugLog("Save to slot \(slot) failed: \(error.localizedDescription)")
+            hudView.showToast(String(format: NSLocalizedString("Couldn't save state: %@", comment: ""), error.localizedDescription))
         }
     }
 
@@ -1280,6 +1343,7 @@ final class NDSRomViewController: UIViewController {
             try core.loadState(fromPath: path)
         } catch {
             debugLog("Load from slot \(slot) failed: \(error.localizedDescription)")
+            hudView.showToast(String(format: NSLocalizedString("Couldn't load state: %@", comment: ""), error.localizedDescription))
         }
     }
 

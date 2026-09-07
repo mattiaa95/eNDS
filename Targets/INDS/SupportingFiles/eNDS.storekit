@@ -89,7 +89,7 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Remove ads & unlock all PRO features.",
+              "description" : "Unlock all PRO features.",
               "displayName" : "eNDS PRO Weekly",
               "locale" : "en_US"
             }
@@ -105,12 +105,12 @@
           "codeOffers" : [],
           "displayPrice" : "12.99",
           "familyShareable" : false,
-          "groupNumber" : 2,
+          "groupNumber" : 1,
           "internalID" : "6800000002",
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Remove ads & unlock all PRO features.",
+              "description" : "Unlock all PRO features.",
               "displayName" : "eNDS PRO Yearly",
               "locale" : "en_US"
             }

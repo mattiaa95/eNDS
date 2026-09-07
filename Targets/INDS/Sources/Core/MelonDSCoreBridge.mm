@@ -84,11 +84,17 @@ constexpr double kMicTargetSampleRate = 47743.4659091;
 // -handleAudioEngineConfigurationChange:).
 constexpr double kAudioOutputSampleRate = 48000.0;
 
+// Same ceiling as ROMStorageManager.maxROMSize. The importer enforces it,
+// but Documents/ROMs is Files-app-browsable, so a multi-GB file renamed
+// `.nds` can land here without going through the importer — and a
+// `std::vector::resize` that size would throw straight through to Swift.
+constexpr std::streamsize kMaxReadFileSize = 512LL * 1024 * 1024;
+
 bool ReadFile(const std::string& path, std::vector<u8>& out) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file) return false;
     std::streamsize size = file.tellg();
-    if (size <= 0) return false;
+    if (size <= 0 || size > kMaxReadFileSize) return false;
     file.seekg(0, std::ios::beg);
     out.resize(static_cast<size_t>(size));
     return file.read(reinterpret_cast<char*>(out.data()), size).good();
@@ -102,10 +108,13 @@ bool ReadFixedFile(const std::string& path, std::array<u8, N>& out) {
     return true;
 }
 
+/// `message` doubles as the catalog key: every call site's literal has an
+/// entry in Localizable.xcstrings, since these surface verbatim in HUD
+/// toasts ("Couldn't load state: %@") and the ROM-load error screen.
 NSError *MakeError(NSInteger code, NSString *message) {
     return [NSError errorWithDomain:MelonDSCoreBridgeErrorDomain
                                code:code
-                           userInfo:@{NSLocalizedDescriptionKey: message}];
+                           userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(message, nil)}];
 }
 
 struct FramebufferSlot {
@@ -152,6 +161,12 @@ struct Runtime {
     FramebufferSlot fbSlots[2];
     int fbLatest = -1;
     int fbWriteNext = 0;
+    // Bumped per publish (under fbMutex). The display link ticks 60x/s
+    // regardless of whether the core produced a frame — at 0.5x speed
+    // exactly half the ticks would otherwise re-copy and re-wrap 2x192 KB
+    // into fresh CGImages that are bit-identical to what's on screen.
+    uint64_t fbGeneration = 0;
+    uint64_t fbPresented = 0;
 
     // Microphone input: written from a real-time-ish AVAudioEngine
     // input-tap block (see -beginMicrophoneEngineCapture) every time a
@@ -235,6 +250,7 @@ void PublishFramebuffer(Runtime *r) {
     {
         std::lock_guard<std::mutex> lock(r->fbMutex);
         r->fbLatest = r->fbWriteNext;
+        r->fbGeneration++;
     }
     r->fbWriteNext ^= 1;
 }
@@ -527,13 +543,19 @@ u64 FileLength(FileHandle* file) {
     return len > 0 ? static_cast<u64>(len) : 0;
 }
 
+// Core chatter (ROM path, game title, cart type) stays out of the Release
+// console — same rule as Swift's `debugLog`.
 void Log(LogLevel level, const char* fmt, ...) {
+#if DEBUG
     va_list args;
     va_start(args, fmt);
     NSString *format = [[NSString alloc] initWithUTF8String:fmt ?: ""];
     NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
     NSLog(@"[melonDS:%d] %@", level, message);
+#else
+    (void)level; (void)fmt;
+#endif
 }
 
 Thread* Thread_Create(std::function<void()> func) { return new Thread(std::move(func)); }
@@ -816,6 +838,19 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 }
 
 - (BOOL)loadROMAtPath:(NSString *)romPath biosDirectory:(NSString *)biosDirectory error:(NSError **)error {
+    // Nothing in the core is `noexcept`: `std::bad_alloc` from the ROM/NDS
+    // buffers under memory pressure would otherwise cross into Swift as
+    // std::terminate. Failed halfway = torn down, reported, not crashed.
+    try {
+        return [self loadROMAtPathUnchecked:romPath biosDirectory:biosDirectory error:error];
+    } catch (const std::exception& e) {
+        [self stopEmulation];
+        if (error) *error = MakeError(1, @"Unable to read ROM data.");
+        return NO;
+    }
+}
+
+- (BOOL)loadROMAtPathUnchecked:(NSString *)romPath biosDirectory:(NSString *)biosDirectory error:(NSError **)error {
     // Tear down any previously loaded session first so a reload on an
     // already-active bridge can never leak the emulation thread or race the
     // NDS instance it's about to replace.
@@ -858,7 +893,10 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
         args.ARM7BIOS = std::make_unique<melonDS::ARM7BIOSImage>(arm7);
     }
     std::vector<u8> firmwareData;
-    if (ReadFile(biosDir + "/firmware.bin", firmwareData) && !firmwareData.empty()) {
+    // BIOSManager only admits 256/512 KB dumps, but Documents/BIOS is
+    // Files-app-browsable too; keep the core's assumptions honest.
+    if (ReadFile(biosDir + "/firmware.bin", firmwareData)
+        && (firmwareData.size() == 256 * 1024 || firmwareData.size() == 512 * 1024)) {
         args.Firmware = melonDS::Firmware(firmwareData.data(), static_cast<u32>(firmwareData.size()));
     } else {
         // Generated firmware: melonDS names its owner "melonDS" and speaks
@@ -1598,6 +1636,8 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     if (!top || !bottom) return NO;
     std::lock_guard<std::mutex> lock(_runtime->fbMutex);
     if (_runtime->fbLatest < 0) return NO;
+    if (_runtime->fbGeneration == _runtime->fbPresented) return NO; // nothing new since last copy
+    _runtime->fbPresented = _runtime->fbGeneration;
     const FramebufferSlot &slot = _runtime->fbSlots[_runtime->fbLatest];
     constexpr size_t byteCount = kFramebufferPixels * sizeof(uint32_t);
     memcpy(top, slot.top.data(), byteCount);
@@ -1714,8 +1754,23 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 
     bool wasActive = PauseAndWaitIdle(_runtime);
 
+    // Snapshot first (melonDS's own frontend keeps the same backup for its
+    // "undo load"): the header check only catches a truncated/foreign file.
+    // A state that fails half-way through — a section missing after a core
+    // update, a corrupt body — would otherwise leave the console partially
+    // overwritten, and CartRetail::DoSavestate flushes SRAM to the .sav on
+    // load regardless, so a half-loaded state could take the battery save
+    // down with it. Restoring the snapshot keeps the game exactly where the
+    // user left it.
+    melonDS::Savestate backup(melonDS::Savestate::DEFAULT_SIZE);
+    bool haveBackup = !backup.Error && _runtime->nds->DoSavestate(&backup) && !backup.Error;
+
     melonDS::Savestate state(buffer.data(), static_cast<u32>(buffer.size()), false);
     bool ok = !state.Error && _runtime->nds->DoSavestate(&state) && !state.Error;
+    if (!ok && haveBackup) {
+        backup.Rewind(false);
+        _runtime->nds->DoSavestate(&backup);
+    }
     if (ok) {
         // Discard whatever was queued from before the jump so playback
         // doesn't glitch on stale pre-load audio.
@@ -1743,7 +1798,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     NSString *path = [NSString stringWithUTF8String:_runtime->savePath.c_str()];
     NSError *error = nil;
     if (![data writeToFile:path options:NSDataWritingAtomic error:&error]) {
-        NSLog(@"[melonDS] Failed to write NDS save: %@", error);
+        NSLog(@"[melonDS] Failed to write NDS save: %@", error.localizedDescription); // no path in Release logs
     }
 }
 

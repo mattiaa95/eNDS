@@ -17,7 +17,10 @@ struct NDSHeader: Equatable {
         }
 
         let data = try handle.read(upToCount: 0x20) ?? Data()
-        guard data.count >= 0x10 else {
+        // Every field below is inside the first 0x20 bytes; a real header is
+        // 0x200. Anything shorter is a truncated download, and Data's range
+        // subscript traps (not throws) past the end.
+        guard data.count >= 0x20 else {
             throw ROMStorageError.invalidROM(NSLocalizedString("The NDS header is incomplete.", comment: "Reason appended to the invalid-ROM import error"))
         }
 

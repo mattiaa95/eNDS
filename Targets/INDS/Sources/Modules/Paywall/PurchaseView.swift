@@ -16,9 +16,9 @@
 //     (`shouldOfferLifetime`) — everyone else sees a pure subscription
 //     paywall, plus a "See all plans" reveal.
 //   - Zero invented reviews/badges/testimonials.
-//   - Restore Purchases + tappable Privacy Policy and Terms of Use (Apple's
-//     standard EULA, since eNDS has no custom one) + an auto-renewal /
-//     cancel-anytime disclosure under the CTA.
+//   - Restore Purchases + tappable Privacy Policy and Terms of Use (eNDS's
+//     own pages, `INDSConstants`) + an auto-renewal / cancel-anytime
+//     disclosure under the CTA.
 //
 //  Adaptations vs. iGBA:
 //   - Brand gradient uses eNDS's own crimson (`Color.indsCrimsonLight` /
@@ -44,6 +44,10 @@ import UIKit
 struct PurchaseView: View {
 
     @StateObject var purchaseModel: PurchaseModel = PurchaseModel()
+    // Pro arriving through the background listener (Ask to Buy approval,
+    // offer code, renewal) while the sheet is up: every other gated view
+    // updates from this; the paywall shouldn't be the one still selling.
+    @ObservedObject private var entitlements = EntitlementManager.shared
 
     @State private var showCloseButton = false
     @State private var progress: CGFloat = 0.0
@@ -204,6 +208,11 @@ struct PurchaseView: View {
                 }
             }
         }
+        .onChange(of: entitlements.hasPro) { _, hasPro in
+            if hasPro && !purchaseModel.purchaseSuccess {
+                purchaseModel.isSubscribed = true
+            }
+        }
     }
 
     // MARK: - Celebration
@@ -337,7 +346,7 @@ struct PurchaseView: View {
     private var featuresSection: some View {
         VStack(spacing: 0) {
             featureRow(icon: "infinity", iconColor: .red,
-                       title: NSLocalizedString("Everything, forever", comment: ""),
+                       title: NSLocalizedString("Everything included", comment: ""),
                        subtitle: NSLocalizedString("Every current and future PRO feature", comment: ""),
                        index: 0)
             Divider().padding(.leading, 52)
@@ -377,10 +386,11 @@ struct PurchaseView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
+                // No lineLimit: the German "Slot 1 + auto-save are free…"
+                // is twice the English and the card grows fine.
                 Text(subtitle)
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .lineLimit(2)
             }
 
             Spacer()
@@ -652,7 +662,11 @@ struct PurchaseView: View {
 
     private var footerSection: some View {
         VStack(spacing: 10) {
-            ManageSubscriptionRow()
+            // Only subscribers have something to manage here; for everyone
+            // else the row was a dead end next to Restore.
+            if purchaseModel.isSubscribed && !EntitlementManager.shared.hasLifetime {
+                ManageSubscriptionRow()
+            }
 
             Button(action: {
                 purchaseModel.restorePurchases()

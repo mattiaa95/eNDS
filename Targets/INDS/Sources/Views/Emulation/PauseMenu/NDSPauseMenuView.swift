@@ -208,11 +208,14 @@ private struct NDSDisplayFilterCard: View {
                     .font(.body)
                     .foregroundColor(.secondary)
             }
+            // Pills stretch to the tallest one so a two-line label (ru
+            // "Сканирующие линии") doesn't leave the row ragged.
             HStack(spacing: 8) {
                 ForEach(NDSDisplayFilter.allCases, id: \.self) { option in
                     filterPill(option)
                 }
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, 13)
         .padding(.horizontal, 16)
@@ -245,7 +248,7 @@ private struct NDSDisplayFilterCard: View {
                         .font(.system(size: 9))
                 }
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.vertical, 8)
             .foregroundColor(selected ? .accentColor : .secondary)
             .background(selected ? Color.accentColor.opacity(0.18) : Color.clear)
@@ -442,7 +445,15 @@ struct NDSPauseMenuView: View {
                 Button(NSLocalizedString("Cancel", comment: ""), role: .cancel) {}
                 Button(NSLocalizedString("Recover", comment: ""), role: .destructive) { onAction(.recoverCartridgeSave) }
             } message: {
-                Text(NSLocalizedString("Puts back the game's own save file as it was before a save state was loaded this session, then restarts the game. Use this if loading a state rolled back your in-game progress.", comment: "Recover cartridge save explanation"))
+                let explanation = NSLocalizedString("Puts back the game's own save file as it was before a save state was loaded this session, then restarts the game. Use this if loading a state rolled back your in-game progress.", comment: "Recover cartridge save explanation")
+                // The timestamp is what tells the player *which* save they are
+                // about to go back to — the `.bak` can predate this session.
+                if let date = INDSSaveBackup.backupDate(baseName: romBaseName) {
+                    let stamp = date.formatted(date: .abbreviated, time: .shortened)
+                    Text(explanation + "\n\n" + String(format: NSLocalizedString("Backup from %@", comment: "Recover cartridge save: when the backup was taken"), stamp))
+                } else {
+                    Text(explanation)
+                }
             }
 
             Button {

@@ -18,7 +18,6 @@ import SwiftUI
 @MainActor
 class PurchaseModel: ObservableObject {
 
-    @Published var productIds: [String] = ["iNDSPRO", "iNDSPROYearly", "iNDSPROLifetime"]
     @Published var productDetails: [PurchaseProductDetails] = []
     @Published var isSubscribed: Bool = false
     @Published var isPurchasing: Bool = false
@@ -58,7 +57,10 @@ class PurchaseModel: ObservableObject {
             }
 
             do {
-                try await purchaseManager.purchase(product)
+                if case .pending = try await purchaseManager.purchase(product) {
+                    purchaseError = NSLocalizedString("Purchase pending approval. PRO will unlock once it is approved.", comment: "")
+                    return
+                }
                 self.isSubscribed = EntitlementManager.shared.hasPro
                 if self.isSubscribed {
                     purchaseSuccess = true
@@ -131,7 +133,7 @@ class PurchaseModel: ObservableObject {
     ///
     /// This used to be `subscriptionPeriod.debugDescription` — an undocumented
     /// Apple debug string that is English-only and free to change between OS
-    /// releases, printed straight into the paywall in all 9 languages. The
+    /// releases, printed straight into the paywall in all 10 languages. The
     /// literals below are the app's own, and `PurchaseView` localizes them.
     private static func durationLabel(for period: Product.SubscriptionPeriod?) -> String {
         guard let period else { return "lifetime" }

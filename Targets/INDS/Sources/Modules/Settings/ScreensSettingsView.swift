@@ -98,7 +98,9 @@ struct ScreensSettingsView: View {
             NDSDisplayFilterPreferences.current = filter
             return
         }
-        displayFilter = .smooth
+        // Snap back to what the user already had, not to Smooth.
+        let saved = NDSDisplayFilterPreferences.current
+        displayFilter = saved.requiresEntitlement ? .smooth : saved
         pendingFilterOffer = ProGateOffer(
             title: NSLocalizedString("Scanlines is PRO", comment: "Display filter gate alert title"),
             message: NSLocalizedString("Smooth and Crisp are always free. Go PRO to unlock the Scanlines filter.", comment: "Display filter gate alert message")

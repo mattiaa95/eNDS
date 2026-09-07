@@ -133,6 +133,12 @@ final class INDSGamepadManager {
     // direction the other source is still holding.
     private var dpadDirections: Set<INDSButton> = []
     private var stickDirections: Set<INDSButton> = []
+    /// Mapped face/shoulder buttons currently down, plus a held Fast-Forward
+    /// trigger: a pad that drops mid-press (Bluetooth, flat battery) never
+    /// sends the release, so `releaseAllInputs` has to send it instead —
+    /// otherwise Mario keeps walking with nothing on screen to stop him.
+    private var heldButtons: Set<INDSButton> = []
+    private var fastForwardHeld = false
 
     private static let stickThreshold: Float = 0.5
 
@@ -194,10 +200,15 @@ final class INDSGamepadManager {
         }
         wiredInputCount = 0
 
-        let held = dpadDirections.union(stickDirections)
+        let held = dpadDirections.union(stickDirections).union(heldButtons)
         dpadDirections = []
         stickDirections = []
+        heldButtons = []
         for button in held { delegate?.gamepadManager(self, setButton: button, pressed: false) }
+        if fastForwardHeld {
+            fastForwardHeld = false
+            delegate?.gamepadManager(self, setFastForwardActive: false)
+        }
     }
 
     // MARK: - Handler wiring
@@ -243,12 +254,14 @@ final class INDSGamepadManager {
         let target = INDSControllerMappingStore.target(forPhysical: key)
 
         if let button = target.indsButton {
+            if pressed { heldButtons.insert(button) } else { heldButtons.remove(button) }
             delegate?.gamepadManager(self, setButton: button, pressed: pressed)
             return
         }
 
         switch target {
         case .fastForward:
+            fastForwardHeld = pressed
             delegate?.gamepadManager(self, setFastForwardActive: pressed)
         case .none:
             break

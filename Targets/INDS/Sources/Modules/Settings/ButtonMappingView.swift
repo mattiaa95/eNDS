@@ -37,6 +37,7 @@ struct ButtonMappingView: View {
     @State private var mapping: [String: Int] = INDSControllerMappingStore.activeMapping()
     @State private var controller: GCController? = GCController.controllers().first
     @State private var capturingTarget: INDSMappingTarget?
+    @State private var confirmingReset = false
 
     private var rowTargets: [INDSMappingTarget] {
         INDSMappingTarget.pickerOrder.filter { $0 != .none }
@@ -62,8 +63,15 @@ struct ButtonMappingView: View {
                 Section {
                     Button("Reset to Defaults", role: .destructive) {
                         endCapture()
-                        INDSControllerMappingStore.resetToDefaults(controller: controller)
-                        mapping = INDSControllerMappingStore.activeMapping()
+                        confirmingReset = true
+                    }
+                    .confirmationDialog("Reset controller mapping?", isPresented: $confirmingReset, titleVisibility: .visible) {
+                        Button("Reset to Defaults", role: .destructive) {
+                            INDSControllerMappingStore.resetToDefaults(controller: controller)
+                            mapping = INDSControllerMappingStore.activeMapping()
+                        }
+                    } message: {
+                        Text("Your custom buttons for this controller will be lost.")
                     }
                 } footer: {
                     Text("This mapping is remembered for this controller model and restored whenever it reconnects.")

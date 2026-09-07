@@ -84,7 +84,9 @@ struct INDSLayoutEditorView: View {
                     Text("Landscape").tag(false)
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 200)
+                // Sized to its labels: "Горизонтальная" needs more than a
+                // 100pt segment and UISegmentedControl truncates, never wraps.
+                .fixedSize()
                 .accessibilityLabel("Orientation")
             }
             ToolbarItem(placement: .topBarTrailing) {

@@ -14,4 +14,8 @@ struct NDSRomViewWrapper: UIViewControllerRepresentable {
         uiViewController.update(rom: rom)
         uiViewController.onQuitToLibrary = onQuitToLibrary
     }
+
+    static func dismantleUIViewController(_ uiViewController: NDSRomViewController, coordinator: ()) {
+        uiViewController.stopForTeardown()
+    }
 }

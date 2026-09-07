@@ -32,7 +32,11 @@ enum INDSHoneymoon {
         guard let firstLaunch = UserDefaults.standard.object(forKey: firstLaunchDateKey) as? Date else {
             return 48
         }
-        let left = duration - Date().timeIntervalSince(firstLaunch)
+        let elapsed = Date().timeIntervalSince(firstLaunch)
+        // A first launch "in the future" means the clock was wound back:
+        // treat it as over rather than as an endless honeymoon.
+        guard elapsed >= 0 else { return nil }
+        let left = duration - elapsed
         return left > 0 ? Int((left / 3600).rounded(.up)) : nil
     }
 
@@ -42,6 +46,7 @@ enum INDSHoneymoon {
             // that IS the honeymoon.
             return true
         }
-        return Date().timeIntervalSince(firstLaunch) < duration
+        let elapsed = Date().timeIntervalSince(firstLaunch)
+        return elapsed >= 0 && elapsed < duration
     }
 }

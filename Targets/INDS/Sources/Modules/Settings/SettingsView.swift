@@ -172,8 +172,8 @@ struct SettingsView: View {
     //
     // Ported from iGBA's `proSubscriptionSection` (GBA-Emu repo,
     // App/SwiftUI/Modules/Settings/SettingsView/SettingsView.swift) — the
-    // main entry point into the paywall (alongside the Fast Forward /
-    // save-slot locks). Deliberately not shown in onboarding.
+    // main entry point into the paywall (alongside the save-slot / scanlines
+    // / background locks). Deliberately not shown in onboarding.
     private var proSubscriptionSection: some View {
         Section {
             if !entitlements.hasPro {
@@ -201,7 +201,7 @@ struct SettingsView: View {
                             Text("eNDS PRO")
                                 .font(.headline.weight(.bold))
                                 .foregroundColor(.primary)
-                            Text("Unlock all features — no limits")
+                            Text("Unlock all PRO features")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -239,9 +239,15 @@ struct SettingsView: View {
                             Text("eNDS PRO Active")
                                 .font(.headline.weight(.bold))
                                 .foregroundColor(.primary)
-                            Text("Manage your subscription")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            Group {
+                                if entitlements.hasLifetime {
+                                    Text("Lifetime unlock — nothing to manage")
+                                } else {
+                                    Text("Manage your subscription")
+                                }
+                            }
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                         }
 
                         Spacer()
@@ -252,6 +258,8 @@ struct SettingsView: View {
                     }
                     .padding(.vertical, 4)
                 }
+                // The sheet is empty for the pay-once unlock — nothing to open.
+                .disabled(entitlements.hasLifetime)
                 .manageSubscriptionsSheet(isPresented: $showManageSubscription)
             }
         }

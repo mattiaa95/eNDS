@@ -14,6 +14,7 @@ struct EmulationView: View {
             .toolbar(.hidden, for: .navigationBar)
             .onAppear {
                 rom.recordingPlayStart()
+                sessionTimer?.invalidate() // a double onAppear must not double-count
                 sessionTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
                     rom.incrementPlayTime(by: 60)
                 }

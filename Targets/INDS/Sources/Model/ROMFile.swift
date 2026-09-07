@@ -79,13 +79,34 @@ struct ROMFile: Identifiable, Equatable {
         return String(format: "%02d:%02d", hours, minutes % 60)
     }
 
+    /// Header + banner parsed once per (path, mtime, size). `reload()` runs
+    /// on the main thread after every import/delete/rename/pull-to-refresh
+    /// and used to reopen every ROM twice each time — linear in library
+    /// size. mtime+size in the key so a replaced ROM (same name, new file)
+    /// is re-parsed. ponytail: unbounded, but it's ~3 KB per ROM.
+    private static var parsedCache: [String: (NDSHeader?, NDSBanner?)] = [:]
+    private static let parsedCacheLock = NSLock()
+
     init(fileURL: URL, creationDate: Date) {
         self.id = fileURL.lastPathComponent
         self.filename = fileURL.lastPathComponent
         self.fileURL = fileURL
         self.creationDate = creationDate
-        self.header = try? NDSHeader.read(from: fileURL)
-        self.banner = try? NDSBanner.read(from: fileURL)
+
+        let values = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
+        let key = "\(fileURL.path)|\(values?.contentModificationDate?.timeIntervalSince1970 ?? 0)|\(values?.fileSize ?? 0)"
+        Self.parsedCacheLock.lock()
+        let cached = Self.parsedCache[key]
+        Self.parsedCacheLock.unlock()
+        if let cached {
+            (self.header, self.banner) = cached
+        } else {
+            self.header = try? NDSHeader.read(from: fileURL)
+            self.banner = try? NDSBanner.read(from: fileURL)
+            Self.parsedCacheLock.lock()
+            Self.parsedCache[key] = (header, banner)
+            Self.parsedCacheLock.unlock()
+        }
     }
 
     func recordingPlayStart() {

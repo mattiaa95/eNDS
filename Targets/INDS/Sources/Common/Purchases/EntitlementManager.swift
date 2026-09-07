@@ -31,12 +31,29 @@ final class EntitlementManager: ObservableObject {
     private static let hasProEverKey = "eNDSHasProEver"
 
     @Published var hasPro: Bool = EntitlementManager.userDefaults.bool(forKey: EntitlementManager.hasProKey)
+    /// Pro came from the pay-once unlock: there is no subscription to manage,
+    /// so Settings must not send the user to an empty subscriptions sheet.
+    @Published var hasLifetime: Bool = EntitlementManager.userDefaults.bool(forKey: "eNDSHasLifetime")
 
     /// Background task that listens for transaction updates from StoreKit.
     /// Started by `startTransactionListener()`.
     private var transactionListenerTask: Task<Void, Never>?
 
     private init() {}
+
+    static let productIDs = ["iNDSPRO", "iNDSPROYearly", "iNDSPROLifetime"]
+
+    /// `currentEntitlements` omits expired and revoked transactions, so an
+    /// empty stream reads the same for "never paid", "subscription lapsed" and
+    /// "offline". `Transaction.latest(for:)` still returns the lapsed/refunded
+    /// one — that is the evidence that lets us downgrade a lapsed subscriber
+    /// without punishing a paying customer who is merely offline.
+    static func hasLapsedTransaction() async -> Bool {
+        for id in productIDs {
+            if await StoreKit.Transaction.latest(for: id) != nil { return true }
+        }
+        return false
+    }
 
     func updateProStatus(isPro: Bool) {
         hasPro = isPro
@@ -63,9 +80,8 @@ final class EntitlementManager: ObservableObject {
             for await result in StoreKit.Transaction.updates {
                 switch result {
                 case .verified(let transaction):
-                    if transaction.revocationDate == nil {
-                        await self?.refreshEntitlements()
-                    }
+                    // Refresh on revocations too — a refund must take PRO away.
+                    await self?.refreshEntitlements()
                     await transaction.finish()
                 case .unverified(let transaction, _):
                     await transaction.finish()
@@ -80,12 +96,13 @@ final class EntitlementManager: ObservableObject {
     /// redeemed an offer code in the App Store and returned to the app).
     func refreshEntitlements() async {
         var verified = false
+        var lifetime = false
         var sawAnyTransaction = false
         for await result in StoreKit.Transaction.currentEntitlements {
             sawAnyTransaction = true
             if case .verified(let transaction) = result, transaction.revocationDate == nil {
                 verified = true
-                break
+                if transaction.productID == "iNDSPROLifetime" { lifetime = true }
             }
         }
 
@@ -95,17 +112,24 @@ final class EntitlementManager: ObservableObject {
         // Apple's servers hiccup — a paying customer punished for our
         // uncertainty. Only ever downgrade on evidence: if StoreKit gave us
         // nothing at all and we currently believe the user is PRO, keep
-        // believing it and try again next foreground.
-        if !sawAnyTransaction, await MainActor.run(body: { self.hasPro }) {
+        // believing it and try again next foreground — unless StoreKit can
+        // show us the lapsed/refunded transaction, which *is* evidence.
+        if !sawAnyTransaction, await MainActor.run(body: { self.hasPro }),
+           await Self.hasLapsedTransaction() == false {
             return
         }
         // Captured as a `let` — a `var` referenced from inside this
         // concurrently-executing closure is a Swift 6 mode error, not just
         // a style nit.
         let isVerified = verified
+        let isLifetime = lifetime
         await MainActor.run {
             if self.hasPro != isVerified {
                 self.updateProStatus(isPro: isVerified)
+            }
+            if self.hasLifetime != isLifetime {
+                self.hasLifetime = isLifetime
+                Self.userDefaults.set(isLifetime, forKey: "eNDSHasLifetime")
             }
         }
     }
