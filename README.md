@@ -72,14 +72,41 @@ What ships is what you see here: no ads, no analytics and no tracking SDKs
 of any kind. The app's privacy policy is at
 [mattiaa95.github.io/privacy.html](https://mattiaa95.github.io/privacy.html).
 
+## What the App Store build charges for
+
+Said plainly, because reading it in the source is not the same as being
+told: the App Store build has a paid tier ("PRO"), sold as a weekly or
+yearly auto-renewing subscription or as a one-time lifetime unlock. It
+gates save-state slots 2–4, the scanlines display filter and custom
+background images — nothing else. Emulation, ROM library, controller and
+layout editing, save slot 1, auto-save, cheats, multiplayer, external
+display and every other feature are free and ungated, and the first 48
+hours after install unlock the gated extras too
+(`INDSHoneymoon.swift`).
+
+The gates are ordinary `if` statements in this repository
+(`EntitlementManager`, `ProGateAlert`) and the GPLv3 gives you the right
+to build this source yourself with them removed. That is by design: the
+subscription funds the work for people who would rather pay than compile,
+it is not a lock.
+
 ## Legal
 
 - eNDS is an unofficial project. It is **not** affiliated with, or endorsed
   by, the melonDS team, and **not** affiliated with Nintendo. "Nintendo DS"
   is a trademark of Nintendo Co., Ltd., used here only to describe
   compatibility.
-- eNDS is also unrelated to earlier DS emulator projects for iOS that used
-  similar names (such as the nds4ios/iNDS lineage) — it shares no code or
-  authorship with them, and its emulation core is melonDS.
+- **On the `INDS` prefix you will see everywhere in this source**: the
+  project was started under the working name *iNDS* and the class prefix,
+  folder names, bundle id (`com.mls.inds`) and StoreKit product ids were
+  never renamed when the app became eNDS. It is a leftover, and it is the
+  obvious thing to be suspicious about, so: eNDS shares no code and no
+  authorship with the earlier nds4ios/iNDS project for iOS. That one wrapped
+  DeSmuME; this one is a SwiftUI/UIKit frontend over melonDS, and every line
+  of it is in this repository for comparison.
+- Parts of the on-screen controller, layout editor and purchase UI were
+  ported from **iGBA**, the author's Game Boy Advance emulator, and the
+  comment headers of those files say so. That code is the author's own and
+  is published here under the GPLv3.
 - eNDS does not include any games and does not link to ROM sites. Play only
   backups of cartridges you legally own.

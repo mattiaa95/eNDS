@@ -91,12 +91,12 @@ enum INDSLayoutSweep {
                         for p in problems { report.append("SWEEP FAIL \(tag): \(p)") }
                     } else {
                         informationalFailures += 1
-                        for p in problems { report.append("SWEEP INFO \(tag) (bajo mínimo de ventana): \(p)") }
+                        for p in problems { report.append("SWEEP INFO \(tag) (below the minimum window size): \(p)") }
                     }
                 }
             }
         }
-        report.append("SWEEP DONE \(total) casos: \(total - failures - informationalFailures) correctos, \(failures) fallos obligatorios, \(informationalFailures) fallos informativos bajo mínimo")
+        report.append("SWEEP DONE \(total) cases: \(total - failures - informationalFailures) passed, \(failures) hard failures, \(informationalFailures) informational failures below the minimum size")
         report.forEach { print($0) }
         // The stdout of a `simctl launch` does not always come through: the
         // file in the container is the reliable way to read the verdict from
@@ -238,10 +238,10 @@ enum INDSLayoutSweep {
         let container = CGRect(origin: .zero, size: size)
         for (id, frame) in frames {
             if frame.width < 1 || frame.height < 1 {
-                problems.append("\(id.rawValue) con tamaño degenerado \(frame.size)")
+                problems.append("\(id.rawValue) has a degenerate size: \(frame.size)")
             }
             if !container.contains(frame) {
-                problems.append("\(id.rawValue) fuera del contenedor: \(frame)")
+                problems.append("\(id.rawValue) falls outside the container: \(frame)")
             }
         }
         for (index, lhs) in frames.enumerated() {
@@ -262,7 +262,7 @@ enum INDSLayoutSweep {
             screenBounds.size.height -= INDSControlBand.height(for: bandIdiom)
         }
         if screenBounds.height < 100 {
-            problems.append("la franja de controles no deja sitio a las pantallas (quedan \(Int(screenBounds.height))pt)")
+            problems.append("the control band leaves no room for the screens (\(Int(screenBounds.height))pt left)")
         } else {
             let (top, bottom) = DSScreenGeometry.frames(mode: mode, swap: false, in: screenBounds)
             for (name, rect) in [("top", top), ("bottom", bottom)] {
@@ -280,7 +280,7 @@ enum INDSLayoutSweep {
                     problems.append("pantalla \(name) pierde el 4:3: \(rect) (aspect \(aspect))")
                 }
                 if !screenBounds.insetBy(dx: -0.5, dy: -0.5).contains(rect) {
-                    problems.append("pantalla \(name) invade la franja de controles: \(rect)")
+                    problems.append("the \(name) screen overlaps the control band: \(rect)")
                 }
             }
         }

@@ -73,7 +73,7 @@ int MPLoopback::sendPacket(int inst, const uint8_t *data, int len, uint64_t time
 int MPLoopback::sendCmd(int inst, const uint8_t *data, int len, uint64_t timestamp) {
     {
         std::lock_guard<std::mutex> guard(_lock);
-        _lastHostID = inst;   // manda CMD el que hace de host
+        _lastHostID = inst;   // whoever acts as host sends CMD
     }
     return broadcast(inst, data, len, timestamp, false, true, 0);
 }
@@ -98,7 +98,7 @@ int MPLoopback::receive(int inst, uint8_t *out, uint64_t *timestamp, bool hostOn
         while (!queue.empty()) {
             Packet packet = std::move(queue.front());
             queue.pop_front();
-            if (hostOnly && !packet.fromHost) continue;   // no es para esta espera
+            if (hostOnly && !packet.fromHost) continue;   // not what this wait is for
             const int len = static_cast<int>(packet.data.size());
             std::memcpy(out, packet.data.data(), packet.data.size());
             if (timestamp) *timestamp = packet.timestamp;
@@ -137,7 +137,7 @@ uint16_t MPLoopback::recvReplies(int inst, uint8_t *out, uint64_t timestamp, uin
             Packet packet = std::move(queue.front());
             queue.pop_front();
             if (packet.sender == inst || isStale(packet.timestamp, timestamp)) continue;
-            if (packet.aid == 0 || packet.aid > 15) continue;   // fuera del búfer
+            if (packet.aid == 0 || packet.aid > 15) continue;   // outside the buffer
             // FIXED per-AID slot: the core imposes it and then reads each
             // reply from its own place. Truncate rather than spill into the
             // neighbour.
@@ -145,7 +145,7 @@ uint16_t MPLoopback::recvReplies(int inst, uint8_t *out, uint64_t timestamp, uin
             const size_t len = std::min(packet.data.size(), room);
             std::memcpy(out + (packet.aid - 1) * kReplyStride, packet.data.data(), len);
             received |= static_cast<uint16_t>(1u << packet.aid);
-            if ((received & aidmask) == aidmask) return received;   // ya están todos
+            if ((received & aidmask) == aidmask) return received;   // everyone has replied
         }
         if (_arrived.wait_until(lock, deadline) == std::cv_status::timeout) return received;
         if (!_queues[inst].connected) return received;

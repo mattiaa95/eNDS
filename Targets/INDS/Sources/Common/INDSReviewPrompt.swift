@@ -88,7 +88,7 @@ enum INDSReviewPrompt {
     static func selfCheck() {
         let day: TimeInterval = 24 * 3600
         let ok = shouldAsk(sessions: 3, playTime: 20 * 60, installedFor: 3 * day, sinceLastAsk: nil)
-        assert(ok, "con los mínimos exactos tiene que preguntar")
+        assert(ok, "exactly at the minimums it must still ask")
         assert(!shouldAsk(sessions: 2, playTime: 60 * 60, installedFor: 30 * day, sinceLastAsk: nil))
         assert(!shouldAsk(sessions: 9, playTime: 60, installedFor: 30 * day, sinceLastAsk: nil))
         assert(!shouldAsk(sessions: 9, playTime: 60 * 60, installedFor: day, sinceLastAsk: nil))

@@ -1004,7 +1004,7 @@ final class NDSRomViewController: UIViewController {
 
     /// Maps a touch to DS coordinates (256×192, aspect-fit, clamped). A touch
     /// that drags outside the screen's own bounds counts as lifted (spec:
-    /// "toque fuera = ReleaseScreen") instead of clamping-and-holding at the
+    /// "touch outside = ReleaseScreen") instead of clamping-and-holding at the
     /// edge, matching how a real stylus behaves when it slides off the glass.
     private func updateTouch(_ recognizer: UIGestureRecognizer) {
         let screen = dualScreenView.bottomScreenView

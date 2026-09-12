@@ -61,8 +61,8 @@ private:
     };
 
     struct Queue {
-        std::deque<Packet> packets;   // tráfico normal + CMD del host
-        std::deque<Packet> replies;   // respuestas de los clientes
+        std::deque<Packet> packets;   // normal traffic + the host's CMD frames
+        std::deque<Packet> replies;   // the clients' replies
         bool connected = false;
     };
 

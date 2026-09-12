@@ -49,8 +49,8 @@ let project = Project(
                 "SWIFT_OBJC_BRIDGING_HEADER": "Targets/INDS/Sources/eNDS-Bridging-Header.h"
             ])
         ),
-        // Harness de capturas App Store (ver Targets/INDSScreenshots) — se
-        // lanza con -eNDSScreenshotHarness; no forma parte del archive.
+        // App Store screenshot harness (see Targets/INDSScreenshots) — it is
+        // launched with -eNDSScreenshotHarness and is not part of the archive.
         Target(
             name: "INDSScreenshots",
             platform: .iOS,
