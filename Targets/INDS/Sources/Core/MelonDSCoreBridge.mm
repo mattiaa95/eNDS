@@ -597,14 +597,14 @@ void WriteGBASave(const u8*, u32, u32, u32, void*) {}
 void WriteFirmware(const Firmware&, u32, u32, void*) {}
 void WriteDateTime(int, int, int, int, int, int, void*) {}
 
-// Multijugador local. Estos nueve se llaman desde el hilo de emulación
-// (Wifi.cpp) y son el único enganche que melonDS ofrece: `net/` no se
-// compila y `MPInterface` es cosa del frontend Qt. Sin transporte instalado
-// devuelven lo mismo que cuando eran stubs, así que una partida normal no
-// paga nada y el binario no gana ni una API de red.
+// Local multiplayer. These nine are called from the emulation thread
+// (Wifi.cpp) and are the only hook melonDS offers: `net/` is not compiled and
+// `MPInterface` belongs to the Qt frontend. With no transport installed they
+// return exactly what they returned as stubs, so an ordinary game pays
+// nothing and the binary gains no networking API.
 //
-// `mpInstance` devuelve -1 si este core no está en una partida multijugador,
-// que es el caso de siempre.
+// `mpInstance` returns -1 when this core is not in a multiplayer game, which
+// is the usual case.
 static inline int mpInstance(void *userdata, eNDS::MPTransport **transport) {
     *transport = eNDS::currentTransport();
     if (!*transport || !userdata) return -1;

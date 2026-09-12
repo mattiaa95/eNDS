@@ -2,7 +2,7 @@
 //  INDSMPTransport.mm
 //  eNDS
 //
-//  Registro del transporte y del mapa userdata → instancia. Nada de red.
+//  Transport registry and the userdata → instance map. No networking.
 //
 
 #include "INDSMPTransport.h"

@@ -43,14 +43,14 @@ final class NDSRomViewController: UIViewController {
     private var isFastForwardHeld = false
     private var periodicAutosaveTimer: Timer?
 
-    /// Botones turbo que se están manteniendo ahora mismo, y el pulso que los
-    /// enciende y apaga. Un solo temporizador para todos: uno por botón no
-    /// aporta nada y además los desincroniza entre sí.
-    /// Tiempo REALMENTE jugado en esta sesión, para `INDSReviewPrompt`. Se
-    /// acumula por tramos en vez de restar dos fechas al final porque mandar
-    /// la app a segundo plano NO llama a `viewDidDisappear` —la vista sigue
-    /// en la jerarquía—, así que una resta simple contaría como partida las
-    /// horas que el móvil pasó en el bolsillo con el juego abierto.
+    /// The turbo buttons being held right now, and the pulse that switches
+    /// them on and off. One timer for all of them: one per button buys
+    /// nothing and drifts them out of step with each other.
+    /// Time ACTUALLY played this session, for `INDSReviewPrompt`. It
+    /// accumulates in stretches instead of subtracting two dates at the end,
+    /// because backgrounding the app does NOT call `viewDidDisappear` — the
+    /// view stays in the hierarchy — so a plain subtraction would count as
+    /// play the hours the phone spent in a pocket with the game open.
     private var sessionPlayed: TimeInterval = 0
     private var sessionResumedAt: Date?
 
@@ -157,10 +157,10 @@ final class NDSRomViewController: UIViewController {
         stopPeriodicAutosave()
         UIApplication.shared.isIdleTimerDisabled = false
 
-        // Volver a la biblioteca tras jugar es el momento de preguntar por una
-        // valoración: nunca en mitad de una partida, que es donde molesta y
-        // donde se contestan tres estrellas por quitar el aviso de en medio.
-        // En cola, para que no pelee con la propia animación de salida.
+        // Coming back to the library after playing is the moment to ask for a
+        // rating: never mid-game, which is where it annoys and where people
+        // tap three stars just to make the prompt go away. Queued, so it does
+        // not fight the exit animation itself.
         if sessionPlayed > 0 {
             INDSReviewPrompt.recordSession(playedFor: sessionPlayed)
             sessionPlayed = 0
@@ -939,13 +939,13 @@ final class NDSRomViewController: UIViewController {
         link.preferredFrameRateRange = CAFrameRateRange(minimum: 30, maximum: 60, preferred: 60)
         link.add(to: .main, forMode: .common)
         displayLink = link
-        // El reloj de sesión cuelga de aquí y no del ciclo de vida de la
-        // vista: esto es lo único que sabe de verdad si el juego está
-        // corriendo. Cubre los tres casos de una vez —primera aparición,
-        // vuelta de segundo plano y reanudar desde el menú de pausa— y evita
-        // contar como jugado el rato con el menú abierto o con el móvil en
-        // el bolsillo. Enganchar a `viewWillAppear` no valía: pasar a
-        // segundo plano no desmonta la vista.
+        // The session clock hangs off this and not off the view lifecycle:
+        // this is the only thing that really knows whether the game is
+        // running. It covers all three cases at once — first appearance,
+        // return from background and resume from the pause menu — and keeps
+        // time spent with the menu open, or with the phone in a pocket, out of
+        // the total. Hooking `viewWillAppear` did not work: backgrounding does
+        // not tear the view down.
         resumeSessionClock()
         // Covers every re-entry point in one place (first appearance,
         // foreground return, resume-from-pause): a Low Power/thermal state
@@ -958,9 +958,9 @@ final class NDSRomViewController: UIViewController {
         displayLink?.invalidate()
         displayLink = nil
         pauseSessionClock()
-        // Pausar con un botón turbo mantenido dejaba la tecla pulsada dentro
-        // del emulador: los toques se cancelan al aparecer el menú, pero el
-        // pulso seguía vivo y la última fase podía quedarse en "pulsado".
+        // Pausing while a turbo button was held used to leave the key down
+        // inside the emulator: touches are cancelled when the menu appears,
+        // but the pulse stayed alive and the last phase could be left "on".
         releaseTurboButtons()
         // presentFrame won't tick again to notice pauseEmulation/
         // stopEmulation already silenced the mic (both do, synchronously,
@@ -1033,11 +1033,12 @@ final class NDSRomViewController: UIViewController {
     /// Layout and Swap Screens reuse the exact same private operations the
     /// HUD button and pause menu rows already call.
     ///
-    /// Política deliberada: Quick Save pisa el slot 1 SIN confirmación — un
-    /// hotkey que pregunta deja de ser quick. La confirmación de
-    /// sobrescritura vive solo en la hoja de Save State; quien asigna el
-    /// hotkey elige esta semántica. El estado anterior además es recuperable
-    /// mientras no se pise dos veces (escritura atómica, ver saveStateToPath).
+    /// Deliberate policy: Quick Save overwrites slot 1 with NO confirmation —
+    /// a hotkey that asks a question stops being quick. The overwrite
+    /// confirmation lives only in the Save State sheet; whoever binds the
+    /// hotkey is choosing these semantics. The previous state also stays
+    /// recoverable as long as it is not overwritten twice (atomic write, see
+    /// saveStateToPath).
     private func performControllerAction(_ action: INDSControllerAppAction) {
         switch action {
         case .pause:
@@ -1232,7 +1233,7 @@ final class NDSRomViewController: UIViewController {
         }
     }
 
-    // MARK: - Reloj de sesión (para el aviso de valoración)
+    // MARK: - Session clock (for the review prompt)
 
     private func resumeSessionClock() {
         if sessionResumedAt == nil { sessionResumedAt = Date() }
@@ -1246,9 +1247,10 @@ final class NDSRomViewController: UIViewController {
 
     // MARK: - Input (turbo)
 
-    /// Único punto por el que pasan los tres orígenes de input (overlay táctil,
-    /// mando y teclado). El turbo vive aquí y no en el manejo de toques por eso:
-    /// un botón marcado como turbo dispara solo se controle como se controle.
+    /// The single point all three input sources pass through (touch overlay,
+    /// game controller and keyboard). Turbo lives here and not in touch
+    /// handling for exactly that reason: a button marked as turbo auto-fires
+    /// whichever way it is being driven.
     private func applyButton(_ button: INDSButton, pressed: Bool) {
         guard INDSTurboPreferences.isTurbo(button) else {
             core.setButton(button, pressed: pressed)
@@ -1256,10 +1258,10 @@ final class NDSRomViewController: UIViewController {
         }
         if pressed {
             turboHeld.insert(button)
-            // El primer toque entra ya: esperar al primer pulso se siente como
-            // que el botón no ha respondido. Se re-pulsa TODO el acorde, no
-            // solo el botón nuevo: si la fase estaba en OFF, los que ya
-            // estaban en turbo se quedarían sueltos hasta el siguiente tick.
+            // The first press goes in immediately: waiting for the first
+            // pulse feels like the button did not respond. The WHOLE chord is
+            // re-pressed, not just the new button: if the phase was OFF, the
+            // ones already on turbo would sit released until the next tick.
             turboPhaseOn = true
             for held in turboHeld { core.setButton(held, pressed: true) }
             startTurboTimer()
@@ -1270,11 +1272,11 @@ final class NDSRomViewController: UIViewController {
         }
     }
 
-    /// 15 pulsos por segundo: cada fase dura ~2 frames de los 60 a los que el
-    /// juego lee el teclado, así que ninguna se pierde. Más rápido y algunos
-    /// juegos empiezan a saltarse pulsaciones.
-    // ponytail: Timer y no el display link — la precisión de frame no hace
-    // falta aquí y acoplarlo al bucle de vídeo lo complica sin ganar nada.
+    /// 15 pulses per second: each phase lasts ~2 of the 60 frames at which
+    /// the game reads the keypad, so none is lost. Any faster and some games
+    /// start dropping presses.
+    // ponytail: a Timer, not the display link — frame accuracy is not needed
+    // here and coupling it to the video loop complicates it for nothing.
     private func startTurboTimer() {
         guard turboTimer == nil else { return }
         turboTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
@@ -1291,22 +1293,22 @@ final class NDSRomViewController: UIViewController {
         turboTimer = nil
     }
 
-    /// Suelta todo lo que estuviera en turbo. Sin esto, pausar con un botón
-    /// mantenido deja la tecla pulsada dentro del emulador para siempre.
+    /// Releases everything that was on turbo. Without this, pausing with a
+    /// button held leaves the key down inside the emulator forever.
     private func releaseTurboButtons() {
         stopTurboTimer()
         for button in turboHeld { core.setButton(button, pressed: false) }
         turboHeld.removeAll()
     }
 
-    /// Guarda el frame de la pantalla superior junto al `.mln` del slot. Cuatro
-    /// filas idénticas con solo una fecha no dicen cuál cargar ni cuál se puede
-    /// sacrificar. `slot < 0` es el autoguardado.
-    // ponytail: el autoguardado periódico llama aquí con el display link vivo,
-    // así que `topBuffer` puede leerse a mitad de escritura. Lo peor que sale
-    // es una miniatura con una franja de dos frames distintos; pausar el bucle
-    // solo para esto costaría más de lo que arregla. Si alguna vez molesta, la
-    // salida es capturar dentro de `presentFrame`.
+    /// Saves the top screen's frame next to the slot's `.mln`. Four identical
+    /// rows with nothing but a date do not say which to load or which can be
+    /// sacrificed. `slot < 0` is the auto-save.
+    // ponytail: the periodic auto-save calls in here with the display link
+    // alive, so `topBuffer` can be read mid-write. The worst that comes out is
+    // a thumbnail with a band of two different frames; pausing the loop just
+    // for this would cost more than it fixes. If it ever becomes a nuisance,
+    // the way out is to capture inside `presentFrame`.
     private func saveSlotThumbnail(_ slot: Int) {
         guard core.loaded, let image = UIImage.ndsFramebufferImageCopy(from: topBuffer) else { return }
         NDSSaveStatePaths.saveThumbnail(image, baseName: rom.baseName, slot: slot)

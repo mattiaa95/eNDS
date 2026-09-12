@@ -36,9 +36,10 @@ struct ROMGridCell: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(rom.displayName)
-                    // relativeTo: hace que crezca con Dynamic Type en vez de
-                    // quedarse en 12pt tanto en XS como en AX5. minHeight fijo
-                    // recortaba el segundo renglón en cuanto el texto crecía.
+                    // relativeTo: lets this grow with Dynamic Type instead of
+                    // sitting at 12pt from XS all the way to AX5. A fixed
+                    // minHeight clipped the second line as soon as the text
+                    // grew.
                     .font(.system(size: 12, weight: .semibold, design: .default).width(.standard))
                     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                     .foregroundStyle(.white)
@@ -80,10 +81,11 @@ struct ROMGridCell: View {
                 .motionBounceSymbolEffect(value: rom.isFavorite)
                 .padding(6)
                 .background(.black.opacity(0.4), in: Circle())
-                // El glifo sigue siendo pequeño, pero el área táctil llega a
-                // los 44pt del HIG: este botón vive DENTRO del NavigationLink
-                // que abre el juego, así que fallar el toque no era "no marco
-                // favorito", era arrancar el emulador y tener que salir.
+                // The glyph stays small, but the hit area reaches the 44pt the
+                // HIG asks for: this button lives INSIDE the NavigationLink
+                // that opens the game, so missing the tap did not mean "the
+                // favourite did not toggle", it meant booting the emulator and
+                // having to back out of it.
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }

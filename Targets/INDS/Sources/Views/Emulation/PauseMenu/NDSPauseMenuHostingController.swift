@@ -3,7 +3,7 @@
 //  eNDS
 //
 //  Ported and adapted from iGBA's PauseMenuHostingController.swift
-//  (GBA-Emu repo): a UIKit sheet that hosts the SwiftUI pause menu, with a
+// : a UIKit sheet that hosts the SwiftUI pause menu, with a
 //  swipe-down-resumes gesture layered over the sheet's own interactive
 //  dismissal so "just swipe it away" behaves the same as tapping Resume.
 //

@@ -2,18 +2,18 @@
 //  INDSReviewPrompt.swift
 //  eNDS
 //
-//  Cuándo pedir una valoración sin resultar pesado.
+//  When to ask for a rating without becoming a nuisance.
 //
-//  El botón de Ajustes › Acerca de abre directamente la ficha de reseña,
-//  porque ahí el usuario ya vino a eso. Esto es lo contrario: el aviso que
-//  aparece sin que nadie lo pida, y por eso usa `SKStoreReviewController`,
-//  que iOS limita a unas tres veces al año y puede decidir no enseñar nada.
-//  Esa limitación es una función, no un problema: aquí solo se decide si
-//  *merece la pena* preguntar.
+//  The button in Settings › About opens the review page directly, because
+//  someone who taps it came for exactly that. This is the opposite: the
+//  prompt nobody asked for, which is why it goes through
+//  `SKStoreReviewController` — iOS caps that at roughly three times a year
+//  and may decide to show nothing at all. That cap is a feature, not a
+//  problem: all that is decided here is whether asking is *worth it*.
 //
-//  Se pide al volver a la biblioteca después de jugar un rato — nunca en
-//  mitad de una partida, que es donde molesta y donde se contestan tres
-//  estrellas por quitarlo de en medio.
+//  It asks on the way back to the library after a decent session — never
+//  mid-game, which is where it annoys and where people tap three stars just
+//  to get rid of it.
 //
 
 import Foundation
@@ -27,16 +27,16 @@ enum INDSReviewPrompt {
         static let lastAsked = "eNDSReviewLastAsked"
     }
 
-    /// Tres días, tres partidas y veinte minutos jugados. Por debajo de eso
-    /// nadie tiene una opinión formada de un emulador, y preguntar antes es
-    /// como se cosechan las valoraciones de una estrella.
+    /// Three days, three sessions and twenty minutes played. Below that
+    /// nobody has formed an opinion of an emulator yet, and asking earlier is
+    /// how one-star ratings are harvested.
     private static let minDaysInstalled: TimeInterval = 3 * 24 * 3600
     private static let minSessions = 3
     private static let minPlayTime: TimeInterval = 20 * 60
     private static let minSecondsBetweenAsks: TimeInterval = 60 * 24 * 3600
 
-    /// Una sesión que no llega al minuto es abrir y cerrar: no cuenta ni como
-    /// partida ni como tiempo jugado.
+    /// A session under a minute is open-and-close: it counts neither as a
+    /// session nor as time played.
     private static let minSessionLength: TimeInterval = 60
 
     static func recordSession(playedFor seconds: TimeInterval) {
@@ -46,9 +46,9 @@ enum INDSReviewPrompt {
         defaults.set(defaults.double(forKey: Keys.playTime) + seconds, forKey: Keys.playTime)
     }
 
-    /// La decisión, aparte del estado. El fallo temido aquí es el silencioso
-    /// —no preguntar nunca— y sin separarlo no hay forma de comprobarlo sin
-    /// ensuciar los UserDefaults de verdad.
+    /// The decision, kept apart from the state. The failure to fear here is
+    /// the silent one — never asking — and without this split there is no way
+    /// to test for it without dirtying the real UserDefaults.
     static func shouldAsk(sessions: Int, playTime: TimeInterval,
                           installedFor: TimeInterval, sinceLastAsk: TimeInterval?) -> Bool {
         guard sessions >= minSessions,
@@ -58,8 +58,9 @@ enum INDSReviewPrompt {
         return true
     }
 
-    /// Llamar al volver a la biblioteca. Devuelve sin hacer nada si aún no
-    /// toca; no hay señal de vuelta porque iOS tampoco dice si enseñó algo.
+    /// Call on the way back to the library. Returns without doing anything
+    /// if it is not time yet; there is no return value because iOS does not
+    /// say whether it showed anything either.
     @MainActor
     static func askIfEarned() {
         let defaults = UserDefaults.standard
@@ -74,16 +75,16 @@ enum INDSReviewPrompt {
             .compactMap({ $0 as? UIWindowScene })
             .first(where: { $0.activationState == .foregroundActive }) else { return }
 
-        // Se apunta la fecha aunque iOS decida no enseñar el aviso: no hay
-        // forma de saberlo, y reintentar en cada salida de partida sería
-        // exactamente el comportamiento pesado que esto evita.
+        // The date is recorded even if iOS decides not to show the prompt:
+        // there is no way to tell, and retrying every time a game is closed
+        // would be exactly the pestering this exists to avoid.
         defaults.set(Date(), forKey: Keys.lastAsked)
         AppStore.requestReview(in: scene)
     }
 
 #if DEBUG
-    /// Corre sola al arrancar en Debug. El fallo que vigila es el que no se
-    /// ve: umbrales mal puestos que hacen que el aviso no salga nunca.
+    /// Runs by itself at launch in Debug. The failure it watches for is the
+    /// invisible one: thresholds set so the prompt never appears at all.
     static func selfCheck() {
         let day: TimeInterval = 24 * 3600
         let ok = shouldAsk(sessions: 3, playTime: 20 * 60, installedFor: 3 * day, sinceLastAsk: nil)
@@ -91,7 +92,7 @@ enum INDSReviewPrompt {
         assert(!shouldAsk(sessions: 2, playTime: 60 * 60, installedFor: 30 * day, sinceLastAsk: nil))
         assert(!shouldAsk(sessions: 9, playTime: 60, installedFor: 30 * day, sinceLastAsk: nil))
         assert(!shouldAsk(sessions: 9, playTime: 60 * 60, installedFor: day, sinceLastAsk: nil))
-        // Ya preguntado hace poco: no se insiste.
+        // Asked recently: do not push.
         assert(!shouldAsk(sessions: 9, playTime: 60 * 60, installedFor: 30 * day, sinceLastAsk: day))
         assert(shouldAsk(sessions: 9, playTime: 60 * 60, installedFor: 30 * day, sinceLastAsk: 90 * day))
     }

@@ -2,7 +2,7 @@
 //  INDSPerGameProfileStore.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's PerGameProfileStore.swift (GBA-Emu repo):
+//  Ported and adapted from iGBA's PerGameProfileStore.swift:
 //  automatic per-game settings memory. When the user changes speed or screen
 //  layout while a game is running, the value is remembered for that game and
 //  re-applied the next time it launches — no new UI, the app "just

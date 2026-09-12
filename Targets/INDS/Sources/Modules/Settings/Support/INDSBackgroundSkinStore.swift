@@ -3,7 +3,7 @@
 //  eNDS
 //
 //  Custom background images for the emulation screen, one per orientation.
-//  Ported from iGBA's "controller skin" (GBA-Emu `SettingsView.backgroundImagePicker`
+//  Ported from iGBA's "controller skin" (`SettingsView.backgroundImagePicker`
 //  + `setVCBGColor` in EmuVC.mm): same idea and the same on-disk storage
 //  decision — the images live in Application Support, never in UserDefaults,
 //  which caps out around 4MB and would happily swallow a 12MP photo until it

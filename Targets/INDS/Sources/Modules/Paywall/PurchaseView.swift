@@ -2,8 +2,8 @@
 //  PurchaseView.swift
 //  eNDS
 //
-//  Ported from iGBA's redesigned paywall (GBA-Emu repo,
-//  App/SwiftUI/Modules/PurchaseView/PurchaseView.swift) — same structure and
+//  Ported from iGBA's redesigned paywall
+//  (App/SwiftUI/Modules/PurchaseView/PurchaseView.swift) — same structure and
 //  the same non-negotiable rules (each one a lesson from a real App Review
 //  rejection or a real pricing complaint, per iGBA's own comments):
 //   - Prices always come from StoreKit; the plan selector shows a loading
@@ -74,8 +74,9 @@ struct PurchaseView: View {
     /// ties the CTA back to whichever plan/lifetime row was just tapped.
     @State private var ctaPulse = false
 
-    // Sin espera: retener al usuario dentro del paywall es un patron
-    // oscuro (UCPD) y Apple exige poder salir. Antes eran hasta 5 s.
+    // No delay: holding someone inside a sales screen is a dark pattern
+    // under the EU unfair-commercial-practices directive, and Apple requires
+    // a way out. This used to be up to 5 s.
     private let allowCloseAfter: CGFloat = 0.0
     var hasCooldown: Bool = true
 
@@ -428,10 +429,11 @@ struct PurchaseView: View {
                 lifetimeRow(product: lifetime)
             } else if !shouldOfferLifetime,
                       productDetails.contains(where: { $0.duration == "lifetime" }) {
-                // The targeting rule keeps lifetime out of most people's way on
-                // purpose, but an IAP submitted with the binary that a reviewer
-                // cannot reach at all is a guaranteed 2.1 "Information Needed".
-                // One quiet line keeps the funnel and makes it reachable.
+                // The targeting rule keeps lifetime out of most people's way
+                // on purpose, but an IAP submitted with the binary that nobody
+                // can reach at all is a guaranteed 2.1 "Information Needed"
+                // from App Review. One quiet line makes it reachable without
+                // putting it in front of everyone.
                 Button {
                     withMotion(.easeInOut(duration: 0.2)) { showAllPlans = true }
                 } label: {
@@ -839,10 +841,10 @@ struct ManageSubscriptionRow: View {
         .disabled(opening)
     }
 
-    /// `showManageSubscriptions` lanza cuando no hay una cuenta de App Store
-    /// detrás (simulador, sesión caducada). Cancelar tiene que funcionar
-    /// igualmente, así que se cae al mismo destino por web en vez de dejar el
-    /// botón muerto.
+    /// `showManageSubscriptions` throws when there is no App Store account
+    /// behind it (simulator, expired session). Cancelling has to work anyway,
+    /// so this falls back to the same destination on the web rather than
+    /// leaving a dead button.
     @MainActor
     private func open() async {
         opening = true
@@ -857,7 +859,7 @@ struct ManageSubscriptionRow: View {
                 try await AppStore.showManageSubscriptions(in: scene)
                 return
             } catch {
-                // Cae al enlace de abajo.
+                // Falls through to the link below.
             }
         }
         if let url = URL(string: "https://apps.apple.com/account/subscriptions") {

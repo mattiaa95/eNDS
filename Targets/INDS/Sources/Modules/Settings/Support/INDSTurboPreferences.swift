@@ -2,17 +2,17 @@
 //  INDSTurboPreferences.swift
 //  eNDS
 //
-//  Qué botones disparan solos mientras se mantienen pulsados. Es una
-//  preferencia y no una propiedad de la distribución de controles: vale
-//  igual para el overlay táctil, para un mando y para un teclado, y la
-//  distribución solo conoce el primero.
+//  Which buttons auto-fire while held. This is a preference, not a property
+//  of the controller layout: it applies equally to the touch overlay, to a
+//  game controller and to a keyboard, and the layout only knows about the
+//  first of the three.
 //
 
 import Foundation
 
 enum INDSTurboPreferences {
-    /// Solo los botones de acción. Turbo en la cruceta o en Start no hace
-    /// nada útil y sí abre la puerta a menús parpadeando solos.
+    /// Action buttons only. Turbo on the d-pad or on Start does nothing
+    /// useful and does open the door to menus flickering on their own.
     static let eligible: [INDSButton] = [.A, .B, .X, .Y, .L, .R]
 
     private static let key = "eNDSTurboButtons"

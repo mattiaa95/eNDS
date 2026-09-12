@@ -2,8 +2,8 @@
 //  INDSButtonStyleEditorSheet.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's ButtonStyleEditorSheet.swift (GBA-Emu
-//  repo). Sheet for editing one button's visual style: label, font, colors
+//  Ported and adapted from iGBA's ButtonStyleEditorSheet.swift. Sheet for
+//  editing one button's visual style: label, font, colors
 //  (background, text/tint, border — each with its own opacity via
 //  `ColorPicker(supportsOpacity: true)`, since `INDSButtonStyle` has no
 //  separate opacity field, same as iGBA's `ButtonStyle`), and shape (border

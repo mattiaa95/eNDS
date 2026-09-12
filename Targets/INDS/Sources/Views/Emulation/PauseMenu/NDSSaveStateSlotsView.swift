@@ -44,10 +44,10 @@ struct NDSSaveStateSlotsView: View {
     /// instead of staying stale until it is dismissed and reopened.
     @State private var liveSlots: [NDSSaveStateSlotInfo] = []
     @State private var slotPendingDeletion: NDSSaveStateSlotInfo?
-    /// Guardar encima de un slot lleno borraba la partida anterior sin avisar.
+    /// Saving over a used slot used to wipe the previous state with no warning.
     @State private var slotPendingOverwrite: NDSSaveStateSlotInfo?
-    /// Cargadas una vez al abrir la hoja: son PNG de 256×192 en disco y
-    /// releerlas en cada paso del `body` no aporta nada.
+    /// Loaded once when the sheet opens: these are 256×192 PNGs on disk and
+    /// re-reading them on every `body` pass buys nothing.
     @State private var thumbs: [Int: UIImage] = [:]
 
     @Environment(\.dismiss) private var dismiss
@@ -99,13 +99,13 @@ struct NDSSaveStateSlotsView: View {
         .presentationDetents([.medium])
         .presentationDragIndicator(.hidden)
         .proGateAlert(offer: $pendingOffer)
-        // Sin esto `liveSlots` se queda en [] y la hoja sale vacía: ni guardar
-        // ni cargar. Y no vale copiar `slots` tal cual: esos arrays se
-        // calcularon al presentar el menú de pausa, así que guardar en un slot
-        // y reabrir la hoja SIN salir de la pausa lo enseñaría "Empty" — en
-        // Save se saltaría la confirmación de sobrescritura y en Load saldría
-        // deshabilitado como si el guardado hubiera fallado. Se refresca cada
-        // fila contra disco al abrir.
+        // Without this `liveSlots` stays [] and the sheet comes up empty:
+        // neither saving nor loading. And copying `slots` verbatim will not do
+        // either: those arrays were computed when the pause menu was
+        // presented, so saving into a slot and reopening the sheet WITHOUT
+        // leaving pause would show it as "Empty" — Save would skip the
+        // overwrite confirmation and Load would come up disabled, as if the
+        // save had failed. Every row is refreshed against disk on open.
         .onAppear {
             if let base = romBaseName {
                 liveSlots = slots.map {
@@ -157,8 +157,8 @@ struct NDSSaveStateSlotsView: View {
         }
     }
 
-    /// Borra el fichero y deja el hueco en "Empty": la hoja siempre enseña los
-    /// mismos slots, quitar la fila descuadraría la numeración.
+    /// Deletes the file and leaves the row as "Empty": the sheet always shows
+    /// the same slots, and removing the row would throw the numbering off.
     private func deletePendingSlot() {
         defer { slotPendingDeletion = nil }
         guard let target = slotPendingDeletion, let base = romBaseName,
@@ -168,8 +168,8 @@ struct NDSSaveStateSlotsView: View {
         thumbs[target.slot] = nil
     }
 
-    /// La miniatura del propio save state cuando la hay; si no (slot vacío, o
-    /// guardado por una versión anterior a las miniaturas), el icono de antes.
+    /// The save state's own thumbnail when there is one; otherwise (empty
+    /// slot, or saved by a build older than thumbnails) the previous icon.
     @ViewBuilder
     private func slotArtwork(_ slot: NDSSaveStateSlotInfo) -> some View {
         if let image = thumbs[slot.slot] {
@@ -226,8 +226,8 @@ struct NDSSaveStateSlotsView: View {
                         .font(.caption)
                         .foregroundColor(.orange)
                 } else if mode == .load, slot.isEmpty {
-                    // Sin icono: la fila ya está deshabilitada y dice "Empty".
-                    // Un candado aquí se confunde con el candado PRO de arriba.
+                    // No icon: the row is already disabled and says "Empty".
+                    // A padlock here reads as the PRO padlock above it.
                     EmptyView()
                 } else {
                     Image(systemName: "chevron.right")

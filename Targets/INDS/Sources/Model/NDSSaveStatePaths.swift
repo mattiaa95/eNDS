@@ -99,10 +99,10 @@ enum NDSSaveStatePaths {
         (try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate]) as? Date
     }
 
-    /// Fecha en disco de un slot (`slot < 0` = autoguardado), `nil` si está
-    /// vacío. Es lo que usa la hoja de Save/Load para refrescarse al abrir:
-    /// los arrays que le llegan se calcularon al presentar el menú de pausa y
-    /// se quedan viejos si se guarda y se reabre sin salir de la pausa.
+    /// On-disk date of one slot (`slot < 0` = auto-save), `nil` when empty.
+    /// This is what the Save/Load sheet refreshes itself with on open: the
+    /// arrays handed to it were computed when the pause menu was presented
+    /// and go stale if you save and reopen without leaving pause.
     static func modifiedDate(baseName: String, slot: Int) -> Date? {
         let url = slot < 0 ? autoPath(forBaseName: baseName)
                            : slotPath(forBaseName: baseName, slot: slot)
@@ -110,13 +110,14 @@ enum NDSSaveStatePaths {
         return modificationDate(at: url)
     }
 
-    // MARK: - Miniaturas por slot
+    // MARK: - Per-slot thumbnails
     //
-    // Un PNG del frame superior junto a cada `.mln`, con el mismo nombre. Sin
-    // esto los cuatro slots son cuatro filas idénticas y elegir cuál cargar (o
-    // cuál sacrificar al guardar) es adivinar por la fecha. Vive aquí y no en
-    // `ThumbnailManager` porque ese guarda una imagen por ROM y estas son una
-    // por slot, con el ciclo de vida del propio save state: se borran con él.
+    // A PNG of the top frame next to each `.mln`, under the same name.
+    // Without it the four slots are four identical rows, and picking which to
+    // load (or which to sacrifice when saving) is guesswork from a date. It
+    // lives here and not in `ThumbnailManager` because that one keeps one
+    // image per ROM and these are one per slot, sharing the save state's own
+    // lifetime: they are deleted with it.
 
     static func thumbnailPath(forBaseName baseName: String, slot: Int) -> URL? {
         let name = slot < 0 ? "auto" : "slot\(slot)"

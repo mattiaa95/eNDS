@@ -2,7 +2,7 @@
 //  INDSKeyboardManager.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's KeyboardController.m (GBA-Emu repo): routes
+//  Ported and adapted from iGBA's KeyboardController.m: routes
 //  a physical keyboard (GCKeyboard, iOS 14+) to the engine through a
 //  delegate, coexisting with the on-screen overlay and any connected gamepad
 //  (does not take exclusive ownership of input, does not hide the overlay).

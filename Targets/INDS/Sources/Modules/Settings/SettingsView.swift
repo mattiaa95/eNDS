@@ -2,8 +2,9 @@
 //  SettingsView.swift
 //  eNDS
 //
-//  Settings hub — clones iGBA's hub-style settings screen (SettingsView.swift,
-//  GBA-Emu repo): a short `Form` of `NavigationLink`s into focused sub-pages
+//  Settings hub — clones iGBA's hub-style settings screen
+//  (SettingsView.swift): a short `Form` of `NavigationLink`s into focused
+//  sub-pages
 //  instead of one long scrolling form. Presented as a sheet (with its own
 //  `NavigationStack`) from the gear button in `ROMListView`'s toolbar.
 //
@@ -170,8 +171,8 @@ struct SettingsView: View {
 
     // MARK: - PRO section
     //
-    // Ported from iGBA's `proSubscriptionSection` (GBA-Emu repo,
-    // App/SwiftUI/Modules/Settings/SettingsView/SettingsView.swift) — the
+    // Ported from iGBA's `proSubscriptionSection`
+    // (App/SwiftUI/Modules/Settings/SettingsView/SettingsView.swift) — the
     // main entry point into the paywall (alongside the save-slot / scanlines
     // / background locks). Deliberately not shown in onboarding.
     private var proSubscriptionSection: some View {

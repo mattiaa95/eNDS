@@ -2,7 +2,7 @@
 //  WelcomeView.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's WelcomeView.swift (GBA-Emu repo): same
+//  Ported and adapted from iGBA's WelcomeView.swift: same
 //  first-launch onboarding shape — a 4-page `TabView` with a custom capsule
 //  page indicator, a top-right Skip button (hidden on the last page), and a
 //  bottom action that morphs from "Continue" into a primary/secondary button

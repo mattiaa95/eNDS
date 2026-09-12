@@ -3,16 +3,17 @@
 //  INDSVisualSweep.swift
 //  eNDS
 //
-//  Hermano visual de `INDSLayoutSweep` (launch-arg `-iNDSVisualSweep`): en vez
-//  de validar números, RENDERIZA la pantalla de emulación real —
-//  `DSDualScreenView` + `NDSControllerView`, las mismas clases y la misma
-//  geometría de producción — a PNG en contenedores sintéticos. NO simula
-//  iPhone Duo, sus dimensiones, bisagra ni regiones reservadas. Escribe los
-//  PNG en `Documents/visual-sweep/` y sale.
+//  The visual sibling of `INDSLayoutSweep` (launch argument
+//  `-iNDSVisualSweep`): instead of validating numbers it RENDERS the real
+//  emulation screen — `DSDualScreenView` + `NDSControllerView`, the same
+//  classes and the same production geometry — to PNGs inside synthetic
+//  containers. It does NOT simulate any foldable device, its dimensions,
+//  hinge or reserved regions. The PNGs are written to
+//  `Documents/visual-sweep/` and the process exits.
 //
-//  Limitación asumida: se pinta con `layer.render(in:)` fuera de ventana, así
-//  que los blurs de los pills del HUD no salen. Lo que se juzga aquí es la
-//  composición: pantallas, franja y botones.
+//  Accepted limitation: it draws with `layer.render(in:)` off-window, so the
+//  blurs behind the HUD pills do not come out. What is judged here is the
+//  composition: screens, band and buttons.
 //
 
 import UIKit
@@ -49,8 +50,8 @@ enum INDSVisualSweep {
         exit(0)
     }
 
-    /// Compone la pantalla de emulación con las vistas de producción y la
-    /// pinta offscreen. Controles y HUD reales resuelven su propio layout.
+    /// Composes the emulation screen from the production views and draws it
+    /// off-screen. The real controls and HUD resolve their own layout.
     private static func render(size: CGSize) -> UIImage {
         let container = UIView(frame: CGRect(origin: .zero, size: size))
         container.backgroundColor = UIColor(white: 0.05, alpha: 1)
@@ -73,9 +74,9 @@ enum INDSVisualSweep {
 
         container.setNeedsLayout()
         container.layoutIfNeeded()
-        // layoutSubviews de DSDualScreenView re-aplica el modo con los bounds
-        // definitivos; una segunda pasada explícita evita quedarnos con el
-        // frame de antes del layout.
+        // DSDualScreenView's layoutSubviews re-applies the mode with the
+        // final bounds; an explicit second pass keeps us from being left with
+        // the pre-layout frame.
         dual.applyLayout(mode: mode, swap: false, stretch: false, animated: false)
 
         let format = UIGraphicsImageRendererFormat()
@@ -85,9 +86,9 @@ enum INDSVisualSweep {
         }
     }
 
-    /// Un framebuffer DS de mentira (256×192): color base, rejilla, marco y
-    /// etiqueta grande — suficiente para ver dónde cae cada pantalla, si se
-    /// respeta el 4:3 y cuánto ocupa.
+    /// A fake DS framebuffer (256×192): base colour, grid, border and a big
+    /// label — enough to see where each screen lands, whether the 4:3 aspect
+    /// holds and how much room it takes.
     private static func testPattern(label: String, base: UIColor) -> UIImage {
         let size = CGSize(width: 256, height: 192)
         return UIGraphicsImageRenderer(size: size).image { ctx in

@@ -2,7 +2,7 @@
 //  NDSControllerView.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's CustomControllerView.swift (GBA-Emu repo).
+//  Ported and adapted from iGBA's CustomControllerView.swift.
 //  On-screen controller overlay that reads button positions from
 //  `INDSControllerLayoutManager` and drives `MelonDSCoreBridge.setButton:pressed:`
 //  through a delegate. Adaptations vs. iGBA:

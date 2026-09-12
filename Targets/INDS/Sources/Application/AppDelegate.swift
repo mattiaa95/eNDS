@@ -10,18 +10,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         // Pro grants activate without the user opening the paywall.
         INDSHoneymoon.recordFirstLaunchIfNeeded()
 #if DEBUG
-        // Swift no tiene inicializadores estáticos como el autochequeo del
-        // loopback en C++, así que este se llama a mano. Aborta en Debug si
-        // los umbrales del aviso de valoración se rompen — el fallo que
-        // vigila es no preguntar nunca, que no se nota hasta que faltan las
-        // valoraciones.
+        // Swift has no static initializers like the loopback's C++ self
+        // check, so this one is called by hand. It aborts in Debug if the
+        // review-prompt thresholds break — the failure it watches for is
+        // never asking, which goes unnoticed until the ratings are missing.
         INDSReviewPrompt.selfCheck()
-        // Barrido de geometría bajo demanda (`-iNDSLayoutSweep`): valida los
-        // layouts por defecto sobre tamaños de plegable/ventana que ningún
-        // simulador actual tiene. Sin el launch-arg no hace nada.
+        // On-demand geometry sweep (`-iNDSLayoutSweep`): validates the
+        // default layouts against foldable/window sizes no current simulator
+        // offers. Without the launch argument it does nothing.
         INDSLayoutSweep.runIfRequested()
-        // Igual pero visual (`-iNDSVisualSweep`): renderiza la pantalla de
-        // emulación a PNG en tamaños de plegable/iPad y sale.
+        // The same thing, visually (`-iNDSVisualSweep`): renders the
+        // emulation screen to PNG at foldable/iPad sizes and exits.
         INDSVisualSweep.runIfRequested()
 #endif
         EntitlementManager.shared.startTransactionListener()

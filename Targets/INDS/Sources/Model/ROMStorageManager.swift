@@ -166,14 +166,14 @@ enum ROMStorageManager {
         }
     }
 
-    /// Margen que se deja libre además del propio fichero. Llenar el disco del
-    /// todo no rompe solo la importación: rompe el autoguardado y los save
-    /// states de la partida que ya está en marcha, que es mucho peor.
+    /// Headroom left free on top of the file itself. Filling the disk
+    /// completely does not just break the import: it breaks the auto-save and
+    /// the save states of the game already running, which is far worse.
     private static let freeSpaceMargin: Int64 = 100 * 1024 * 1024
 
-    /// `false` solo cuando sabemos que no cabe. Si el sistema no da el dato no
-    /// se bloquea nada: mejor dejar que falle la copia con su error real que
-    /// impedir una importación legítima por no poder medir.
+    /// `false` only when we know it does not fit. If the system will not give
+    /// the number, nothing is blocked: better to let the copy fail with its
+    /// real error than to refuse a legitimate import for lack of a measurement.
     static func hasRoom(forBytes bytes: Int64) -> Bool {
         guard let docs = try? romsDirectoryURL(),
               let free = try? docs.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
@@ -282,13 +282,13 @@ enum ROMStorageManager {
         let tmpDir = fileManager.temporaryDirectory.appendingPathComponent("ROMImport-\(UUID().uuidString)", isDirectory: true)
         defer { try? fileManager.removeItem(at: tmpDir) }
 
-        // La extracción entera cae en tmp ANTES de que importROM haga su
-        // propio guard por entrada, y es la fase que más disco come. El
-        // tamaño comprimido es cota inferior de lo extraído: si ni eso cabe,
-        // mejor el error localizado ahora que llenar el disco a mitad.
-        // ponytail: cota inferior a sabiendas — un archivo que descomprime a
-        // mucho más aún puede llenar tmp y fallará con el error crudo del
-        // extractor, como hasta ahora.
+        // The whole extraction lands in tmp BEFORE importROM applies its own
+        // per-entry guard, and it is the phase that eats the most disk. The
+        // compressed size is a lower bound on what comes out: if even that
+        // does not fit, a localized error now beats filling the disk halfway.
+        // ponytail: knowingly a lower bound — an archive that expands to much
+        // more can still fill tmp and will fail with the extractor's raw
+        // error, exactly as before.
         let archiveSize = ((try? fileManager.attributesOfItem(atPath: sourceURL.path))?[.size] as? Int64) ?? 0
         guard hasRoom(forBytes: archiveSize) else { throw ROMStorageError.notEnoughSpace }
 

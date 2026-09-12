@@ -4,7 +4,7 @@
 //
 //  Settings → About. Version/build, melonDS license note, and the
 //  Rate/Support/Privacy rows iGBA's own About-flavored footer covers
-//  (SettingsView.swift, GBA-Emu repo) — using `INDSConstants` for the URLs.
+//  (SettingsView.swift) — using `INDSConstants` for the URLs.
 //
 
 import StoreKit

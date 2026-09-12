@@ -2,8 +2,8 @@
 //  EntitlementManager.swift
 //  eNDS
 //
-//  Ported from iGBA's `EntitlementManager` (GBA-Emu repo,
-//  App/SwiftUI/Common/PurchaseManager/EntitlementManager.swift). Same
+//  Ported from iGBA's `EntitlementManager`
+//  (App/SwiftUI/Common/PurchaseManager/EntitlementManager.swift). Same
 //  revocation check as iGBA — a real bug paid for elsewhere in this
 //  developer's apps: reading `Transaction.currentEntitlements` without
 //  filtering out transactions with a non-nil `revocationDate` keeps granting

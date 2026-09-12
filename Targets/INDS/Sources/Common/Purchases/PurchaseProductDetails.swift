@@ -2,8 +2,8 @@
 //  PurchaseProductDetails.swift
 //  eNDS
 //
-//  Ported verbatim from iGBA (GBA-Emu repo,
-//  App/SwiftUI/Common/PurchaseManager/PurchaseProductDetails.swift) — a
+//  Ported verbatim from iGBA
+//  (App/SwiftUI/Common/PurchaseManager/PurchaseProductDetails.swift) — a
 //  plain display-ready mirror of a StoreKit `Product`, built by
 //  `PurchaseModel.fetchProducts()` so `PurchaseView` never touches
 //  `StoreKit.Product` directly.

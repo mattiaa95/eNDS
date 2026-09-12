@@ -2,7 +2,7 @@
 //  INDSControllerMappingStore.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's ControllerMappingStore.swift (GBA-Emu repo):
+//  Ported and adapted from iGBA's ControllerMappingStore.swift:
 //  single source of truth for external-gamepad button remapping. Same shape
 //  (active mapping + per-controller-model profiles in UserDefaults, healed on
 //  every read), rescoped to the DS button set.

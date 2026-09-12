@@ -2,7 +2,7 @@
 //  INDSButtonStyle.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's ButtonStyle.swift (GBA-Emu repo).
+//  Ported and adapted from iGBA's ButtonStyle.swift.
 //  Per-button visual style: text/colors/border, or a user-imported image.
 //  eNDS ships with no bundled controller-skin artwork (unlike iGBA's legacy
 //  xcassets skin), so unlike the original there is no `.asset` fallback kind —

@@ -2,17 +2,18 @@
 //  INDSMPLoopback.h
 //  eNDS
 //
-//  Transporte de multijugador en proceso: varias instancias del core en la
-//  misma app hablando entre ellas por colas de memoria. No toca la red.
+//  In-process multiplayer transport: several core instances inside the same
+//  app talking to each other over in-memory queues. It never touches the
+//  network.
 //
-//  Existe por dos motivos, y el segundo es el importante:
+//  It exists for two reasons, and the second is the important one:
 //
-//   1. Es la referencia contra la que comparar el transporte de verdad. Si
-//      dos partidas no se sincronizan aquí, donde la latencia es cero y no
-//      hay pérdida de paquetes, no se van a sincronizar por Wi-Fi.
-//   2. Aísla la máquina de estados del lockstep de la red. En iGBA los 16
-//      bugs críticos del cable salieron de mezclar las dos cosas desde el
-//      principio y no poder decir cuál de las dos fallaba.
+//   1. It is the reference the real transport is measured against. If two
+//      games do not stay in sync here, where latency is zero and no packet
+//      is ever lost, they will not stay in sync over Wi-Fi.
+//   2. It isolates the lockstep state machine from the network. Mixing the
+//      two from the start, with no way to say which of them was failing, is
+//      where the link-cable bugs in our GBA emulator came from.
 //
 
 #ifndef INDS_MP_LOOPBACK_H
@@ -44,9 +45,9 @@ public:
     uint16_t recvReplies(int inst, uint8_t *out, uint64_t timestamp, uint16_t aidmask) override;
 
 #if DEBUG
-    /// Comprobación con asserts del contrato de arriba. Se ejecuta sola al
-    /// cargar en Debug: esto es una máquina de estados con relojes y máscaras
-    /// de bits, y romperla en silencio es justo lo que no se puede permitir.
+    /// Assert-based check of the contract above. It runs by itself on load
+    /// in Debug: this is a state machine with clocks and bit masks, and
+    /// breaking it silently is exactly what cannot be allowed to happen.
     static void selfCheck();
 #endif
 
@@ -65,10 +66,11 @@ private:
         bool connected = false;
     };
 
-    /// Deja el paquete en la cola de todos menos en la del que lo envía.
+    /// Drops the packet into everyone's queue except the sender's.
     int broadcast(int from, const uint8_t *data, int len, uint64_t timestamp,
                   bool toReplyQueue, bool fromHost, uint16_t aid);
-    /// Saca el primer paquete no caducado, esperando hasta `kRecvTimeoutMs`.
+    /// Pops the first packet that has not gone stale, waiting up to
+    /// `kRecvTimeoutMs`.
     int receive(int inst, uint8_t *out, uint64_t *timestamp, bool hostOnly);
 
     std::mutex _lock;

@@ -2,8 +2,7 @@
 //  AppearanceSettingsView.swift
 //  eNDS
 //
-//  Settings → Appearance. Same idea as iGBA's AppearanceSettingsView (GBA-Emu
-//  repo): a native `ColorPicker` bound to a persisted accent color, applied
+//  Settings → Appearance. Same idea as iGBA's AppearanceSettingsView: a native `ColorPicker` bound to a persisted accent color, applied
 //  app-wide via `.tint`, plus the per-orientation background images (iGBA
 //  calls them controller skins). iGBA's page also has a GB palette picker —
 //  a GBA-only concern with no eNDS equivalent.

@@ -121,7 +121,7 @@ final class DSDualScreenView: UIView {
     }
 
     /// Applies a screen arrangement, animating the transition when it changes
-    /// (spec: "swap ... con transición suave"). Safe to call every layout
+    /// (the spec asks for a smooth swap). Safe to call every layout
     /// pass — a no-op animation still runs but settles on the same frames.
     /// `stretch` mirrors Screens > "Fill screen (ignore aspect ratio)".
     func applyLayout(mode: DSScreenLayoutMode, swap: Bool, stretch: Bool = false, animated: Bool) {
@@ -146,16 +146,15 @@ final class DSDualScreenView: UIView {
         // full rect — there the controls overlay the screens' outer corners
         // translucently, and with a hardware gamepad there are no on-screen
         // controls to make room for at all.
-        // `>=`, no `>`: en un contenedor CUADRADO (un plegable a media
-        // apertura, una ventana de iPadOS a mitad de drag) el resto del
-        // sistema — controles, HUD, orientationClass — resuelve "portrait",
-        // y si aquí no se reserva la franja los controles caen encima de la
-        // pantalla táctil.
+        // `>=`, not `>`: in a SQUARE container (a foldable half open, an
+        // iPadOS window mid-drag) the rest of the system — controls, HUD,
+        // orientationClass — resolves to "portrait", and if the band is not
+        // reserved here the controls land on top of the touch screen.
         var portraitBand = false
         if content.height >= content.width, reservesControlBand, console == nil {
-            // Idiom efectivo por ancho: en una ventana estrecha de iPad los
-            // controles pasan a métricas de iPhone y la franja reservada
-            // tiene que encoger con ellos, o queda un hueco muerto.
+            // Effective idiom derived from width: in a narrow iPad window
+            // the controls switch to iPhone metrics and the reserved band has
+            // to shrink with them, or it leaves dead space.
             let idiom = INDSControlBand.effectiveIdiom(for: content.size)
             content.size.height = max(1, content.height - INDSControlBand.height(for: idiom))
             portraitBand = true
@@ -166,11 +165,11 @@ final class DSDualScreenView: UIView {
             bottomFrame = (swap ? console.top : console.bottom).offsetBy(dx: contentOrigin.x, dy: contentOrigin.y)
         }
 
-        // El par apilado nace anclado arriba (en un iPhone el sobrante ≈ la
-        // franja y no se nota), pero en una ventana alta y estrecha (Split
-        // View a 1/3) deja un agujero negro enorme entre la pantalla táctil
-        // y los controles. Se centra el bloque en el espacio que queda sobre
-        // la franja; en iPhones el desplazamiento es ~0-10pt.
+        // The stacked pair starts anchored to the top (on a phone the
+        // leftover ≈ the band and nobody notices), but in a tall narrow window
+        // (1/3 Split View) it leaves a huge black gap between the touch screen
+        // and the controls. The block is centred in whatever space is left
+        // above the band; on phones the shift is ~0-10pt.
         if portraitBand, mode == .stacked, let top = topFrame, let bottom = bottomFrame {
             let slack = content.maxY - max(top.maxY, bottom.maxY)
             if slack > 1 {

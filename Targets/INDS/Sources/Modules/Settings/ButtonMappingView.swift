@@ -3,7 +3,7 @@
 //  eNDS
 //
 //  Settings → Controls → Controller Mapping. Adapted from iGBA's
-//  ButtonMappingView.swift (GBA-Emu repo) but organized the other way round:
+//  ButtonMappingView.swift but organized the other way round:
 //  one row per DS BUTTON / APP ACTION (18 possible targets), each captured by
 //  tapping the row and then pressing the physical controller button that
 //  should trigger it — rather than iGBA's one-row-per-physical-button picker.

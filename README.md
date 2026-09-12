@@ -3,10 +3,23 @@
 A Nintendo DS emulator for iPhone and iPad, built on the
 [melonDS](https://github.com/melonDS-emu/melonDS) emulation core.
 
-This repository contains the complete source code of the eNDS app as shipped
-on the App Store. It is published under the **GNU GPLv3** (see `LICENSE`) —
-the same license as melonDS — so that anyone who receives the app can study,
-build and modify exactly what runs on their device.
+This repository contains the complete source code of the eNDS app as it is
+built and distributed. It is published under the **GNU GPLv3** (see
+`LICENSE`) — the same license as melonDS — so that anyone who receives the
+app can study, build and modify exactly what runs on their device.
+
+## Built with AI assistance
+
+This project was written with heavy use of AI coding assistants (Anthropic's
+Claude, driven from Claude Code). A large share of the Swift and
+Objective-C++ in `Targets/` was drafted by a model and then read, corrected,
+tested on real devices and shipped by a human — but it would be dishonest to
+present it as hand-typed work, so it is said here plainly rather than left
+for you to guess from the commit log.
+
+What that does **not** cover: the emulation core. `Vendor/melonDS` is
+unmodified upstream melonDS, written by Arisotura and the melonDS team, and
+no AI touched it.
 
 ## What eNDS adds on top of melonDS
 
@@ -19,6 +32,8 @@ build and modify exactly what runs on their device.
 - Game Controller framework + hardware keyboard support with remapping.
 - `.zip` / `.7z` / `.gz` archive import, cheat codes, display filters,
   ReplayKit clip recording, per-game profiles.
+- A layout that follows the window rather than the device: it reflows on
+  iPad Split View, Stage Manager and continuously resizable windows.
 
 ## Credits
 
@@ -44,12 +59,17 @@ CMake (exact flags documented), then open `eNDS.xcworkspace` and build the
 `eNDS` scheme. No account-specific secrets are needed to build; signing uses
 your own team.
 
-## App Store distribution
+## Releases
 
-The App Store build of eNDS corresponds to the tagged releases of this
-repository — one tag per released build. What ships is
-what you see here: the complete corresponding source, with no ads, no
-analytics and no tracking SDKs of any kind. The app's privacy policy is at
+Every build of eNDS that leaves this machine gets a tag here — `v1.0-b29`,
+`v1.0-b30`, … — and each tag is the complete corresponding source for that
+exact binary. The [releases
+page](https://github.com/mattiaa95/eNDS/releases) lists what changed in each
+one. `main` may carry later work (comment translations, docs) that is not in
+any binary yet; when in doubt, build a tag.
+
+What ships is what you see here: no ads, no analytics and no tracking SDKs
+of any kind. The app's privacy policy is at
 [mattiaa95.github.io/privacy.html](https://mattiaa95.github.io/privacy.html).
 
 ## Legal

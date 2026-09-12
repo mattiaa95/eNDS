@@ -1,8 +1,9 @@
 import XCTest
 
-/// Screenshot harness v2 — capturas finales App Store (post feature-merge).
-/// La app se lanza con -eNDSScreenshotHarness (sin dialogos del sistema, overlay táctil
-/// forzado aunque haya "mando" (teclado del sim), sin toast Connected).
+/// Screenshot harness v2 — final App Store captures (post feature merge).
+/// The app launches with -eNDSScreenshotHarness: no system dialogs, the touch
+/// overlay forced on even when a "controller" is present (the simulator's
+/// keyboard), and no Connected toast.
 final class ScreenshotTests: XCTestCase {
 
     let outDir = "/tmp/inds-screenshots"
@@ -53,7 +54,7 @@ final class ScreenshotTests: XCTestCase {
         if pause.waitForExistence(timeout: 4) {
             pause.tap()
         } else {
-            // fallback: esquina superior izquierda del HUD
+            // fallback: the HUD's top-left corner
             app.coordinate(withNormalizedOffset: CGVector(dx: 0.06, dy: 0.055)).tap()
         }
         sleep(2)
@@ -104,22 +105,22 @@ final class ScreenshotTests: XCTestCase {
         openPauseMenu(app)
         shoot("pause-menu")
 
-        // Guarda de verdad en el slot 1 y vuelve a entrar, para que la hoja
-        // enseñe una miniatura real en vez de cuatro filas "Empty". Es a la
-        // vez la comprobación de que capturar → escribir → leer → pintar
-        // funciona de punta a punta.
+        // Really saves into slot 1 and comes back in, so the sheet shows a
+        // real thumbnail instead of four "Empty" rows. It doubles as the check
+        // that capture → write → read → draw works end to end.
         openSaveStateSheet(app)
         let slot1 = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Slot 1")).firstMatch
         if slot1.waitForExistence(timeout: 4) { slot1.tap() }
         sleep(3)
 
-        // Tras guardar, unas veces se queda el menú de pausa abierto y otras
-        // se vuelve al juego. Si el menú sigue ahí, reabrirlo tapa la captura.
+        // After saving, sometimes the pause menu stays open and sometimes the
+        // game comes back. If the menu is still there, reopening it covers the
+        // shot.
         if !app.buttons["Save State"].firstMatch.waitForExistence(timeout: 2) {
             openPauseMenu(app)
         }
         openSaveStateSheet(app)
-        // la hoja sobre hoja tarda: con 2 s la captura sale a medio presentar
+        // sheet-over-sheet is slow: at 2 s the capture lands half-presented
         sleep(5)
         shoot("save-states")
     }
@@ -245,8 +246,9 @@ final class ScreenshotTests: XCTestCase {
         shoot("rom-preview")
     }
 
-    /// Ajustes › Controles. No va a la ficha: es la página que más se mueve
-    /// (turbo, hápticos, opacidad, mapeo) y una captura la revisa entera.
+    /// Settings › Controls. Not bound for the store listing: it is the page
+    /// that moves the most (turbo, haptics, opacity, mapping) and one capture
+    /// reviews all of it.
     @MainActor
     func test12_Controls() throws {
         let app = launchApp()

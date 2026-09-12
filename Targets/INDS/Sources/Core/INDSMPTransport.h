@@ -2,28 +2,29 @@
 //  INDSMPTransport.h
 //  eNDS
 //
-//  Multijugador local del DS. melonDS NO expone esto por `MPInterface`: eso
-//  es cosa del frontend Qt y `src/net/` ni se compila aquí. `Wifi.cpp` llama
-//  a `Platform::MP_*` (Platform.h:299-307) y esas nueve funciones las pone el
-//  frontend — nosotros. Así que todo esto vive en la app y el submódulo
-//  `Vendor/melonDS` se queda intacto, que es lo que sostiene el
-//  "unmodified upstream melonDS" de BUILDING.md.
+//  Local DS multiplayer. melonDS does NOT expose this through `MPInterface`:
+//  that belongs to the Qt frontend and `src/net/` is not even compiled here.
+//  `Wifi.cpp` calls `Platform::MP_*` (Platform.h:299-307) and those nine
+//  functions are the frontend's job — ours. So all of this lives in the app
+//  and the `Vendor/melonDS` submodule stays untouched, which is what keeps
+//  BUILDING.md's "unmodified upstream melonDS" true.
 //
-//  El contrato lo fija `net/LocalMP.cpp`, que es la implementación de
-//  referencia. Lo que hay que respetar sí o sí:
+//  The contract is set by `net/LocalMP.cpp`, the reference implementation.
+//  What has to be respected, no exceptions:
 //
-//   - `recvReplies` escribe la respuesta de cada cliente en
-//     `out[(aid - 1) * kReplyStride]`, con hueco fijo. Pasarse de ahí pisa
-//     la respuesta del siguiente.
-//   - Se descarta todo paquete con `timestamp < now - kStaleWindow`: son
-//     microsegundos de tiempo emulado, no de reloj de pared.
-//   - Las recepciones bloquean hasta `kRecvTimeoutMs`. Se llaman DESDE EL
-//     HILO DE EMULACIÓN, así que ese timeout es tiempo que el juego pasa
-//     congelado: es el precio del lockstep y el motivo de que esto sea duro.
+//   - `recvReplies` writes each client's reply at
+//     `out[(aid - 1) * kReplyStride]`, a fixed slot. Writing past it
+//     overwrites the next client's reply.
+//   - Every packet with `timestamp < now - kStaleWindow` is dropped: those
+//     are microseconds of emulated time, not wall clock.
+//   - Receives block for up to `kRecvTimeoutMs`. They are called FROM THE
+//     EMULATION THREAD, so that timeout is time the game spends frozen: it
+//     is the price of lockstep and the reason this is hard.
 //
-//  Un transporte no sabe nada de red. El de verdad (MultipeerConnectivity)
-//  llegará detrás de esta misma interfaz; el primero es un loopback en
-//  proceso para poder validar la máquina de estados sin red de por medio.
+//  A transport knows nothing about networking. The real one
+//  (MultipeerConnectivity) will land behind this same interface; the first
+//  one is an in-process loopback so the state machine can be validated with
+//  no network in the way.
 //
 
 #ifndef INDS_MP_TRANSPORT_H
@@ -33,12 +34,12 @@
 
 namespace eNDS {
 
-/// Hueco por AID en el búfer de `recvReplies`. Lo fija el core, no nosotros.
+/// Per-AID slot in the `recvReplies` buffer. The core sets it, not us.
 constexpr int kReplyStride = 1024;
-/// Antigüedad máxima de un paquete, en microsegundos de tiempo emulado.
+/// Maximum packet age, in microseconds of emulated time.
 constexpr uint64_t kStaleWindow = 32;
-/// Lo que melonDS usa por defecto. Cada milisegundo aquí es un milisegundo
-/// que el emulador pasa parado.
+/// What melonDS uses by default. Every millisecond here is a millisecond
+/// the emulator spends stalled.
 constexpr int kRecvTimeoutMs = 25;
 
 class MPTransport {
@@ -53,23 +54,22 @@ public:
     virtual int sendCmd(int inst, const uint8_t *data, int len, uint64_t timestamp) = 0;
     virtual int sendReply(int inst, const uint8_t *data, int len, uint64_t timestamp, uint16_t aid) = 0;
     virtual int sendAck(int inst, const uint8_t *data, int len, uint64_t timestamp) = 0;
-    /// -1 si el host se ha ido; si no, longitud del paquete (0 = nada).
+    /// -1 if the host is gone; otherwise the packet length (0 = nothing).
     virtual int recvHostPacket(int inst, uint8_t *out, uint64_t *timestamp) = 0;
-    /// Máscara de los AID que contestaron.
+    /// Mask of the AIDs that replied.
     virtual uint16_t recvReplies(int inst, uint8_t *out, uint64_t timestamp, uint16_t aidmask) = 0;
 };
 
-/// Sin transporte instalado los hooks devuelven 0, que es exactamente lo que
-/// hacían cuando eran stubs: sin multijugador la app se comporta igual y no
-/// aparece ni una API de red en el binario.
+/// With no transport installed the hooks return 0, exactly what they did as
+/// stubs: without multiplayer the app behaves the same and not one networking
+/// API shows up in the binary.
 MPTransport *currentTransport();
 void setCurrentTransport(MPTransport *transport);
 
-/// El core pasa la instancia de `MelonDSCoreBridge` como `userdata`
+/// The core carries the `MelonDSCoreBridge` instance as `userdata`
 /// (`MelonDSCoreBridge.mm`, `make_unique<NDS>(args, (__bridge void *)self)`),
-/// así que hay un core por bridge y dos partidas en el mismo proceso no
-/// necesitan ningún desenredo. Esto traduce ese puntero al índice que espera
-/// el transporte.
+/// so there is one core per bridge and two games in the same process need no
+/// untangling. This maps that pointer to the index the transport expects.
 int instanceForUserdata(void *userdata);
 void registerInstance(void *userdata, int inst);
 void unregisterInstance(void *userdata);

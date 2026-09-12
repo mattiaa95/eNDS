@@ -2,8 +2,8 @@
 //  PurchaseManager.swift
 //  eNDS
 //
-//  Ported from iGBA (GBA-Emu repo,
-//  App/SwiftUI/Common/PurchaseManager/PurchaseManager.swift). StoreKit 2
+//  Ported from iGBA
+//  (App/SwiftUI/Common/PurchaseManager/PurchaseManager.swift). StoreKit 2
 //  product loading + purchase/restore, unchanged apart from eNDS's own
 //  product IDs. Owns the revocation-safe entitlement bookkeeping alongside
 //  `EntitlementManager` (see that file's header for the bug this guards).

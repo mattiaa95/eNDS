@@ -2,7 +2,7 @@
 //  SplashScreenView.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's SplashScreenView.swift (GBA-Emu repo): same
+//  Ported and adapted from iGBA's SplashScreenView.swift: same
 //  animation shape — icon spring-scale + radial glow, title fade+offset,
 //  subtitle, version badge, then a fade-to-app exit — driven by
 //  `onAnimationComplete`. Adaptations vs. iGBA:

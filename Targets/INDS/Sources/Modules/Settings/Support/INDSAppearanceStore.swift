@@ -3,7 +3,7 @@
 //  eNDS
 //
 //  Shared accent-color preference, loosely inspired by iGBA's
-//  `SettingsViewModel.accentColor` (GBA-Emu repo) — same idea (a persisted,
+//  `SettingsViewModel.accentColor` — same idea (a persisted,
 //  reactive `Color`, applied app-wide via `.tint`/`.accentColor`) scaled down
 //  to a single-property singleton since eNDS's Settings has nothing else that
 //  needs to be a shared, cross-screen `ObservableObject` yet. Everything else

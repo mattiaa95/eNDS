@@ -3,48 +3,48 @@
 //  INDSLayoutSweep.swift
 //  eNDS
 //
-//  Barrido de geometría por launch-arg `-iNDSLayoutSweep`: valida los layouts
-//  por defecto y las pantallas DS sobre una matriz de tamaños de contenedor
-//  arbitrarios — los candybar actuales, los aspectos casi cuadrados de un
-//  iPhone plegable desplegado y los tamaños intermedios de una ventana
-//  redimensionable de iPadOS (que un drag recorre TODOS). Ningún simulador
-//  actual puede reproducir esos tamaños; la geometría es pura función del
-//  contenedor, así que se valida directamente.
+//  Geometry sweep behind the `-iNDSLayoutSweep` launch argument: validates
+//  the default layouts and the DS screens across a matrix of arbitrary
+//  container sizes — today's candybar phones, the near-square aspects of an
+//  unfolded foldable phone, and the in-between sizes of a resizable iPadOS
+//  window (a single drag walks through ALL of them). No current simulator can
+//  reproduce those sizes; the geometry is a pure function of the container,
+//  so it is validated directly.
 //
-//  Es la misma invariante que `NDSControllerView.assertDefaultLayoutHasNoOverlaps`
-//  (la clase de bug de v1.0(8): un solape de 1px = un pulgar dispara dos
-//  botones), pero contra el espacio de tamaños completo en vez del único
-//  device donde corre el build. Imprime un veredicto por caso y termina el
-//  proceso: PASS todos → exit 0, cualquier FAIL → exit 1.
+//  Same invariant as `NDSControllerView.assertDefaultLayoutHasNoOverlaps`
+//  (the bug class from v1.0(8): a 1px overlap means one thumb fires two
+//  buttons), but against the whole size space instead of the single device
+//  the build happens to run on. It prints one verdict per case and ends the
+//  process: all PASS → exit 0, any FAIL → exit 1.
 //
 
 import UIKit
 
 enum INDSLayoutSweep {
 
-    /// Llamado desde `AppDelegate.didFinishLaunching` (solo DEBUG). Si el
-    /// launch-arg no está, no hace nada.
+    /// Called from `AppDelegate.didFinishLaunching` (DEBUG only). Does
+    /// nothing when the launch argument is absent.
     static func runIfRequested() {
         guard ProcessInfo.processInfo.arguments.contains("-iNDSLayoutSweep") else { return }
 
-        // Anchos×altos en puntos. Cada tamaño se prueba tal cual y traspuesto,
-        // con idiom .phone y .pad. `mustPass: false` = por debajo del mínimo
-        // real de ventana (informativo, no rompe el barrido).
+        // Widths × heights in points. Every size is tried as-is and
+        // transposed, with idiom .phone and .pad. `mustPass: false` = below
+        // any real window minimum (informational, does not fail the sweep).
         let cases: [(size: CGSize, mustPass: Bool)] = [
-            // Candybar actuales (plegado, pantalla exterior)
+            // Today's candybar phones (folded, outer display)
             (CGSize(width: 320, height: 568), true),
             (CGSize(width: 375, height: 667), true),
             (CGSize(width: 393, height: 852), true),
             (CGSize(width: 430, height: 932), true),
             (CGSize(width: 440, height: 956), true),
-            // Plegable desplegado: aspectos 4:3-ish / casi cuadrados
+            // Unfolded foldable: 4:3-ish / near-square aspects
             (CGSize(width: 600, height: 700), true),
             (CGSize(width: 640, height: 840), true),
             (CGSize(width: 700, height: 840), true),
             (CGSize(width: 717, height: 829), true),
             (CGSize(width: 768, height: 1024), true),
             (CGSize(width: 800, height: 900), true),
-            // Cuadrados exactos (peor caso del umbral portrait/landscape)
+            // Exact squares (worst case for the portrait/landscape threshold)
             (CGSize(width: 500, height: 500), true),
             (CGSize(width: 700, height: 700), true),
             // Both sides of the control-metric thresholds, including the
@@ -53,7 +53,7 @@ enum INDSLayoutSweep {
             (CGSize(width: 500, height: 700), true),
             (CGSize(width: 619, height: 600), true),
             (CGSize(width: 620, height: 600), true),
-            // Ventana iPadOS / Split View (el drag pasa por todos los intermedios)
+            // iPadOS window / Split View (a drag passes through every size in between)
             (CGSize(width: 320, height: 480), true),
             (CGSize(width: 400, height: 600), true),
             (CGSize(width: 507, height: 678), true),
@@ -61,7 +61,7 @@ enum INDSLayoutSweep {
             (CGSize(width: 834, height: 1194), true),
             (CGSize(width: 1024, height: 768), true),
             (CGSize(width: 1032, height: 1376), true),
-            // Por debajo de cualquier mínimo de ventana: solo informativo
+            // Below any window minimum: informational only
             (CGSize(width: 280, height: 400), false),
             (CGSize(width: 320, height: 1000), false),
         ]
@@ -98,8 +98,9 @@ enum INDSLayoutSweep {
         }
         report.append("SWEEP DONE \(total) casos: \(total - failures - informationalFailures) correctos, \(failures) fallos obligatorios, \(informationalFailures) fallos informativos bajo mínimo")
         report.forEach { print($0) }
-        // El stdout de un `simctl launch` no siempre llega: el fichero en el
-        // contenedor es la vía fiable de leer el veredicto desde fuera.
+        // The stdout of a `simctl launch` does not always come through: the
+        // file in the container is the reliable way to read the verdict from
+        // outside.
         if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
             try? report.joined(separator: "\n")
                 .write(to: docs.appendingPathComponent("layout-sweep.txt"), atomically: true, encoding: .utf8)
@@ -107,9 +108,9 @@ enum INDSLayoutSweep {
         exit(failures == 0 ? 0 : 1)
     }
 
-    /// Los cuatro botones frontales forman rombo apretado a propósito;
-    /// `buttonsForTouch` resuelve ese solape por centro más cercano. Mismo
-    /// eximente que la aserción de producción.
+    /// The four face buttons form a deliberately tight diamond;
+    /// `buttonsForTouch` resolves that overlap by nearest centre. Same
+    /// exemption as the production assertion.
     private static let faceCluster: Set<INDSControllerButtonID> = [.a, .b, .x, .y]
 
     /// Exercise the actual views, including a resize that doesn't recreate
@@ -227,8 +228,8 @@ enum INDSLayoutSweep {
             ? INDSCustomControllerLayout.defaultPortrait(containerSize: size, idiom: idiom)
             : INDSCustomControllerLayout.defaultLandscape(containerSize: size, idiom: idiom)
 
-        // Mismo conjunto que valida producción: visibles y no-chrome (el HUD
-        // dibuja Menu/Layout/FF con su propia métrica).
+        // Same set production validates: visible and non-chrome (the HUD
+        // draws Menu/Layout/FF with its own metrics).
         let frames: [(id: INDSControllerButtonID, frame: CGRect)] = layout.buttons
             .filter { $0.isVisible && !$0.id.isHUDChrome }
             .map { ($0.id, $0.clampedFrame(in: size, userInterfaceIdiom: idiom)) }
@@ -250,13 +251,13 @@ enum INDSLayoutSweep {
             }
         }
 
-        // Pantallas DS: en vertical la franja de controles se resta primero
-        // (exactamente lo que hace DSDualScreenView con reservesControlBand).
+        // DS screens: in portrait the control band is subtracted first
+        // (exactly what DSDualScreenView does with reservesControlBand).
         let mode: DSScreenLayoutMode = isPortrait ? .stacked : .sideBySide
         var screenBounds = container
         if isPortrait {
-            // Mismo cálculo que DSDualScreenView: la franja usa el idiom
-            // efectivo por ancho, no el del device.
+            // Same computation as DSDualScreenView: the band uses the
+            // effective idiom derived from width, not the device's.
             let bandIdiom = INDSControlBand.effectiveIdiom(for: size, device: idiom)
             screenBounds.size.height -= INDSControlBand.height(for: bandIdiom)
         }

@@ -2,7 +2,7 @@
 //  INDSVirtualJoystickView.swift
 //  eNDS
 //
-//  Ported near-verbatim from iGBA's VirtualJoystickView.swift (GBA-Emu repo).
+//  Ported near-verbatim from iGBA's VirtualJoystickView.swift.
 //  Only the direction → button raw-value mapping changed (INDSButton's
 //  Up/Down/Left/Right instead of GBAControllerButton's).
 //

@@ -12,10 +12,10 @@
 namespace eNDS {
 
 namespace {
-/// Un paquete caduca por tiempo EMULADO, no por reloj de pared: llega con el
-/// microsegundo del emisor y se compara con el del receptor. Restar sin más
-/// se da la vuelta cuando el receptor va por detrás, y un `u64` al revés es
-/// enorme, así que todo pasaría el filtro justo cuando no debe.
+/// A packet goes stale on EMULATED time, not on wall clock: it arrives with
+/// the sender's microsecond and is compared against the receiver's. A plain
+/// subtraction wraps around when the receiver is behind, and a wrapped `u64`
+/// is enormous, so everything would pass the filter exactly when it must not.
 bool isStale(uint64_t packetTimestamp, uint64_t now) {
     return now > kStaleWindow && packetTimestamp < (now - kStaleWindow);
 }
@@ -33,15 +33,15 @@ void MPLoopback::end(int inst) {
     {
         std::lock_guard<std::mutex> guard(_lock);
         _queues[inst] = Queue{};
-        // `_lastHostID` NO se borra, aunque el que se vaya sea el propio host:
-        // es lo único que le queda al cliente para distinguir "el host todavía
-        // no ha mandado nada" de "el host se ha ido". Borrándolo,
-        // `recvHostPacket` devolvía 0 en vez de -1 y el cliente se comía los
-        // 25 ms de espera en cada frame esperando a alguien que no vuelve.
-        // Si otro toma el relevo, el siguiente `sendCmd` lo actualiza.
+        // `_lastHostID` is NOT cleared, even when it is the host itself
+        // leaving: it is all the client has left to tell "the host has not
+        // sent anything yet" from "the host is gone". Clearing it made
+        // `recvHostPacket` return 0 instead of -1, and the client ate the
+        // full 25 ms wait every frame on someone who is never coming back.
+        // If another peer takes over, the next `sendCmd` updates it.
     }
-    // Al irse hay que despertar a los que estaban bloqueados esperándole, o
-    // se quedan los 25 ms enteros parados por alguien que ya no va a contestar.
+    // Leaving has to wake whoever was blocked waiting on this peer, or they
+    // sit out the full 25 ms on someone who will never answer.
     _arrived.notify_all();
 }
 
@@ -116,8 +116,8 @@ int MPLoopback::recvPacket(int inst, uint8_t *out, uint64_t *timestamp) {
 int MPLoopback::recvHostPacket(int inst, uint8_t *out, uint64_t *timestamp) {
     {
         std::lock_guard<std::mutex> guard(_lock);
-        // Igual que LocalMP: si el host se fue, -1 en vez de 0. El core
-        // distingue "todavía no hay nada" de "ya no va a haber nada".
+        // Same as LocalMP: if the host left, -1 rather than 0. The core
+        // tells "nothing yet" apart from "nothing ever again".
         if (_lastHostID >= 0 && !_queues[_lastHostID].connected) return -1;
     }
     return receive(inst, out, timestamp, true);
@@ -138,8 +138,9 @@ uint16_t MPLoopback::recvReplies(int inst, uint8_t *out, uint64_t timestamp, uin
             queue.pop_front();
             if (packet.sender == inst || isStale(packet.timestamp, timestamp)) continue;
             if (packet.aid == 0 || packet.aid > 15) continue;   // fuera del búfer
-            // Hueco FIJO por AID: lo impone el core, que luego lee cada
-            // respuesta en su sitio. Se recorta antes que desbordar al vecino.
+            // FIXED per-AID slot: the core imposes it and then reads each
+            // reply from its own place. Truncate rather than spill into the
+            // neighbour.
             const size_t room = static_cast<size_t>(kReplyStride);
             const size_t len = std::min(packet.data.size(), room);
             std::memcpy(out + (packet.aid - 1) * kReplyStride, packet.data.data(), len);
@@ -157,7 +158,7 @@ void MPLoopback::selfCheck() {
     mp.begin(0);
     mp.begin(1);
 
-    // El host manda un CMD y el cliente lo ve como paquete de host.
+    // The host sends a CMD and the client sees it as a host packet.
     const uint8_t cmd[] = {0xDE, 0xAD, 0xBE, 0xEF};
     assert(mp.sendCmd(0, cmd, sizeof(cmd), 1000) == (int)sizeof(cmd));
     uint8_t buffer[kReplyStride * 16] = {};
@@ -165,10 +166,10 @@ void MPLoopback::selfCheck() {
     assert(mp.recvHostPacket(1, buffer, &ts) == (int)sizeof(cmd));
     assert(ts == 1000 && buffer[0] == 0xDE && buffer[3] == 0xEF);
 
-    // Quien lo envía no lo recibe.
+    // The sender does not receive its own packet.
     assert(mp.recvPacket(0, buffer, &ts) == 0);
 
-    // La respuesta del cliente aterriza en su hueco, no en el principio.
+    // The client's reply lands in its own slot, not at the start.
     const uint8_t reply[] = {0x11, 0x22};
     assert(mp.sendReply(1, reply, sizeof(reply), 1000, 2) == (int)sizeof(reply));
     std::memset(buffer, 0, sizeof(buffer));
@@ -176,22 +177,24 @@ void MPLoopback::selfCheck() {
     assert(got == (1 << 2));
     assert(buffer[0] == 0 && buffer[kReplyStride] == 0x11 && buffer[kReplyStride + 1] == 0x22);
 
-    // Un paquete viejo se descarta: es lo que evita arrastrar el frame anterior.
+    // A stale packet is dropped: that is what keeps the previous frame from
+    // being dragged along.
     mp.sendReply(1, reply, sizeof(reply), 1000, 2);
     assert(mp.recvReplies(0, buffer, 1000 + kStaleWindow + 1, 1 << 2) == 0);
 
-    // Y con el reloj por debajo de la ventana no se da la vuelta el unsigned.
+    // And with the clock below the window, the unsigned subtraction does not
+    // wrap.
     mp.sendReply(1, reply, sizeof(reply), 0, 2);
     assert(mp.recvReplies(0, buffer, 1, 1 << 2) == (1 << 2));
 
-    // Si el host se va, el cliente recibe -1 y no se queda esperando.
+    // If the host leaves, the client gets -1 instead of waiting.
     mp.end(0);
     assert(mp.recvHostPacket(1, buffer, &ts) == -1);
     mp.end(1);
 }
 
-// Inicializador estático: corre al cargar el binario en Debug, sin que nadie
-// tenga que acordarse de llamarlo. Verificado que aborta si un assert falla.
+// Static initializer: runs when the binary loads in Debug, with nobody having
+// to remember to call it. Verified to abort if an assert fails.
 namespace { const bool gLoopbackSelfCheckRan = (MPLoopback::selfCheck(), true); }
 #endif
 

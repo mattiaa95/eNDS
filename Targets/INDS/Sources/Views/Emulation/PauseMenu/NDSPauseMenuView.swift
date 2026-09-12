@@ -2,7 +2,7 @@
 //  NDSPauseMenuView.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's PauseMenuView.swift (GBA-Emu repo): same
+//  Ported and adapted from iGBA's PauseMenuView.swift: same
 //  visual language (grouped-background rows with icon + title + subtitle,
 //  inline slider cards, prominent Resume button, drag-to-dismiss-resumes
 //  sheet) applied to eNDS's action set — no link cable, macros or TAS;

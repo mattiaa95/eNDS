@@ -18,9 +18,9 @@ enum INDSHoneymoon {
         }
     }
 
-    /// Cuándo se instaló. Lo lee `INDSReviewPrompt` en vez de llevar su propia
-    /// cuenta: ya hay una fecha de instalación fiable y dos serían dos que se
-    /// desincronizan en cuanto alguien toque una.
+    /// When the app was installed. `INDSReviewPrompt` reads this instead of
+    /// keeping its own count: there is already one reliable install date, and
+    /// two would be two that drift apart the moment anyone touches one.
     static var firstLaunchDate: Date? {
         UserDefaults.standard.object(forKey: firstLaunchDateKey) as? Date
     }

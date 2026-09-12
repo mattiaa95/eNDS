@@ -2,7 +2,7 @@
 //  INDSGamepadManager.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's ExternalController.m (GBA-Emu repo): reads
+//  Ported and adapted from iGBA's ExternalController.m: reads
 //  a physical game controller (GCController) and drives the engine through a
 //  delegate, the same role `NDSControllerView` plays for the on-screen
 //  overlay. Adaptations vs. iGBA:

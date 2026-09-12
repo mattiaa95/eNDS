@@ -2,7 +2,7 @@
 //  INDSControllerLayoutManager.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's ControllerLayoutManager.swift (GBA-Emu repo).
+//  Ported and adapted from iGBA's ControllerLayoutManager.swift.
 //  Persists the active on-screen controller layout to disk (JSON in
 //  Application Support). Own storage directory and notification name so this
 //  never collides with iGBA's identically-shaped manager if the two ever end

@@ -2,7 +2,7 @@
 //  INDSControllerLayout.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's CustomControllerLayout.swift (GBA-Emu repo).
+//  Ported and adapted from iGBA's CustomControllerLayout.swift.
 //  Data model for the on-screen controller overlay: which buttons exist, where
 //  they sit (normalized 0-1 position within the emulation view), and how big
 //  they are. Positions are authored once per orientation and reused for both
@@ -208,8 +208,8 @@ public struct INDSButtonLayoutEntry: Codable, Equatable {
     /// coordinates when the container itself isn't the full view bounds.
     public func clampedFrame(in containerSize: CGSize,
                              userInterfaceIdiom: UIUserInterfaceIdiom = UIDevice.current.userInterfaceIdiom) -> CGRect {
-        // Ventana estrecha en iPad → tamaños de iPhone, igual que los centros
-        // de los defaults (ver `INDSControlBand.effectiveIdiom`).
+        // A narrow window on iPad → phone sizes, same as the default centres
+        // (see `INDSControlBand.effectiveIdiom`).
         let idiom = INDSControlBand.effectiveIdiom(for: containerSize,
                                                    device: userInterfaceIdiom)
         let baseSize = id.baseSize(for: idiom)
@@ -432,11 +432,11 @@ public enum INDSControlBand {
         let dpadCX = s.margin + size(.dpad, idiom).width / 2
         let faceCX = containerSize.width - s.margin - faceClusterRadius(for: idiom)
         let lrHalf = size(.l, idiom).width / 2
-        // SELECT/START a ±startOffset del centro, pero sin invadir jamás la
-        // pastilla L/R: a 320pt de ancho el offset fijo dejaba L y SELECT
-        // solapados 1pt (un pulgar = dos botones, la clase de bug de v1.0(8)).
-        // El suelo mantiene SELECT y START separados entre sí aunque el
-        // contenedor sea absurdo de estrecho.
+        // SELECT/START at ±startOffset from the centre, but never reaching
+        // into the L/R pill: at 320pt wide the fixed offset left L and SELECT
+        // overlapping by 1pt (one thumb = two buttons, the bug class from
+        // v1.0(8)). The floor keeps SELECT and START apart from each other
+        // even when the container is absurdly narrow.
         let selectHalf = size(.select, idiom).width / 2
         let maxOffset = containerSize.width / 2 - (s.margin + 2 * lrHalf) - selectHalf - 2
         let startOffset = max(selectHalf + 1, min(s.startOffset, maxOffset))
@@ -483,22 +483,23 @@ public enum INDSControlBand {
         let bottom = containerSize.height - s.margin
         let startSize = size(.start, idiom)
         let hudSize = size(.menu, idiom)
-        // Igual que en vertical: SELECT/START a ±startOffset del centro pero
-        // sin pisar la cruceta (izquierda) ni el rombo ABXY (derecha) — en
-        // una ventana de 568pt de ancho el offset fijo dejaba dpad y SELECT
-        // solapados 13pt. El suelo evita que SELECT y START se pisen entre sí.
+        // Same as portrait: SELECT/START at ±startOffset from the centre but
+        // without stepping on the d-pad (left) or the ABXY diamond (right) —
+        // in a 568pt-wide window the fixed offset left the d-pad and SELECT
+        // overlapping by 13pt. The floor keeps SELECT and START off each
+        // other.
         let dpadRight = s.margin + size(.dpad, idiom).width
         let faceLeft = faceCX - radius
         let selectHalf = max(size(.select, idiom).width, startSize.width) / 2
         let halfSpan = min(containerSize.width / 2 - dpadRight, faceLeft - containerSize.width / 2)
         let startOffset = max(selectHalf + 1, min(s.startOffset, halfSpan - selectHalf - 4))
         let hudOffset = startOffset + startSize.width / 2 + 6 + hudSize.width / 2
-        // L/R viven en la esquina superior DE LAS PANTALLAS, no del
-        // contenedor: en un teléfono da igual (las pantallas llenan el alto y
-        // ambas esquinas coinciden), pero en un contenedor casi cuadrado
-        // (plegable desplegado en horizontal) las pantallas quedan centradas
-        // en una franja y unos hombros pegados al techo flotan a un palmo del
-        // juego. Misma cuenta que `DSScreenGeometry.sideBySidePair`.
+        // L/R live at the top corner OF THE SCREENS, not of the container:
+        // on a phone it makes no difference (the screens fill the height and
+        // both corners coincide), but in a near-square container (a foldable
+        // unfolded, in landscape) the screens sit centred in a band and
+        // shoulders glued to the ceiling float a hand's width away from the
+        // game. Same arithmetic as `DSScreenGeometry.sideBySidePair`.
         let sideScreenH = min(containerSize.height,
                               ((containerSize.width - DSScreenGeometry.gap) / 2)
                                   * DSScreenGeometry.aspectHeight / DSScreenGeometry.aspectWidth)

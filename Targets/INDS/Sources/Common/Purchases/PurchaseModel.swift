@@ -2,8 +2,8 @@
 //  PurchaseModel.swift
 //  eNDS
 //
-//  Ported from iGBA (GBA-Emu repo,
-//  App/SwiftUI/Modules/PurchaseView/PurchaseModel.swift) — the `PurchaseView`
+//  Ported from iGBA
+//  (App/SwiftUI/Modules/PurchaseView/PurchaseModel.swift) — the `PurchaseView`
 //  view model. Same rule as iGBA: `productDetails` starts empty and
 //  `isFetchingProducts` starts `true`, so the paywall can only ever show a
 //  loading placeholder or a real StoreKit-localized price — never a

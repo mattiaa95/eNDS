@@ -2,8 +2,7 @@
 //  INDSLayoutEditorView.swift
 //  eNDS
 //
-//  Ported and adapted from iGBA's ControllerLayoutEditorView.swift (GBA-Emu
-//  repo). Full-screen canvas for repositioning, resizing, hiding, and
+//  Ported and adapted from iGBA's ControllerLayoutEditorView.swift. Full-screen canvas for repositioning, resizing, hiding, and
 //  restyling on-screen controller buttons, per orientation.
 //
 //  Adaptations vs. iGBA:
