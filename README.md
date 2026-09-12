@@ -63,10 +63,10 @@ your own team.
 
 Every build of eNDS that leaves this machine gets a tag here — `v1.0-b29`,
 `v1.0-b30`, … — and each tag is the complete corresponding source for that
-exact binary. The [releases
-page](https://github.com/mattiaa95/eNDS/releases) lists what changed in each
-one. `main` may carry later work (comment translations, docs) that is not in
-any binary yet; when in doubt, build a tag.
+exact binary. The current one has release notes on the [releases
+page](https://github.com/mattiaa95/eNDS/releases). `main` may carry later
+work (comment translations, docs) that is not in any binary yet; when in
+doubt, build a tag.
 
 What ships is what you see here: no ads, no analytics and no tracking SDKs
 of any kind. The app's privacy policy is at
