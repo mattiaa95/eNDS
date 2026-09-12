@@ -47,6 +47,12 @@ enum INDSLayoutSweep {
             // Cuadrados exactos (peor caso del umbral portrait/landscape)
             (CGSize(width: 500, height: 500), true),
             (CGSize(width: 700, height: 700), true),
+            // Both sides of the control-metric thresholds, including the
+            // compact-height transition after transposing the first pair.
+            (CGSize(width: 499, height: 700), true),
+            (CGSize(width: 500, height: 700), true),
+            (CGSize(width: 619, height: 600), true),
+            (CGSize(width: 620, height: 600), true),
             // Ventana iPadOS / Split View (el drag pasa por todos los intermedios)
             (CGSize(width: 320, height: 480), true),
             (CGSize(width: 400, height: 600), true),
@@ -61,8 +67,17 @@ enum INDSLayoutSweep {
         ]
 
         var failures = 0
+        var informationalFailures = 0
         var total = 0
         var report: [String] = []
+        let adaptiveProblems = validateAdaptiveViews()
+        total += 1
+        if adaptiveProblems.isEmpty {
+            report.append("SWEEP PASS adaptive view identity, resizing, and touch image geometry")
+        } else {
+            failures += 1
+            adaptiveProblems.forEach { report.append("SWEEP FAIL adaptive views: \($0)") }
+        }
         for (base, mustPass) in cases {
             for size in [base, CGSize(width: base.height, height: base.width)] {
                 for idiom in [UIUserInterfaceIdiom.phone, .pad] {
@@ -75,12 +90,13 @@ enum INDSLayoutSweep {
                         failures += 1
                         for p in problems { report.append("SWEEP FAIL \(tag): \(p)") }
                     } else {
+                        informationalFailures += 1
                         for p in problems { report.append("SWEEP INFO \(tag) (bajo mínimo de ventana): \(p)") }
                     }
                 }
             }
         }
-        report.append("SWEEP DONE \(total - failures)/\(total) casos correctos, \(failures) fallos")
+        report.append("SWEEP DONE \(total) casos: \(total - failures - informationalFailures) correctos, \(failures) fallos obligatorios, \(informationalFailures) fallos informativos bajo mínimo")
         report.forEach { print($0) }
         // El stdout de un `simctl launch` no siempre llega: el fichero en el
         // contenedor es la vía fiable de leer el veredicto desde fuera.
@@ -95,6 +111,113 @@ enum INDSLayoutSweep {
     /// `buttonsForTouch` resuelve ese solape por centro más cercano. Mismo
     /// eximente que la aserción de producción.
     private static let faceCluster: Set<INDSControllerButtonID> = [.a, .b, .x, .y]
+
+    /// Exercise the actual views, including a resize that doesn't recreate
+    /// the controller. Copying the geometry formula here missed these bugs.
+    private static func validateAdaptiveViews() -> [String] {
+        var problems: [String] = []
+        let preferenceKey = "eNDSScreenLayoutLandscape"
+        let savedPreference = UserDefaults.standard.object(forKey: preferenceKey)
+        defer { UserDefaults.standard.set(savedPreference, forKey: preferenceKey) }
+        DSScreenLayoutPreferences.setMode(nil, for: .landscape)
+        if DSScreenLayoutPreferences.savedMode(for: .landscape) != nil
+            || DSScreenLayoutPreferences.mode(for: .landscape, containerSize: CGSize(width: 840, height: 700)) != .stacked
+            || DSScreenLayoutPreferences.mode(for: .landscape, containerSize: CGSize(width: 780, height: 390)) != .sideBySide {
+            problems.append("Automatic does not follow available screen/control space")
+        }
+        DSScreenLayoutPreferences.setMode(.topOnly, for: .landscape)
+        if DSScreenLayoutPreferences.mode(for: .landscape, containerSize: CGSize(width: 840, height: 700)) != .topOnly {
+            problems.append("expanded automatic layout overwrites an explicit screen choice")
+        }
+        DSScreenLayoutPreferences.setMode(nil, for: .landscape)
+        if DSScreenLayoutPreferences.cycleMode(for: .landscape, containerSize: CGSize(width: 840, height: 700)) != .sideBySide {
+            problems.append("cycling skips the mode after the visible expanded default")
+        }
+        // Expanded stacked presentation must leave the lower display between
+        // the thumb controls, instead of putting both displays above them.
+        for size in [CGSize(width: 700, height: 840), CGSize(width: 840, height: 700),
+                     CGSize(width: 688, height: 676), CGSize(width: 834, height: 1194),
+                     CGSize(width: 1194, height: 834)] {
+            let screens = DSDualScreenView(frame: CGRect(origin: .zero, size: size))
+            screens.applyLayout(mode: .stacked, swap: false, animated: false)
+            let upper = screens.topScreenView.frame
+            let lower = screens.bottomScreenView.frame
+            if upper.midY >= size.height / 2 || lower.midY <= size.height / 2 {
+                problems.append("expanded DS must put one display above and one below the middle: \(size)")
+            }
+            if lower.minX < 208 || lower.maxX > size.width - 208 {
+                problems.append("expanded DS must leave room beside the touch display for controls: \(size)")
+            }
+            let controller = NDSControllerView(frame: screens.bounds)
+            let hud = NDSHUDView(frame: screens.bounds)
+            controller.layoutIfNeeded()
+            hud.layoutIfNeeded()
+            let buttons = controller.subviews + hud.subviews.filter { $0 is UIButton }
+            for button in buttons where !button.isHidden {
+                if !screens.bounds.contains(button.frame) || button.frame.intersects(upper) || button.frame.intersects(lower) {
+                    problems.append("expanded control clips or covers a DS screen: \(button.accessibilityLabel ?? "HUD") at \(size)")
+                }
+            }
+            for y in [lower.minY + 1, lower.midY, lower.maxY - 1] {
+                for x in [lower.minX + 1, lower.midX, lower.maxX - 1] {
+                    if controller.hitTest(CGPoint(x: x, y: y), with: nil) != nil {
+                        problems.append("controller intercepts the DS stylus at \(size)")
+                    }
+                }
+            }
+        }
+        for size in [CGSize(width: 390, height: 780), CGSize(width: 700, height: 840),
+                     CGSize(width: 840, height: 700), CGSize(width: 780, height: 390)] {
+            let phone = INDSControlBand.effectiveIdiom(for: size, device: .phone)
+            let pad = INDSControlBand.effectiveIdiom(for: size, device: .pad)
+            if phone != pad { problems.append("same space gives different control metrics: \(size)") }
+        }
+
+        let dual = DSDualScreenView(frame: CGRect(x: 0, y: 0, width: 700, height: 840))
+        let top = dual.topScreenView
+        let touch = dual.bottomScreenView
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 256, height: 192)).image { ctx in
+            UIColor.red.setFill()
+            ctx.fill(CGRect(x: 0, y: 0, width: 256, height: 192))
+        }
+        top.image = image
+        touch.image = image
+        dual.applyLayout(mode: .stacked, swap: false, stretch: true, animated: false)
+        if touch.contentMode != .scaleToFill || top.contentMode != .scaleToFill {
+            problems.append("Fill Screen leaves letterboxing inside the stylus coordinate space")
+        }
+        dual.frame.size = CGSize(width: 840, height: 700)
+        dual.applyLayout(mode: .sideBySide, swap: true, animated: false)
+        dual.layoutIfNeeded()
+        if dual.topScreenView !== top || dual.bottomScreenView !== touch || touch.image !== image {
+            problems.append("resize/swap recreated a screen or lost its framebuffer")
+        }
+        if touch.frame.minX >= top.frame.minX || touch.contentMode != .scaleAspectFit {
+            problems.append("swap or aspect-fit restoration failed")
+        }
+
+        let controller = NDSControllerView(frame: CGRect(x: 0, y: 0, width: 390, height: 780))
+        // A caller must not have to set an orientation before UIKit lays out
+        // its child, or the first resize pass uses yesterday's button positions.
+        for size in [CGSize(width: 390, height: 780), CGSize(width: 840, height: 700),
+                     CGSize(width: 700, height: 700), CGSize(width: 390, height: 780)] {
+            controller.screenLayoutMode = size.width > size.height ? .sideBySide : .stacked
+            controller.frame.size = size
+            controller.setNeedsLayout()
+            controller.layoutIfNeeded()
+            guard let shoulder = controller.subviews.first(where: {
+                $0.accessibilityLabel == INDSControllerButtonID.l.accessibilityName
+            }) else {
+                problems.append("missing L shoulder after resize")
+                continue
+            }
+            let landscape = size.width > size.height
+            if landscape && shoulder.frame.midY > size.height / 2 {
+                problems.append("landscape resize keeps portrait controls: \(size)")
+            }
+        }
+        return problems
+    }
 
     private static func validate(containerSize size: CGSize, idiom: UIUserInterfaceIdiom) -> [String] {
         var problems: [String] = []

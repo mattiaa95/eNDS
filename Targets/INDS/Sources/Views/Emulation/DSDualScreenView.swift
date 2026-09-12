@@ -129,7 +129,16 @@ final class DSDualScreenView: UIView {
         currentSwap = swap
         currentStretch = stretch
 
+        // Stylus coordinates use the view's entire bounds. Fill mode must
+        // stretch the framebuffer too, or taps land on different pixels.
+        for screen in [topScreenView, bottomScreenView] {
+            screen.contentMode = stretch ? .scaleToFill : .scaleAspectFit
+        }
+
         var content = bounds.inset(by: safeAreaInsets)
+        let console = reservesControlBand
+            ? DSConsoleLayout.current(in: content.size, mode: mode, stretch: stretch) : nil
+        let contentOrigin = content.origin
         // Portrait hands the bottom strip to the on-screen controls. Without
         // this the two stacked screens take ~79% of the height and the buttons
         // have to be crammed into what's left, landing on top of each other
@@ -143,7 +152,7 @@ final class DSDualScreenView: UIView {
         // y si aquí no se reserva la franja los controles caen encima de la
         // pantalla táctil.
         var portraitBand = false
-        if content.height >= content.width, reservesControlBand {
+        if content.height >= content.width, reservesControlBand, console == nil {
             // Idiom efectivo por ancho: en una ventana estrecha de iPad los
             // controles pasan a métricas de iPhone y la franja reservada
             // tiene que encoger con ellos, o queda un hueco muerto.
@@ -152,6 +161,10 @@ final class DSDualScreenView: UIView {
             portraitBand = true
         }
         var (topFrame, bottomFrame) = DSScreenGeometry.frames(mode: mode, swap: swap, stretch: stretch, in: content)
+        if let console {
+            topFrame = (swap ? console.bottom : console.top).offsetBy(dx: contentOrigin.x, dy: contentOrigin.y)
+            bottomFrame = (swap ? console.top : console.bottom).offsetBy(dx: contentOrigin.x, dy: contentOrigin.y)
+        }
 
         // El par apilado nace anclado arriba (en un iPhone el sobrante ≈ la
         // franja y no se nota), pero en una ventana alta y estrecha (Split

@@ -35,6 +35,8 @@ struct INDSLayoutEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var layout = INDSControllerLayoutManager.shared.activeLayout
+    @State private var initialLayout = INDSControllerLayoutManager.shared.activeLayout
+    @State private var referenceSizes = INDSControllerLayout.referenceContainerSizes()
     @State private var isPortrait = true
     @State private var selectedButton: INDSControllerButtonID?
     @State private var showResetAlert = false
@@ -49,19 +51,25 @@ struct INDSLayoutEditorView: View {
             Color.black.ignoresSafeArea()
 
             GeometryReader { geo in
+                let size = isPortrait ? referenceSizes.portrait : referenceSizes.landscape
+                let scale = min(geo.size.width / size.width, geo.size.height / size.height)
                 ZStack {
-                    screenSilhouette(in: geo.size)
-                    gridGuides(in: geo.size)
+                    screenSilhouette(in: size)
+                    gridGuides(in: size)
 
                     ForEach(currentLayout.wrappedValue.buttons.indices, id: \.self) { index in
                         let entry = currentLayout.wrappedValue.buttons[index]
                         if entry.isVisible {
-                            buttonView(for: entry, index: index, in: geo.size)
+                            buttonView(for: entry, index: index, in: size)
                         }
                     }
                 }
-                .frame(width: geo.size.width, height: geo.size.height)
+                // Scale the whole preview: normalized positions and button
+                // sizes must share one canvas, including inside an iPad sheet.
+                .frame(width: size.width, height: size.height)
                 .coordinateSpace(name: "indsLayoutEditorCanvas")
+                .scaleEffect(scale)
+                .frame(width: geo.size.width, height: geo.size.height)
             }
 
             VStack {
@@ -114,7 +122,8 @@ struct INDSLayoutEditorView: View {
         }
         .alert("Reset Layout?", isPresented: $showResetAlert) {
             Button("Reset", role: .destructive) {
-                layout = .defaultLayout()
+                layout = .defaultLayout(portraitContainer: referenceSizes.portrait,
+                                        landscapeContainer: referenceSizes.landscape)
                 selectedButton = nil
                 INDSHaptics.medium()
             }
@@ -145,7 +154,10 @@ struct INDSLayoutEditorView: View {
     /// so any game screen the user returns to reflects the new layout
     /// without further wiring here.
     private func save() {
-        INDSControllerLayoutManager.shared.activeLayout = layout
+        // Opening and saving an untouched preview must preserve Automatic.
+        if layout != initialLayout {
+            INDSControllerLayoutManager.shared.activeLayout = layout
+        }
         INDSHaptics.medium()
         dismiss()
     }
@@ -253,18 +265,14 @@ struct INDSLayoutEditorView: View {
                                         size: CGSize(width: max(0, frame.width - 6), height: max(0, frame.height - 6)))
                     .padding(3)
             }
-
-            Text(entry.id.rawValue.uppercased())
-                .font(.system(size: 9, weight: .bold))
-                .foregroundColor(.white)
-                .padding(.horizontal, 4)
-                .padding(.vertical, 1)
-                .background(Color.black.opacity(0.6))
-                .cornerRadius(3)
-                .offset(y: frame.height / 2 + 8)
         }
         .frame(width: frame.width, height: frame.height)
+        .contentShape(Rectangle())
         .position(x: frame.midX, y: frame.midY)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(entry.id.accessibilityName)
+        .accessibilityIdentifier("layout-editor-\(entry.id.rawValue)")
+        .accessibilityAddTraits(.isButton)
         .onTapGesture {
             selectedButton = entry.id
             INDSHaptics.light()

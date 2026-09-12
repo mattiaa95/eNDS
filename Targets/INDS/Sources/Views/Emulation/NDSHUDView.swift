@@ -14,6 +14,8 @@ import UIKit
 
 final class NDSHUDView: UIView {
 
+    private var screenLayoutMode: DSScreenLayoutMode = .stacked
+
     var onPauseTapped: (() -> Void)?
     var onCycleLayoutTapped: (() -> Void)?
     var onErrorBackTapped: (() -> Void)?
@@ -177,23 +179,28 @@ final class NDSHUDView: UIView {
     private func updateBadgePlacement() {
         let content = bounds.inset(by: safeAreaInsets)
         guard content.width > 1, content.height > 1 else { return }
-        let isPortrait = content.height >= content.width
+        let console = DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
+                                               stretch: DSScreenLayoutPreferences.stretchEnabled)
+        let isPortrait = content.height >= content.width && console == nil
 
         // Portrait: the column between the thumb clusters, where Menu and
         // Layout already live. Landscape: plain centre, nothing is there.
         let bandIdiom = INDSControlBand.effectiveIdiom(for: content.size)
-        badgeCenterXConstraint.constant = isPortrait
+        badgeCenterXConstraint.constant = console != nil ? content.minX + 90 : isPortrait
             ? content.minX + INDSControlBand.hudColumnCenterX(containerWidth: content.width, idiom: bandIdiom)
             : bounds.midX
-        badgeWidthConstraint.constant = INDSControlBand.hudColumnWidth(containerWidth: content.width, idiom: bandIdiom)
+        badgeWidthConstraint.constant = console != nil ? 160 : INDSControlBand.hudColumnWidth(containerWidth: content.width, idiom: bandIdiom)
+        badgeWidthConstraint.isActive = isPortrait || console != nil
+        // Console chrome occupies the top row; transient messages go below
+        // that row so a save/speed toast never covers the pause button.
+        toastTopConstraint.constant = console != nil ? INDSControllerButtonID.menu.baseSize(for: bandIdiom).height + 20 : 10
+        toastBelowBadgesConstraint.isActive = !isPortrait && console == nil
+        toastTopConstraint.isActive = isPortrait || console != nil
 
         guard badgesArePortrait != isPortrait else { return }
         badgesArePortrait = isPortrait
         badgeTopConstraint.isActive = !isPortrait
         badgeBottomConstraint.isActive = isPortrait
-        badgeWidthConstraint.isActive = isPortrait
-        toastBelowBadgesConstraint.isActive = !isPortrait
-        toastTopConstraint.isActive = isPortrait
     }
 
     @objc private func controllerLayoutChanged() {
@@ -212,6 +219,9 @@ final class NDSHUDView: UIView {
         let layout: INDSControllerLayout
         if let custom = INDSControllerLayoutManager.shared.persistedLayout {
             layout = isPortrait ? custom.portrait : custom.landscape
+        } else if let console = DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
+                                                        stretch: DSScreenLayoutPreferences.stretchEnabled) {
+            layout = console.controls
         } else {
             layout = isPortrait
                 ? INDSCustomControllerLayout.defaultPortrait(containerSize: content.size)
@@ -296,6 +306,8 @@ final class NDSHUDView: UIView {
     // Configuration-based buttons ignore `setImage(_:for:)` — mutate the
     // configuration itself.
     func setLayoutIcon(_ mode: DSScreenLayoutMode) {
+        screenLayoutMode = mode
+        setNeedsLayout()
         layoutButton.configuration?.image = UIImage(systemName: mode.sfSymbolName, withConfiguration: Self.pairSymbolConfig)
     }
 

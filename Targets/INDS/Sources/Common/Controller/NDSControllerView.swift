@@ -22,29 +22,15 @@ protocol NDSControllerViewDelegate: AnyObject {
     func controllerView(_ view: NDSControllerView, setButton button: INDSButton, pressed: Bool)
 }
 
-/// Lightweight orientation class for the controller overlay. Deliberately not
-/// the legacy `GBAControllerSkinOrientation` option set — eNDS has no shared
-/// ObjC code that needs it.
-enum INDSControllerOrientation {
-    case portrait
-    case landscape
-}
-
 final class NDSControllerView: UIView {
 
     weak var delegate: NDSControllerViewDelegate?
 
-    // MARK: - Configuration
-
-    var orientation: INDSControllerOrientation = .portrait {
-        didSet {
-            // Defer to let bounds update for the new orientation first (on
-            // rotation, layoutSubviews for the new size hasn't run yet).
-            DispatchQueue.main.async { [weak self] in
-                self?.rebuildLayout()
-            }
-        }
+    var screenLayoutMode: DSScreenLayoutMode = .stacked {
+        didSet { if oldValue != screenLayoutMode { setNeedsLayout() } }
     }
+
+    // MARK: - Configuration
 
     /// Controller opacity applied to all button visuals. Floor of 0.15: a
     /// persisted 0 would make every button invisible but still tappable, with
@@ -86,10 +72,15 @@ final class NDSControllerView: UIView {
     /// the control band is a fixed number of *points*, so its normalized
     /// position differs on every device (see `INDSControlBand`).
     private func layout(in containerSize: CGSize) -> INDSControllerLayout {
+        let isPortrait = containerSize.height >= containerSize.width
         if let custom = INDSControllerLayoutManager.shared.persistedLayout {
-            return orientation == .portrait ? custom.portrait : custom.landscape
+            return isPortrait ? custom.portrait : custom.landscape
         }
-        return orientation == .portrait
+        if let console = DSConsoleLayout.current(in: containerSize, mode: screenLayoutMode,
+                                                  stretch: DSScreenLayoutPreferences.stretchEnabled) {
+            return console.controls
+        }
+        return isPortrait
             ? INDSCustomControllerLayout.defaultPortrait(containerSize: containerSize)
             : INDSCustomControllerLayout.defaultLandscape(containerSize: containerSize)
     }

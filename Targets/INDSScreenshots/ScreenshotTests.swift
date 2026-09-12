@@ -155,7 +155,32 @@ final class ScreenshotTests: XCTestCase {
             if txt.waitForExistence(timeout: 1) { txt.tap(); break }
         }
         sleep(2)
+        let ids = ["dpad", "a", "b", "x", "y", "l", "r", "start", "select", "menu", "layout", "fastForward"]
+        func verifyEditor() {
+            let controls = ids.map { app.buttons["layout-editor-\($0)"].firstMatch }
+            for control in controls {
+                XCTAssertTrue(control.exists)
+                XCTAssertTrue(control.isHittable)
+            }
+            let frames = controls.map(\.frame)
+            for i in controls.indices {
+                for j in controls.indices where j > i {
+                    let overlap = frames[i].intersection(frames[j])
+                    XCTAssertTrue(overlap.isNull || overlap.width < 1 || overlap.height < 1,
+                                  "Editor controls overlap: \(ids[i]), \(ids[j])")
+                }
+            }
+        }
+        verifyEditor()
         shoot("layout-editor")
+        app.segmentedControls.buttons["Landscape"].tap()
+        verifyEditor()
+        shoot("layout-editor-landscape")
+        let a = app.buttons["layout-editor-a"].firstMatch
+        let before = a.frame.midX
+        let start = a.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: -35, dy: -30)))
+        XCTAssertLessThan(a.frame.midX, before - 20, "Dragging must use the scaled canvas coordinates")
     }
 
     @MainActor
@@ -242,5 +267,133 @@ final class ScreenshotTests: XCTestCase {
             let t = app.staticTexts[label].firstMatch
             if t.waitForExistence(timeout: 1) { t.tap(); return }
         }
+    }
+
+    @MainActor
+    func test15_AutomaticScreenPreference() throws {
+        continueAfterFailure = false
+        let app = launchApp()
+        tapAny(app, labels: ["Settings"])
+        tapAny(app, labels: ["Screens"])
+        let landscape = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Landscape")).firstMatch
+        XCTAssertTrue(landscape.waitForExistence(timeout: 5))
+        XCTAssertTrue(landscape.label.contains("Automatic"), landscape.label)
+        landscape.tap()
+        app.buttons["Side by Side"].tap()
+        XCTAssertTrue(landscape.label.contains("Side by Side"), landscape.label)
+        app.terminate()
+        app.launch()
+        tapAny(app, labels: ["Settings"])
+        tapAny(app, labels: ["Screens"])
+        XCTAssertTrue(landscape.label.contains("Side by Side"), landscape.label)
+        landscape.tap()
+        app.buttons["Automatic"].tap()
+        XCTAssertTrue(landscape.label.contains("Automatic"), landscape.label)
+    }
+
+    /// Expanded default: controls flank the lower display through rotation,
+    /// then a real save/load round trip leaves the same game playable.
+    @MainActor
+    func test14_ExpandedDSGameplay() throws {
+        continueAfterFailure = false
+        let app = launchApp(extraArgs: ["-eNDSStretchScreens", "NO", "-eNDSScreenSwap", "NO"])
+        bootJamClown(app)
+        let top = app.images["DS top screen"]
+        let touch = app.descendants(matching: .any)["DS touch screen"].firstMatch
+        XCTAssertTrue(top.waitForExistence(timeout: 10))
+        defer { XCUIDevice.shared.orientation = .portrait }
+        for orientation in [UIDeviceOrientation.portrait, .landscapeLeft, .landscapeRight, .portrait] {
+            XCUIDevice.shared.orientation = orientation
+            let settled = NSPredicate { _, _ in
+                top.exists && touch.exists && top.frame.maxY < touch.frame.minY
+                    && abs(top.frame.midX - touch.frame.midX) < 2
+            }
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: settled, object: nil)], timeout: 10), .completed)
+            for screen in [top, touch] {
+                XCTAssertEqual(screen.frame.width / screen.frame.height, 4.0 / 3.0, accuracy: 0.02)
+                XCTAssertTrue(app.frame.contains(screen.frame))
+            }
+            for name in ["Directional pad", "A button", "B button", "X button", "Y button",
+                         "L shoulder button", "R shoulder button", "Start button", "Select button", "hud.pause"] {
+                let button = app.buttons[name]
+                XCTAssertTrue(button.isHittable, name)
+                XCTAssertFalse(button.frame.intersects(top.frame), name)
+                XCTAssertFalse(button.frame.intersects(touch.frame), name)
+            }
+            XCTAssertLessThan(app.buttons["Directional pad"].frame.maxX, touch.frame.minX)
+            XCTAssertGreaterThan(app.buttons["A button"].frame.minX, touch.frame.maxX)
+            touch.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.1))
+                .press(forDuration: 0.1, thenDragTo: touch.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.9)))
+            app.buttons["Start button"].tap()
+            app.buttons["A button"].tap()
+            let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            attachment.name = "ds-console-\(orientation.rawValue)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+        app.buttons["hud.pause"].tap()
+        XCTAssertTrue(app.buttons["Save State"].waitForExistence(timeout: 5))
+        app.buttons["Save State"].tap()
+        let slot = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Slot 1")).firstMatch
+        XCTAssertTrue(slot.waitForExistence(timeout: 5))
+        slot.tap()
+        if app.buttons["Overwrite"].waitForExistence(timeout: 1) { app.buttons["Overwrite"].tap() }
+        if !app.buttons["Load State"].waitForExistence(timeout: 3) { app.buttons["hud.pause"].tap() }
+        app.buttons["Load State"].tap()
+        XCTAssertTrue(slot.waitForExistence(timeout: 5))
+        XCTAssertTrue(slot.isEnabled)
+        XCTAssertFalse(slot.label.contains("Empty"))
+        slot.tap()
+        if app.buttons["Resume"].waitForExistence(timeout: 3) { app.buttons["Resume"].tap() }
+        XCTAssertTrue(app.buttons["hud.pause"].waitForExistence(timeout: 5))
+        XCTAssertTrue(touch.isHittable)
+    }
+
+    /// Requires JamClown.nds in Documents/ROMs of the test simulator.
+    /// One running game crosses both shapes and returns;
+    /// screenshots are attached to xcresult as reproducible evidence.
+    @MainActor
+    func test13_AdaptiveGameplay() throws {
+        continueAfterFailure = false
+        let app = launchApp(extraArgs: ["-eNDSScreenLayoutPortrait", "stacked",
+                                        "-eNDSScreenLayoutLandscape", "sideBySide",
+                                        "-eNDSStretchScreens", "NO",
+                                        "-eNDSScreenSwap", "NO"])
+        bootJamClown(app)
+        let top = app.images["DS top screen"]
+        let touch = app.descendants(matching: .any)["DS touch screen"].firstMatch
+        XCTAssertTrue(top.waitForExistence(timeout: 10))
+        XCTAssertTrue(touch.exists)
+        defer { XCUIDevice.shared.orientation = .portrait }
+
+        for (orientation, name) in [(UIDeviceOrientation.portrait, "adaptive-portrait"),
+                                    (.landscapeLeft, "adaptive-landscape"),
+                                    (.portrait, "adaptive-return-portrait")] {
+            XCUIDevice.shared.orientation = orientation
+            let landscape = orientation == .landscapeLeft
+            let settled = NSPredicate { _, _ in
+                guard top.exists, touch.exists else { return false }
+                return landscape
+                    ? abs(top.frame.midY - touch.frame.midY) < 2 && top.frame.maxX <= touch.frame.minX + 1
+                    : abs(top.frame.midX - touch.frame.midX) < 2 && top.frame.maxY <= touch.frame.minY + 1
+            }
+            let expectation = XCTNSPredicateExpectation(predicate: settled, object: nil)
+            XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: 10), .completed)
+            for screen in [top, touch] {
+                XCTAssertGreaterThan(screen.frame.height, 50)
+                XCTAssertEqual(screen.frame.width / screen.frame.height, 4.0 / 3.0, accuracy: 0.02)
+                XCTAssertTrue(app.frame.insetBy(dx: -1, dy: -1).contains(screen.frame))
+            }
+            XCTAssertTrue(app.buttons["hud.pause"].isHittable)
+            touch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            attachment.name = name
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+        // Open the live menu after the return trip: catches a stranded HUD
+        // or a session replaced by the library during the transition.
+        app.buttons["hud.pause"].tap()
+        XCTAssertTrue(app.buttons["Resume"].waitForExistence(timeout: 5))
     }
 }

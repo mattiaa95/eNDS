@@ -341,24 +341,15 @@ public struct INDSCustomControllerLayout: Codable, Equatable {
 /// v1.0(8) defaults produced on every phone).
 public enum INDSControlBand {
 
-    /// Idiom a usar para métricas de controles dado el tamaño REAL del
-    /// contenedor. En una ventana estrecha de iPad (Split View a 1/3,
-    /// ventana redimensionada de iPadOS, un plegable a media apertura) los
-    /// botones tamaño pad físicamente no caben — el barrido de geometría los
-    /// pillaba solapados hasta 78pt entre 320 y 440pt de ancho — y se pasa a
-    /// métricas de iPhone. Umbrales: 500 en vertical (deja el Split View a
-    /// 1/2 de un iPad de 11", ~507pt, todavía en pad); 620 en horizontal,
-    /// porque ahí cruceta + SELECT/START + rombo comparten UNA fila y con
-    /// métricas pad esa fila mide ~600pt como mínimo.
-    ///
-    /// Único punto de decisión: lo aplican `clampedFrame`, las factories de
-    /// defaults, la franja (`height`) y la columna del HUD, así que centros,
-    /// tamaños y reserva de pantalla siempre están de acuerdo.
+    /// Control metrics follow usable space, including an expanded phone or
+    /// a narrow tablet window. The existing pad row needs 620pt horizontally;
+    /// compact heights keep the smaller controls off the game image.
+    /// `device` remains source-compatible with saved-layout callers, but
+    /// device identity must not change geometry for the same container.
     public static func effectiveIdiom(for containerSize: CGSize,
-                                      device: UIUserInterfaceIdiom = UIDevice.current.userInterfaceIdiom) -> UIUserInterfaceIdiom {
-        guard device == .pad else { return device }
+                                      device _: UIUserInterfaceIdiom = .unspecified) -> UIUserInterfaceIdiom {
         let minWidth: CGFloat = containerSize.width > containerSize.height ? 620 : 500
-        return containerSize.width < minWidth ? .phone : device
+        return containerSize.width >= minWidth && containerSize.height >= 500 ? .pad : .phone
     }
 
     /// Spacing only — the button *sizes* come from

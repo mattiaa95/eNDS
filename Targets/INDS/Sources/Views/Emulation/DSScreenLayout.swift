@@ -64,24 +64,27 @@ enum DSScreenLayoutPreferences {
     private static let swapKey = "eNDSScreenSwap"
     private static let stretchKey = "eNDSStretchScreens"
 
-    static func mode(for orientationClass: DSScreenOrientationClass) -> DSScreenLayoutMode {
-        let key = orientationClass == .portrait ? portraitKey : landscapeKey
-        let fallback: DSScreenLayoutMode = orientationClass == .portrait ? .stacked : .sideBySide
-        guard let raw = UserDefaults.standard.string(forKey: key), let mode = DSScreenLayoutMode(rawValue: raw) else {
-            return fallback
-        }
-        return mode
+    static func mode(for orientationClass: DSScreenOrientationClass, containerSize: CGSize? = nil) -> DSScreenLayoutMode {
+        if let saved = savedMode(for: orientationClass) { return saved }
+        let consoleFits = containerSize.flatMap { DSConsoleLayout(in: $0) } != nil
+        return orientationClass == .portrait || consoleFits ? .stacked : .sideBySide
     }
 
-    static func setMode(_ mode: DSScreenLayoutMode, for orientationClass: DSScreenOrientationClass) {
+    /// nil is Automatic; explicit per-orientation choices keep their old keys.
+    static func savedMode(for orientationClass: DSScreenOrientationClass) -> DSScreenLayoutMode? {
         let key = orientationClass == .portrait ? portraitKey : landscapeKey
-        UserDefaults.standard.set(mode.rawValue, forKey: key)
+        return UserDefaults.standard.string(forKey: key).flatMap(DSScreenLayoutMode.init(rawValue:))
+    }
+
+    static func setMode(_ mode: DSScreenLayoutMode?, for orientationClass: DSScreenOrientationClass) {
+        let key = orientationClass == .portrait ? portraitKey : landscapeKey
+        UserDefaults.standard.set(mode?.rawValue, forKey: key)
     }
 
     /// Advances and persists the mode for `orientationClass`, returning the new value.
     @discardableResult
-    static func cycleMode(for orientationClass: DSScreenOrientationClass) -> DSScreenLayoutMode {
-        let next = mode(for: orientationClass).next
+    static func cycleMode(for orientationClass: DSScreenOrientationClass, containerSize: CGSize? = nil) -> DSScreenLayoutMode {
+        let next = mode(for: orientationClass, containerSize: containerSize).next
         setMode(next, for: orientationClass)
         return next
     }
@@ -96,6 +99,61 @@ enum DSScreenLayoutPreferences {
     static var stretchEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: stretchKey) }
         set { UserDefaults.standard.set(newValue, forKey: stretchKey) }
+    }
+}
+
+/// A DS-shaped arrangement when two native-resolution panels and both thumb
+/// clusters fit. These are content measurements, not device or hinge metrics.
+struct DSConsoleLayout {
+    let top: CGRect
+    let bottom: CGRect
+    let controls: INDSControllerLayout
+
+    static func current(in size: CGSize, mode: DSScreenLayoutMode, stretch: Bool = false) -> DSConsoleLayout? {
+        guard mode == .stacked, !stretch,
+              INDSControllerLayoutManager.shared.persistedLayout == nil,
+              (UserDefaults.standard.object(forKey: "eNDSControllerScale") as? Double ?? 1) <= 1 else { return nil }
+        return DSConsoleLayout(in: size)
+    }
+
+    init?(in size: CGSize) {
+        let idiom = INDSControlBand.effectiveIdiom(for: size)
+        let dpad = INDSControllerButtonID.dpad.baseSize(for: idiom)
+        let shoulder = INDSControllerButtonID.l.baseSize(for: idiom)
+        let start = INDSControllerButtonID.start.baseSize(for: idiom)
+        let hud = INDSControllerButtonID.menu.baseSize(for: idiom)
+        let radius = INDSControlBand.faceClusterRadius(for: idiom)
+        let rail = max(dpad.width, 2 * radius) + 16
+        let header = hud.height + 20
+        let panelHeight = (size.height - header - 16) / 2
+        let screenWidth = min(size.width - 2 * rail, panelHeight * 4 / 3)
+        guard screenWidth >= 256,
+              panelHeight >= shoulder.height + 12 + max(dpad.height, 2 * radius) + 12 + start.height else { return nil }
+
+        let screenHeight = screenWidth * 3 / 4
+        let lowerY = header + panelHeight + 16
+        top = CGRect(x: (size.width - screenWidth) / 2,
+                     y: header + (panelHeight - screenHeight) / 2,
+                     width: screenWidth, height: screenHeight)
+        bottom = top.offsetBy(dx: 0, dy: panelHeight + 16)
+        let left = rail / 2
+        let right = size.width - left
+        let middle = lowerY + panelHeight / 2
+        let spread = INDSControlBand.faceSpread(for: idiom)
+        controls = INDSControllerLayout(buttons: INDSControllerLayout.entries(from: [
+            .l: CGPoint(x: left, y: lowerY + shoulder.height / 2),
+            .r: CGPoint(x: right, y: lowerY + shoulder.height / 2),
+            .dpad: CGPoint(x: left, y: middle),
+            .y: CGPoint(x: right - spread, y: middle),
+            .a: CGPoint(x: right + spread, y: middle),
+            .x: CGPoint(x: right, y: middle - spread),
+            .b: CGPoint(x: right, y: middle + spread),
+            .select: CGPoint(x: left, y: size.height - start.height / 2),
+            .start: CGPoint(x: right, y: size.height - start.height / 2),
+            .layout: CGPoint(x: size.width / 2 - hud.width - 12, y: header / 2),
+            .menu: CGPoint(x: size.width / 2, y: header / 2),
+            .fastForward: CGPoint(x: size.width / 2 + hud.width + 12, y: header / 2),
+        ], in: size))
     }
 }
 

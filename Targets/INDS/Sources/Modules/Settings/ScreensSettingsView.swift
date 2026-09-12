@@ -14,8 +14,8 @@
 import SwiftUI
 
 struct ScreensSettingsView: View {
-    @State private var portraitMode = DSScreenLayoutPreferences.mode(for: .portrait)
-    @State private var landscapeMode = DSScreenLayoutPreferences.mode(for: .landscape)
+    @State private var portraitMode = DSScreenLayoutPreferences.savedMode(for: .portrait)
+    @State private var landscapeMode = DSScreenLayoutPreferences.savedMode(for: .landscape)
     @State private var swapEnabled = DSScreenLayoutPreferences.swapEnabled
     @State private var stretchEnabled = DSScreenLayoutPreferences.stretchEnabled
     @State private var displayFilter = NDSDisplayFilterPreferences.current
@@ -31,8 +31,9 @@ struct ScreensSettingsView: View {
         Form {
             Section {
                 Picker("Portrait", selection: $portraitMode) {
+                    Text("Automatic").tag(DSScreenLayoutMode?.none)
                     ForEach(DSScreenLayoutMode.allCases, id: \.self) { mode in
-                        Text(mode.displayName).tag(mode)
+                        Text(mode.displayName).tag(Optional(mode))
                     }
                 }
                 .onChange(of: portraitMode) { _, newValue in
@@ -40,8 +41,9 @@ struct ScreensSettingsView: View {
                 }
 
                 Picker("Landscape", selection: $landscapeMode) {
+                    Text("Automatic").tag(DSScreenLayoutMode?.none)
                     ForEach(DSScreenLayoutMode.allCases, id: \.self) { mode in
-                        Text(mode.displayName).tag(mode)
+                        Text(mode.displayName).tag(Optional(mode))
                     }
                 }
                 .onChange(of: landscapeMode) { _, newValue in

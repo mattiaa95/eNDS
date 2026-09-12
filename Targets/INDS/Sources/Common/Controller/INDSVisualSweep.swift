@@ -6,14 +6,12 @@
 //  Hermano visual de `INDSLayoutSweep` (launch-arg `-iNDSVisualSweep`): en vez
 //  de validar números, RENDERIZA la pantalla de emulación real —
 //  `DSDualScreenView` + `NDSControllerView`, las mismas clases y la misma
-//  geometría de producción — a PNG en tamaños que ningún simulador actual
-//  tiene (iPhone plegable plegado/desplegado, ventanas de iPadOS, Split
-//  View), para poder VER cómo queda el layout antes de que exista el
-//  hardware. Escribe los PNG en `Documents/visual-sweep/` y sale.
+//  geometría de producción — a PNG en contenedores sintéticos. NO simula
+//  iPhone Duo, sus dimensiones, bisagra ni regiones reservadas. Escribe los
+//  PNG en `Documents/visual-sweep/` y sale.
 //
 //  Limitación asumida: se pinta con `layer.render(in:)` fuera de ventana, así
-//  que los blurs de los pills del HUD no salen (el HUD ni se monta — Menu/
-//  Layout/Speed los dibuja NDSHUDView). Lo que se juzga aquí es la
+//  que los blurs de los pills del HUD no salen. Lo que se juzga aquí es la
 //  composición: pantallas, franja y botones.
 //
 
@@ -24,17 +22,17 @@ enum INDSVisualSweep {
     static func runIfRequested() {
         guard ProcessInfo.processInfo.arguments.contains("-iNDSVisualSweep") else { return }
 
-        // (tamaño en puntos, etiqueta, idiom que declararía ese hardware)
-        let cases: [(CGSize, String, UIUserInterfaceIdiom)] = [
-            (CGSize(width: 430, height: 932), "plegable-PLEGADO-vertical", .phone),
-            (CGSize(width: 932, height: 430), "plegable-PLEGADO-horizontal", .phone),
-            (CGSize(width: 717, height: 829), "plegable-ABIERTO-vertical", .phone),
-            (CGSize(width: 829, height: 717), "plegable-ABIERTO-horizontal", .phone),
-            (CGSize(width: 800, height: 800), "plegable-cuadrado", .phone),
-            (CGSize(width: 1032, height: 1376), "iPad13-vertical", .pad),
-            (CGSize(width: 1376, height: 1032), "iPad13-horizontal", .pad),
-            (CGSize(width: 507, height: 1376), "iPad-SplitView-mitad", .pad),
-            (CGSize(width: 375, height: 1112), "iPad-SplitView-tercio", .pad),
+        // Arbitrary container sizes in points, not hardware specifications.
+        let cases: [(CGSize, String)] = [
+            (CGSize(width: 430, height: 932), "compact-portrait"),
+            (CGSize(width: 932, height: 430), "compact-landscape"),
+            (CGSize(width: 700, height: 840), "expanded-portrait"),
+            (CGSize(width: 840, height: 700), "expanded-landscape"),
+            (CGSize(width: 800, height: 800), "square"),
+            (CGSize(width: 1032, height: 1376), "large-portrait"),
+            (CGSize(width: 1376, height: 1032), "large-landscape"),
+            (CGSize(width: 507, height: 1376), "medium-window"),
+            (CGSize(width: 375, height: 1112), "narrow-window"),
         ]
 
         guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { exit(1) }
@@ -42,8 +40,8 @@ enum INDSVisualSweep {
         try? FileManager.default.removeItem(at: dir)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
-        for (size, name, idiom) in cases {
-            let image = render(size: size, idiom: idiom)
+        for (size, name) in cases {
+            let image = render(size: size)
             let url = dir.appendingPathComponent("\(name)-\(Int(size.width))x\(Int(size.height)).png")
             try? image.pngData()?.write(to: url)
         }
@@ -52,15 +50,13 @@ enum INDSVisualSweep {
     }
 
     /// Compone la pantalla de emulación con las vistas de producción y la
-    /// pinta offscreen. El idiom se fuerza pasándoselo a las factories/frames
-    /// directamente — `UIDevice.current` aquí es el del simulador que corre
-    /// el harness, no el del hardware simulado.
-    private static func render(size: CGSize, idiom: UIUserInterfaceIdiom) -> UIImage {
+    /// pinta offscreen. Controles y HUD reales resuelven su propio layout.
+    private static func render(size: CGSize) -> UIImage {
         let container = UIView(frame: CGRect(origin: .zero, size: size))
         container.backgroundColor = UIColor(white: 0.05, alpha: 1)
 
         let isPortrait = size.height >= size.width
-        let mode: DSScreenLayoutMode = isPortrait ? .stacked : .sideBySide
+        let mode: DSScreenLayoutMode = isPortrait || DSConsoleLayout(in: size) != nil ? .stacked : .sideBySide
 
         let dual = DSDualScreenView(frame: container.bounds)
         container.addSubview(dual)
@@ -68,41 +64,12 @@ enum INDSVisualSweep {
         dual.bottomScreenView.image = testPattern(label: "TOUCH", base: UIColor(red: 0.09, green: 0.32, blue: 0.36, alpha: 1))
         dual.applyLayout(mode: mode, swap: false, stretch: false, animated: false)
 
-        // Overlay de controles con los defaults calculados para ESTE
-        // contenedor y ESTE idiom (mismo camino que updateButtonFrames, con
-        // el idiom inyectado en vez del de UIDevice).
-        let layout = isPortrait
-            ? INDSCustomControllerLayout.defaultPortrait(containerSize: size, idiom: idiom)
-            : INDSCustomControllerLayout.defaultLandscape(containerSize: size, idiom: idiom)
-        for entry in layout.buttons where entry.isVisible {
-            let frame = entry.clampedFrame(in: size, userInterfaceIdiom: idiom)
-            let view: UIView
-            if entry.id == .dpad {
-                view = INDSDPadShapeView(frame: frame)
-                view.alpha = 0.55
-            } else if entry.id.isHUDChrome {
-                // El HUD real dibuja pills con blur; aquí una cápsula plana
-                // con la misma métrica para juzgar la composición.
-                let label = UILabel(frame: frame)
-                label.text = entry.id.defaultStyleLabel
-                label.font = .systemFont(ofSize: 11, weight: .semibold)
-                label.textAlignment = .center
-                label.textColor = .white
-                label.backgroundColor = UIColor(white: 0.25, alpha: 0.75)
-                label.layer.cornerRadius = 10
-                label.clipsToBounds = true
-                view = label
-            } else {
-                let styled = INDSStyledButtonView(buttonID: entry.id,
-                                                  style: entry.style ?? .defaultStyle(for: entry.id))
-                styled.frame = frame
-                styled.updateForSize(frame.size)
-                styled.alpha = 0.55
-                view = styled
-            }
-            view.frame = frame
-            container.addSubview(view)
-        }
+        let controller = NDSControllerView(frame: container.bounds)
+        controller.screenLayoutMode = mode
+        container.addSubview(controller)
+        let hud = NDSHUDView(frame: container.bounds)
+        hud.setLayoutIcon(mode)
+        container.addSubview(hud)
 
         container.setNeedsLayout()
         container.layoutIfNeeded()

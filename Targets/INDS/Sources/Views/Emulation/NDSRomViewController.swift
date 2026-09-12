@@ -571,14 +571,15 @@ final class NDSRomViewController: UIViewController {
     /// re-laying-out its *current* mode on every bounds change — this only
     /// needs to step in when the mode itself must change.
     private func applyLayoutForCurrentSize() {
-        let isLandscape = view.bounds.width > view.bounds.height
+        let content = view.bounds.inset(by: view.safeAreaInsets)
+        guard content.width > 1, content.height > 1 else { return }
+        let isLandscape = content.width > content.height
         let newClass: DSScreenOrientationClass = isLandscape ? .landscape : .portrait
-        guard newClass != lastOrientationClass else { return }
+        let orientationChanged = newClass != lastOrientationClass
         lastOrientationClass = newClass
         orientationClass = newClass
 
-        controllerView.orientation = isLandscape ? .landscape : .portrait
-        applyBackgroundSkin(animated: true)
+        if orientationChanged { applyBackgroundSkin(animated: true) }
         applyCurrentScreenLayout(animated: false)
     }
 
@@ -647,7 +648,9 @@ final class NDSRomViewController: UIViewController {
     private func applyCurrentScreenLayout(animated: Bool) {
         let mode: DSScreenLayoutMode = INDSExternalDisplayController.shared.isConnected
             ? .bottomOnly
-            : DSScreenLayoutPreferences.mode(for: orientationClass)
+            : DSScreenLayoutPreferences.mode(for: orientationClass, containerSize: view.bounds.inset(by: view.safeAreaInsets).size)
+        controllerView.screenLayoutMode = mode
+        controllerView.setNeedsLayout()
         dualScreenView.applyLayout(mode: mode, swap: DSScreenLayoutPreferences.swapEnabled,
                                     stretch: DSScreenLayoutPreferences.stretchEnabled, animated: animated)
         hudView.setLayoutIcon(mode)
@@ -667,7 +670,7 @@ final class NDSRomViewController: UIViewController {
             hudView.showToast(NSLocalizedString("TV connected — showing touch screen here", comment: ""))
             return .bottomOnly
         }
-        let newMode = DSScreenLayoutPreferences.cycleMode(for: orientationClass)
+        let newMode = DSScreenLayoutPreferences.cycleMode(for: orientationClass, containerSize: view.bounds.inset(by: view.safeAreaInsets).size)
         applyCurrentScreenLayout(animated: true)
         hudView.showToast(newMode.displayName)
         let settingName = orientationClass == .portrait ? "layoutPortrait" : "layoutLandscape"
@@ -1099,7 +1102,7 @@ final class NDSRomViewController: UIViewController {
             saveSlots: saveStateSlotInfos(includeAuto: false),
             loadSlots: saveStateSlotInfos(includeAuto: true),
             currentVolume: core.audioVolume,
-            currentLayoutMode: DSScreenLayoutPreferences.mode(for: orientationClass),
+            currentLayoutMode: DSScreenLayoutPreferences.mode(for: orientationClass, containerSize: view.bounds.inset(by: view.safeAreaInsets).size),
             currentSwapEnabled: DSScreenLayoutPreferences.swapEnabled,
             currentStretchEnabled: DSScreenLayoutPreferences.stretchEnabled,
             currentDisplayFilter: displayFilter,
