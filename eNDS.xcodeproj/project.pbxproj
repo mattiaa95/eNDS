@@ -14,7 +14,6 @@
 		0ABD704090B6C490DFE92A7B /* 7zBuf.c in Sources */ = {isa = PBXBuildFile; fileRef = A2BAB440FAF621E1857D36A6 /* 7zBuf.c */; };
 		0CBD536C491811904F34EB9F /* INDSButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E6BCDFFB9BA55C5E8E9C0D /* INDSButtonStyle.swift */; };
 		0D188A982B9012CEC33A1A60 /* Bra86.c in Sources */ = {isa = PBXBuildFile; fileRef = 43BDA80E44199C5D5F771072 /* Bra86.c */; };
-		0E99B91039E7989265E652CC /* INDSCrossPromo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F783DF4BABC64C4A2C74F8 /* INDSCrossPromo.swift */; };
 		0F1DB859AD024577C66B60C0 /* ROMListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12BFD3480A8B6F3479DFB063 /* ROMListViewModel.swift */; };
 		0FD3EE37A132F300E131806D /* THIRD_PARTY.md in Resources */ = {isa = PBXBuildFile; fileRef = B5F4E073693E71160ED123DC /* THIRD_PARTY.md */; };
 		1451342316B194B030DE476F /* INDSSaveBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C0FFF68243287F7F37E105 /* INDSSaveBackup.swift */; };
@@ -225,7 +224,6 @@
 		7C380A3BC39CAD2A1065CC9C /* UTType+NDS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+NDS.swift"; sourceTree = "<group>"; };
 		7CED5D6BD8B64A4776064716 /* NDSCheatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NDSCheatsView.swift; sourceTree = "<group>"; };
 		832C9E7B82057B4070014001 /* INDSTurboPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = INDSTurboPreferences.swift; sourceTree = "<group>"; };
-		87F783DF4BABC64C4A2C74F8 /* INDSCrossPromo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = INDSCrossPromo.swift; sourceTree = "<group>"; };
 		8909A1957DA2CE7DD6C24E48 /* SavingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingSettingsView.swift; sourceTree = "<group>"; };
 		8EBC2B6BCAE919D63D3BF3FB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		91C904010B7AD91405065430 /* BatterySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatterySettingsView.swift; sourceTree = "<group>"; };
@@ -644,7 +642,6 @@
 				BF201C0878847E940FDAB34E /* ExternalInput */,
 				651B0672B885DBA8EB217AE9 /* Purchases */,
 				46D8BE41E3A39F7CDAF9019E /* DebugLog.swift */,
-				87F783DF4BABC64C4A2C74F8 /* INDSCrossPromo.swift */,
 				FE3A407B35815197407A6DED /* INDSHoneymoon.swift */,
 				A16BBD6076B0776B809C6E9E /* INDSLaunchFlags.swift */,
 				7902A93230922C4CF8A04C1A /* INDSMotion.swift */,
@@ -846,7 +843,6 @@
 				2917722F9FF00C876BCEFD05 /* INDSControllerMappingStore.swift in Sources */,
 				8C815AE8E50E83F08DAE233A /* INDSGamepadManager.swift in Sources */,
 				97185BD199CA510DA4CD9E3B /* INDSKeyboardManager.swift in Sources */,
-				0E99B91039E7989265E652CC /* INDSCrossPromo.swift in Sources */,
 				DFB2E2F7FA097D6820428E50 /* INDSHoneymoon.swift in Sources */,
 				2701C1F0A9B6ED6A9676D847 /* INDSLaunchFlags.swift in Sources */,
 				4BD9C7FF57E7383860DB7BAD /* INDSMotion.swift in Sources */,
