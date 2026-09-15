@@ -28,7 +28,14 @@ struct ROMListView: View {
     /// Slow ambient pulse behind the empty-state icon.
     @State private var emptyStateGlowPulse = false
 
-    private let importContentTypes: [UTType] = [.ndsROM, .zip, .sevenZipArchive, .gzip, UTType(filenameExtension: "sav")].compactMap { $0 }
+    // ponytail: `.data` instead of our own `.ndsROM` on purpose. If another
+    // emulator that also exports `.nds` is installed (or the file comes from a
+    // cloud provider that types it as plain `public.data`), the system types
+    // the dumped ROM as *that* UTI and the picker greys it out — the file the
+    // user came to import is the one file they cannot pick. Extensions are
+    // validated in `ROMStorageManager`, which shows a clear "Unsupported file
+    // type" alert, so the only thing lost here is the grey-out.
+    private let importContentTypes: [UTType] = [.data]
 
     var body: some View {
         NavigationStack {
