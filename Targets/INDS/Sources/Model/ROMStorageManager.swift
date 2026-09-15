@@ -45,7 +45,7 @@ enum ROMStorageError: LocalizedError {
             )
         case .fileTooLarge:
             return NSLocalizedString(
-                "This file is too large to be a Nintendo DS ROM.",
+                "This file is too large to be a DS ROM.",
                 comment: "Import Failed alert: the user imported a ROM bigger than the supported size limit."
             )
         case .unavailableDocumentsDirectory:

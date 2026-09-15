@@ -7398,60 +7398,60 @@
         }
       }
     },
-    "eNDS is open-source software licensed under the GNU General Public License v3 (GPLv3). It is powered by the melonDS emulation core, © Arisotura and the melonDS team, also GPLv3. eNDS is not affiliated with or endorsed by the melonDS team or by Nintendo." : {
+    "eNDS is open-source software licensed under the GNU General Public License v3 (GPLv3). It is powered by the melonDS emulation core, © Arisotura and the melonDS team, also GPLv3. eNDS is not affiliated with or endorsed by the melonDS team or by any console manufacturer." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS ist Open-Source-Software unter der GNU General Public License v3 (GPLv3). Es basiert auf dem melonDS-Emulationskern, © Arisotura und das melonDS-Team, ebenfalls GPLv3. eNDS ist weder mit dem melonDS-Team noch mit Nintendo verbunden oder von ihnen unterstützt."
+            "value" : "eNDS ist Open-Source-Software unter der GNU General Public License v3 (GPLv3). Es basiert auf dem melonDS-Emulationskern, © Arisotura und das melonDS-Team, ebenfalls GPLv3. eNDS ist weder mit dem melonDS-Team noch mit einem Konsolenhersteller verbunden oder von ihnen unterstützt."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS es software de código abierto bajo la licencia GNU General Public License v3 (GPLv3). Funciona con el núcleo de emulación melonDS, © Arisotura y el equipo de melonDS, también GPLv3. eNDS no está afiliado ni respaldado por el equipo de melonDS ni por Nintendo."
+            "value" : "eNDS es software de código abierto bajo la licencia GNU General Public License v3 (GPLv3). Funciona con el núcleo de emulación melonDS, © Arisotura y el equipo de melonDS, también GPLv3. eNDS no está afiliado ni respaldado por el equipo de melonDS ni por ningún fabricante de consolas."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS est un logiciel open source sous licence GNU General Public License v3 (GPLv3). Il repose sur le cœur d'émulation melonDS, © Arisotura et l'équipe melonDS, également GPLv3. eNDS n'est ni affilié ni approuvé par l'équipe melonDS ou par Nintendo."
+            "value" : "eNDS est un logiciel open source sous licence GNU General Public License v3 (GPLv3). Il repose sur le cœur d'émulation melonDS, © Arisotura et l'équipe melonDS, également GPLv3. eNDS n'est ni affilié ni approuvé par l'équipe melonDS ou par un quelconque fabricant de consoles."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS è software open source con licenza GNU General Public License v3 (GPLv3). Si basa sul core di emulazione melonDS, © Arisotura e il team melonDS, anch'esso GPLv3. eNDS non è affiliato né approvato dal team melonDS o da Nintendo."
+            "value" : "eNDS è software open source con licenza GNU General Public License v3 (GPLv3). Si basa sul core di emulazione melonDS, © Arisotura e il team melonDS, anch'esso GPLv3. eNDS non è affiliato né approvato dal team melonDS o da alcun produttore di console."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS は GNU General Public License v3（GPLv3）のオープンソースソフトウェアです。エミュレーションコアには melonDS（© Arisotura および melonDS チーム、同じく GPLv3）を使用しています。eNDS は melonDS チームおよび任天堂とは無関係です。"
+            "value" : "eNDS は GNU General Public License v3（GPLv3）のオープンソースソフトウェアです。エミュレーションコアには melonDS（© Arisotura および melonDS チーム、同じく GPLv3）を使用しています。eNDS は melonDS チームおよびゲーム機メーカーとは無関係です。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS는 GNU General Public License v3(GPLv3) 오픈 소스 소프트웨어입니다. 에뮬레이션 코어로 melonDS(© Arisotura 및 melonDS 팀, 역시 GPLv3)를 사용합니다. eNDS는 melonDS 팀 또는 Nintendo와 무관합니다."
+            "value" : "eNDS는 GNU General Public License v3(GPLv3) 오픈 소스 소프트웨어입니다. 에뮬레이션 코어로 melonDS(© Arisotura 및 melonDS 팀, 역시 GPLv3)를 사용합니다. eNDS는 melonDS 팀 또는 게임 콘솔 제조사와 무관합니다."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O eNDS é software de código aberto sob a licença GNU General Public License v3 (GPLv3). Usa o núcleo de emulação melonDS, © Arisotura e a equipa melonDS, também GPLv3. O eNDS não é afiliado nem aprovado pela equipa melonDS nem pela Nintendo."
+            "value" : "O eNDS é software de código aberto sob a licença GNU General Public License v3 (GPLv3). Usa o núcleo de emulação melonDS, © Arisotura e a equipa melonDS, também GPLv3. O eNDS não é afiliado nem aprovado pela equipa melonDS nem por qualquer fabricante de consolas."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS — программное обеспечение с открытым кодом под лицензией GNU General Public License v3 (GPLv3). Использует ядро эмуляции melonDS, © Arisotura и команда melonDS, также GPLv3. eNDS не связан с командой melonDS или Nintendo."
+            "value" : "eNDS — программное обеспечение с открытым кодом под лицензией GNU General Public License v3 (GPLv3). Использует ядро эмуляции melonDS, © Arisotura и команда melonDS, также GPLv3. eNDS не связан с командой melonDS или каким-либо производителем консолей."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS 是基于 GNU 通用公共许可证 v3（GPLv3）的开源软件。其模拟核心为 melonDS（© Arisotura 及 melonDS 团队，同为 GPLv3）。eNDS 与 melonDS 团队及任天堂均无关联。"
+            "value" : "eNDS 是基于 GNU 通用公共许可证 v3（GPLv3）的开源软件。其模拟核心为 melonDS（© Arisotura 及 melonDS 团队，同为 GPLv3）。eNDS 与 melonDS 团队及任何游戏主机厂商均无关联。"
           }
         }
       }
@@ -11870,60 +11870,60 @@
         }
       }
     },
-    "Most Nintendo DS games ship every European language on the cartridge and pick one from this setting instead of asking. Japanese games rarely offer a choice at all.\n\nBoth apply the next time you open a game — the console reads them once, while it boots." : {
+    "Most DS games ship every European language on the cartridge and pick one from this setting instead of asking. Japanese games rarely offer a choice at all.\n\nBoth apply the next time you open a game — the console reads them once, while it boots." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die meisten Nintendo-DS-Spiele haben alle europäischen Sprachen auf dem Modul und wählen anhand dieser Einstellung aus, statt zu fragen. Japanische Spiele bieten meist gar keine Wahl.\n\nBeides gilt ab dem nächsten Spielstart – die Konsole liest es einmal beim Hochfahren."
+            "value" : "Die meisten DS-Spiele haben alle europäischen Sprachen auf dem Modul und wählen anhand dieser Einstellung aus, statt zu fragen. Japanische Spiele bieten meist gar keine Wahl.\n\nBeides gilt ab dem nächsten Spielstart – die Konsole liest es einmal beim Hochfahren."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La mayoría de juegos de Nintendo DS llevan todos los idiomas europeos en el cartucho y eligen uno con este ajuste en vez de preguntar. Los juegos japoneses casi nunca dan a elegir.\n\nAmbos se aplican la próxima vez que abras un juego: la consola los lee una sola vez, al arrancar."
+            "value" : "La mayoría de juegos de DS llevan todos los idiomas europeos en el cartucho y eligen uno con este ajuste en vez de preguntar. Los juegos japoneses casi nunca dan a elegir.\n\nAmbos se aplican la próxima vez que abras un juego: la consola los lee una sola vez, al arrancar."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La plupart des jeux Nintendo DS contiennent toutes les langues européennes sur la cartouche et en choisissent une d’après ce réglage, sans rien demander. Les jeux japonais ne laissent presque jamais le choix.\n\nLes deux s’appliquent au prochain lancement d’un jeu : la console les lit une seule fois, au démarrage."
+            "value" : "La plupart des jeux DS contiennent toutes les langues européennes sur la cartouche et en choisissent une d’après ce réglage, sans rien demander. Les jeux japonais ne laissent presque jamais le choix.\n\nLes deux s’appliquent au prochain lancement d’un jeu : la console les lit une seule fois, au démarrage."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La maggior parte dei giochi Nintendo DS contiene tutte le lingue europee nella cartuccia e ne sceglie una in base a questa impostazione, senza chiedere. I giochi giapponesi quasi mai lasciano scegliere.\n\nEntrambi si applicano alla prossima apertura di un gioco: la console li legge una sola volta, all’avvio."
+            "value" : "La maggior parte dei giochi DS contiene tutte le lingue europee nella cartuccia e ne sceglie una in base a questa impostazione, senza chiedere. I giochi giapponesi quasi mai lasciano scegliere.\n\nEntrambi si applicano alla prossima apertura di un gioco: la console li legge una sola volta, all’avvio."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ニンテンドーDSのソフトの多くは、欧州の全言語をカートリッジに収録していて、たずねる代わりにこの設定から言語を選びます。日本語版のソフトはそもそも選択肢がないことがほとんどです。\n\nどちらも次にゲームを開いたときから有効になります（本体が起動時に一度だけ読み込むため）。"
+            "value" : "DSのソフトの多くは、欧州の全言語をカートリッジに収録していて、たずねる代わりにこの設定から言語を選びます。日本語版のソフトはそもそも選択肢がないことがほとんどです。\n\nどちらも次にゲームを開いたときから有効になります（本体が起動時に一度だけ読み込むため）。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "대부분의 닌텐도 DS 게임은 유럽 언어를 모두 카트리지에 담고 있으며, 묻지 않고 이 설정에서 언어를 고릅니다. 일본어판은 선택지가 아예 없는 경우가 많습니다.\n\n둘 다 다음에 게임을 열 때 적용됩니다. 본체가 부팅하면서 한 번만 읽기 때문입니다."
+            "value" : "대부분의 DS 게임은 유럽 언어를 모두 카트리지에 담고 있으며, 묻지 않고 이 설정에서 언어를 고릅니다. 일본어판은 선택지가 아예 없는 경우가 많습니다.\n\n둘 다 다음에 게임을 열 때 적용됩니다. 본체가 부팅하면서 한 번만 읽기 때문입니다."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A maioria dos jogos da Nintendo DS traz todos os idiomas europeus na cassete e escolhe um a partir desta definição, em vez de perguntar. Os jogos japoneses quase nunca dão hipótese de escolha.\n\nAmbos se aplicam da próxima vez que abrires um jogo: a consola lê-os apenas uma vez, ao arrancar."
+            "value" : "A maioria dos jogos de DS traz todos os idiomas europeus na cassete e escolhe um a partir desta definição, em vez de perguntar. Os jogos japoneses quase nunca dão hipótese de escolha.\n\nAmbos se aplicam da próxima vez que abrires um jogo: a consola lê-os apenas uma vez, ao arrancar."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Большинство игр для Nintendo DS содержат все европейские языки на картридже и выбирают один по этой настройке, не спрашивая. В японских играх выбора обычно нет вовсе.\n\nОбе настройки вступят в силу при следующем запуске игры — консоль читает их один раз, при загрузке."
+            "value" : "Большинство игр для DS содержат все европейские языки на картридже и выбирают один по этой настройке, не спрашивая. В японских играх выбора обычно нет вовсе.\n\nОбе настройки вступят в силу при следующем запуске игры — консоль читает их один раз, при загрузке."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "大多数任天堂 DS 游戏都把所有欧洲语言放在卡带里，并根据这项设置直接选择，而不会询问。日文版游戏通常没有语言选项。\n\n两项都会在下次打开游戏时生效——主机只在启动时读取一次。"
+            "value" : "大多数 DS 游戏都把所有欧洲语言放在卡带里，并根据这项设置直接选择，而不会询问。日文版游戏通常没有语言选项。\n\n两项都会在下次打开游戏时生效——主机只在启动时读取一次。"
           }
         }
       }
@@ -21599,61 +21599,61 @@
         }
       }
     },
-    "This file is too large to be a Nintendo DS ROM." : {
+    "This file is too large to be a DS ROM." : {
       "comment" : "Import Failed alert: the user imported a ROM bigger than the supported size limit.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diese Datei ist zu groß für ein Nintendo-DS-ROM."
+            "value" : "Diese Datei ist zu groß für ein DS-ROM."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este archivo es demasiado grande para ser una ROM de Nintendo DS."
+            "value" : "Este archivo es demasiado grande para ser una ROM de DS."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce fichier est trop volumineux pour être une ROM Nintendo DS."
+            "value" : "Ce fichier est trop volumineux pour être une ROM DS."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Questo file è troppo grande per essere una ROM Nintendo DS."
+            "value" : "Questo file è troppo grande per essere una ROM DS."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このファイルはニンテンドーDSのROMとしては大きすぎます。"
+            "value" : "このファイルはDSのROMとしては大きすぎます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 파일은 닌텐도 DS ROM이라기에는 너무 큽니다."
+            "value" : "이 파일은 DS ROM이라기에는 너무 큽니다."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este ficheiro é demasiado grande para ser uma ROM da Nintendo DS."
+            "value" : "Este ficheiro é demasiado grande para ser uma ROM de DS."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Этот файл слишком велик для ROM Nintendo DS."
+            "value" : "Этот файл слишком велик для ROM DS."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "该文件过大，不可能是 Nintendo DS ROM。"
+            "value" : "该文件过大，不可能是 DS ROM。"
           }
         }
       }

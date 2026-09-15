@@ -79,7 +79,7 @@ struct AboutSettingsView: View {
             } header: {
                 Text("Open Source")
             } footer: {
-                Text("eNDS is open-source software licensed under the GNU General Public License v3 (GPLv3). It is powered by the melonDS emulation core, © Arisotura and the melonDS team, also GPLv3. eNDS is not affiliated with or endorsed by the melonDS team or by Nintendo.")
+                Text("eNDS is open-source software licensed under the GNU General Public License v3 (GPLv3). It is powered by the melonDS emulation core, © Arisotura and the melonDS team, also GPLv3. eNDS is not affiliated with or endorsed by the melonDS team or by any console manufacturer.")
             }
         }
         .navigationTitle("About")

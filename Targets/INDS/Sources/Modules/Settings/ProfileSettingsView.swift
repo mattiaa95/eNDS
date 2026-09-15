@@ -56,7 +56,7 @@ struct ProfileSettingsView: View {
                     INDSConsolePreferences.languageOverride = INDSConsoleLanguage(rawValue: newValue)
                 }
             } footer: {
-                Text("Most Nintendo DS games ship every European language on the cartridge and pick one from this setting instead of asking. Japanese games rarely offer a choice at all.\n\nBoth apply the next time you open a game — the console reads them once, while it boots.")
+                Text("Most DS games ship every European language on the cartridge and pick one from this setting instead of asking. Japanese games rarely offer a choice at all.\n\nBoth apply the next time you open a game — the console reads them once, while it boots.")
             }
         }
         .navigationTitle("Profile")

@@ -136,7 +136,7 @@ enum INDSControllerMappingStore {
     /// are intentionally absent (movement stays fixed).
     static let remappablePhysicalInputs: [String] = ["A", "B", "X", "Y", "L1", "R1", "L2", "R2", "Options"]
 
-    /// Positional "Nintendo layout" default (see `INDSGamepadManager`'s doc
+    /// Positional "DS layout" default (see `INDSGamepadManager`'s doc
     /// comment for the south/east/west/north reasoning) plus L2/R2/Options
     /// covering the two DS buttons a standard 8-button-plus-bumpers pad has
     /// no face button left for: L2→Select, R2→Start, Options→Pause (a

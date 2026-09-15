@@ -1,6 +1,6 @@
 # eNDS
 
-A Nintendo DS emulator for iPhone and iPad, built on the
+A DS emulator for iPhone and iPad, built on the
 [melonDS](https://github.com/melonDS-emu/melonDS) emulation core.
 
 This repository contains the complete source code of the eNDS app as it is
@@ -41,7 +41,7 @@ no AI touched it.
   GPLv3. eNDS uses the core unmodified (see `Vendor/melonDS`, pinned as a
   submodule to the upstream commit each release builds against).
 - **FreeBIOS** — the built-in BIOS replacement inside melonDS, © Gilead
-  Kutnick (BSD). No Nintendo BIOS, firmware or keys are included anywhere
+  Kutnick (BSD). No proprietary console BIOS, firmware or keys are included anywhere
   in this repository or in the shipped app.
 - **[teakra](https://github.com/wwylele/teakra)** — DSi DSP emulation, MIT.
 - **LZMA SDK** (7z extraction) — Igor Pavlov, public domain.
@@ -93,9 +93,9 @@ it is not a lock.
 ## Legal
 
 - eNDS is an unofficial project. It is **not** affiliated with, or endorsed
-  by, the melonDS team, and **not** affiliated with Nintendo. "Nintendo DS"
-  is a trademark of Nintendo Co., Ltd., used here only to describe
-  compatibility.
+  by, the melonDS team, and **not** affiliated with any game console
+  manufacturer. All related console names are trademarks of their respective
+  owners and are used here only to describe compatibility.
 - **On the `INDS` prefix you will see everywhere in this source**: the
   project was started under the working name *iNDS* and the class prefix,
   folder names, bundle id (`com.mls.inds`) and StoreKit product ids were

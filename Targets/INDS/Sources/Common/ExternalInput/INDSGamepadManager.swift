@@ -12,16 +12,16 @@
 //     `INDSControllerMappingStore` (per-controller-model remapping) instead
 //     of a single flat dictionary.
 //   - D-pad AND left thumbstick both drive movement simultaneously (union of
-//     both sources), matching Nintendo-layout defaults; ports
+//     both sources), matching the DS-layout defaults; ports
 //     iGBA's dpad-plus-thumbstick pattern but merges them into one directions
 //     set instead of only ever reading whichever changed last.
 //
-//  Button-position mapping ("layout Nintendo"): GameController normalizes
-//  every gamepad (Xbox/PlayStation/MFi/Nintendo) to Xbox-style position
+//  Button-position mapping ("DS layout"): GameController normalizes
+//  every gamepad (Xbox, PlayStation, MFi and the rest) to Xbox-style position
 //  names — buttonA/B/X/Y always mean south/east/west/north regardless of
-//  what's printed on the controller. Nintendo's own printed layout has B at
+//  what's printed on the controller. A DS-style printed layout has B at
 //  south, A at east, Y at west, X at north — the exact rotation applied
-//  below — so a physical Nintendo pad's printed A/B/X/Y line up with the DS's
+//  below — so a pad printed that way has its A/B/X/Y line up with the DS's
 //  own A/B/X/Y, while an Xbox/PlayStation pad's SOUTH button (labelled A or
 //  ✕) drives the DS's B (matching where B actually sits on a real DS).
 //
