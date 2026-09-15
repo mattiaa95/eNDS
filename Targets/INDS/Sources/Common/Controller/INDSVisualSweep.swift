@@ -34,6 +34,13 @@ enum INDSVisualSweep {
             (CGSize(width: 1376, height: 1032), "large-landscape"),
             (CGSize(width: 507, height: 1376), "medium-window"),
             (CGSize(width: 375, height: 1112), "narrow-window"),
+            // iPhone Duo: Apple's published point sizes for the inner and
+            // outer displays. Still not a simulator capture, and the hinge is
+            // not drawn — what is judged is where the panels and controls land.
+            (CGSize(width: 626, height: 890), "duo-inner-portrait"),
+            (CGSize(width: 890, height: 626), "duo-inner-landscape"),
+            (CGSize(width: 466, height: 678), "duo-outer-portrait"),
+            (CGSize(width: 678, height: 466), "duo-outer-landscape"),
         ]
 
         guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { exit(1) }

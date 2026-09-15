@@ -261,3 +261,201 @@ enum DSScreenGeometry {
                 CGRect(x: trailingX, y: bounds.minY, width: screenW, height: bounds.height))
     }
 }
+
+// MARK: - Foldable (unfolded folding iPhone)
+
+struct DSFoldableLayout {
+    let top: CGRect
+    let bottom: CGRect
+    /// `nil` = keep the container's default control arrangement (portrait,
+    /// where the reserved band already sits below both panels), or no
+    /// controls at all (a hardware gamepad is driving).
+    let controls: INDSControllerLayout?
+
+    /// Whether `size` can only be an unfolded folding iPhone.
+    ///
+    /// The exception is as narrow as it can be made without a posture API: an
+    /// *iPhone* reporting a container no iPhone has. The largest iPhone gives
+    /// 440×956pt, so its shortest side is 440pt in either orientation, and
+    /// 560pt cannot be a candybar phone. An iPad — including every Split View
+    /// and Stage Manager window on it, which can be any size at all — reports
+    /// `.pad` and never takes this path. Nothing that exists today changes.
+    static func isUnfolded(_ size: CGSize,
+                           idiom: UIUserInterfaceIdiom = UIDevice.current.userInterfaceIdiom) -> Bool {
+        idiom == .phone && min(size.width, size.height) >= 560
+    }
+
+    /// The arrangement for `size`, or nil to keep the existing layout — which
+    /// is also the answer for an explicit screen choice, a custom control
+    /// layout, enlarged controls or Fill Screen, exactly like
+    /// `DSConsoleLayout.current`.
+    static func current(in size: CGSize,
+                        mode: DSScreenLayoutMode,
+                        stretch: Bool = false,
+                        controlsReserved: Bool = true,
+                        idiom: UIUserInterfaceIdiom = UIDevice.current.userInterfaceIdiom) -> DSFoldableLayout? {
+        guard isUnfolded(size, idiom: idiom), !stretch,
+              INDSControllerLayoutManager.shared.persistedLayout == nil,
+              (UserDefaults.standard.object(forKey: "eNDSControllerScale") as? Double ?? 1) <= 1 else { return nil }
+        // The hinge is horizontal in portrait and vertical in landscape, so
+        // the arrangement that straddles it is the stacked pair in portrait
+        // and the side-by-side pair in landscape — which is what Automatic
+        // already resolves to at these sizes.
+        let isPortrait = size.height >= size.width
+        guard mode == (isPortrait ? .stacked : .sideBySide) else { return nil }
+        return isPortrait
+            ? DSFoldableLayout(portraitIn: size, controlsReserved: controlsReserved)
+            : DSFoldableLayout(landscapeIn: size, controlsReserved: controlsReserved)
+    }
+
+    // MARK: - Portrait: hinge across the middle
+
+    private init?(portraitIn size: CGSize, controlsReserved: Bool) {
+        let fold = (size.height / 2).rounded()
+        // The upper panel hangs from the hinge, so the picture breaks exactly
+        // where the display physically does.
+        top = Self.panel(in: CGRect(x: 0, y: 0, width: size.width, height: fold), anchor: .maxYEdge)
+
+        // A gamepad is driving: no controls, so both panels take a whole half
+        // each and the two DS screens fill the display edge to edge.
+        guard controlsReserved else {
+            bottom = Self.panel(in: CGRect(x: 0, y: fold, width: size.width, height: size.height - fold),
+                                anchor: .minYEdge)
+            controls = nil
+            return
+        }
+
+        // Lower half = a DS's body: the touch panel sits on the hinge with the
+        // d-pad and the face buttons either side of it, exactly where the
+        // thumbs already are, and the small buttons go under it.
+        //
+        // The clusters have to shrink for that: at full iPad metrics they are
+        // 200pt wide each, which on a ~626pt display leaves under 200pt of
+        // panel between them. `Self.clusterScale` of those metrics is about
+        // what an iPhone already gives (a 133pt d-pad against 132pt), so
+        // nothing ends up smaller than a phone's controls while the panel
+        // gets ~40% wider than it would below the buttons.
+        let idiom = INDSControlBand.effectiveIdiom(for: size)
+        let s = Self.clusterScale
+        let dpad = Self.size(.dpad, idiom, s)
+        let shoulder = Self.size(.l, idiom, s)
+        let start = Self.size(.start, idiom, s)
+        let hud = Self.size(.menu, idiom, s)
+        let spread = INDSControlBand.faceSpread(for: idiom) * s
+        let radius = INDSControlBand.faceClusterRadius(for: idiom) * s
+
+        let rail = max(dpad.width, 2 * radius) + 16
+        let panelWidth = size.width - 2 * rail
+        let panelHeight = panelWidth * DSScreenGeometry.aspectHeight / DSScreenGeometry.aspectWidth
+        // Two rows under the panel: L/R with the HUD pills, then SELECT/START
+        // against the bottom edge.
+        let rowHeight = max(shoulder.height, hud.height)
+        guard panelWidth >= 192,
+              fold + panelHeight + 12 + rowHeight + 12 + start.height + 16 <= size.height else { return nil }
+
+        bottom = CGRect(x: (size.width - panelWidth) / 2, y: fold,
+                        width: panelWidth, height: panelHeight)
+        let clusterY = bottom.midY
+        let left = rail / 2
+        let right = size.width - left
+        let bottomY = size.height - 16 - start.height / 2
+        // SELECT/START sit on the bottom edge, so the L/R + HUD row is
+        // centred in what is left between them and the touch panel instead
+        // of hugging the panel and leaving a dead strip in the middle.
+        let rowY = (bottom.maxY + bottomY - start.height / 2 - 12) / 2
+        controls = INDSControllerLayout(buttons: INDSControllerLayout.entries(from: [
+            .dpad: CGPoint(x: left, y: clusterY),
+            .y: CGPoint(x: right - spread, y: clusterY),
+            .a: CGPoint(x: right + spread, y: clusterY),
+            .x: CGPoint(x: right, y: clusterY - spread),
+            .b: CGPoint(x: right, y: clusterY + spread),
+            .l: CGPoint(x: 12 + shoulder.width / 2, y: rowY),
+            .r: CGPoint(x: size.width - 12 - shoulder.width / 2, y: rowY),
+            .layout: CGPoint(x: size.width / 2 - hud.width - 12, y: rowY),
+            .menu: CGPoint(x: size.width / 2, y: rowY),
+            .fastForward: CGPoint(x: size.width / 2 + hud.width + 12, y: rowY),
+            .select: CGPoint(x: size.width / 2 - start.width, y: bottomY),
+            .start: CGPoint(x: size.width / 2 + start.width, y: bottomY),
+        ], in: size, scale: s))
+    }
+
+    // MARK: - Landscape: hinge down the middle
+
+    private init?(landscapeIn size: CGSize, controlsReserved: Bool) {
+        let fold = (size.width / 2).rounded()
+        let idiom = INDSControlBand.effectiveIdiom(for: size)
+        let dpad = INDSControllerButtonID.dpad.baseSize(for: idiom)
+        let shoulder = INDSControllerButtonID.l.baseSize(for: idiom)
+        let start = INDSControllerButtonID.start.baseSize(for: idiom)
+        let hud = INDSControllerButtonID.menu.baseSize(for: idiom)
+        let radius = INDSControlBand.faceClusterRadius(for: idiom)
+        let spread = INDSControlBand.faceSpread(for: idiom)
+
+        // Both panels are as wide as half the display, so their height is
+        // fixed by the width — the leftover vertical space is free, and the
+        // thumb clusters take the bottom of it while the HUD takes the top.
+        // That keeps every control off both panels instead of floating them
+        // over the game, which is what the compact-landscape default does.
+        let lowerBand = controlsReserved ? max(dpad.height, 2 * radius) + 24 : 0
+        let upperBand = controlsReserved ? max(shoulder.height, hud.height) + 20 : 0
+        let free = size.height - lowerBand - upperBand
+        let scale = min(fold / DSScreenGeometry.aspectWidth, free / DSScreenGeometry.aspectHeight)
+        let panelWidth = DSScreenGeometry.aspectWidth * scale
+        let panelHeight = DSScreenGeometry.aspectHeight * scale
+        guard panelWidth >= 192, free > 0 else { return nil }
+
+        let y = upperBand + (free - panelHeight) / 2
+        top = CGRect(x: fold - panelWidth, y: y, width: panelWidth, height: panelHeight)
+        bottom = CGRect(x: fold, y: y, width: panelWidth, height: panelHeight)
+
+        guard controlsReserved else {
+            controls = nil
+            return
+        }
+
+        let lowerMiddle = size.height - lowerBand / 2
+        let upperMiddle = upperBand / 2
+        let left = 12 + max(dpad.width, 2 * radius) / 2
+        let right = size.width - left
+        // SELECT/START and the HUD pills live in the wide gap the two thumb
+        // clusters leave between them, split across the two bands.
+        controls = INDSControllerLayout(buttons: INDSControllerLayout.entries(from: [
+            .l: CGPoint(x: 12 + shoulder.width / 2, y: upperMiddle),
+            .r: CGPoint(x: size.width - 12 - shoulder.width / 2, y: upperMiddle),
+            .dpad: CGPoint(x: left, y: lowerMiddle),
+            .y: CGPoint(x: right - spread, y: lowerMiddle),
+            .a: CGPoint(x: right + spread, y: lowerMiddle),
+            .x: CGPoint(x: right, y: lowerMiddle - spread),
+            .b: CGPoint(x: right, y: lowerMiddle + spread),
+            .select: CGPoint(x: fold - start.width, y: lowerMiddle),
+            .start: CGPoint(x: fold + start.width, y: lowerMiddle),
+            .layout: CGPoint(x: fold - hud.width - 12, y: upperMiddle),
+            .menu: CGPoint(x: fold, y: upperMiddle),
+            .fastForward: CGPoint(x: fold + hud.width + 12, y: upperMiddle),
+        ], in: size))
+    }
+
+    /// How much of the default iPad control metrics the portrait arrangement
+    /// uses, so the touch panel fits between the thumb clusters. Roughly a
+    /// phone's own button sizes; `INDSButtonLayoutEntry.scale` carries it to
+    /// the drawn frames, so measurements and pixels agree.
+    private static let clusterScale: CGFloat = 0.7
+
+    private static func size(_ id: INDSControllerButtonID,
+                             _ idiom: UIUserInterfaceIdiom,
+                             _ scale: CGFloat) -> CGSize {
+        let base = id.baseSize(for: idiom)
+        return CGSize(width: base.width * scale, height: base.height * scale)
+    }
+
+    /// A native-aspect panel, as large as `slot` allows, centred across the
+    /// slot and pushed against `anchor` (the hinge).
+    private static func panel(in slot: CGRect, anchor: CGRectEdge) -> CGRect {
+        let scale = min(slot.width / DSScreenGeometry.aspectWidth,
+                        slot.height / DSScreenGeometry.aspectHeight)
+        let width = DSScreenGeometry.aspectWidth * scale
+        let height = DSScreenGeometry.aspectHeight * scale
+        let y = anchor == .maxYEdge ? slot.maxY - height : slot.minY
+        return CGRect(x: slot.midX - width / 2, y: y, width: width, height: height)
+    }
+}

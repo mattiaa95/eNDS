@@ -268,14 +268,20 @@ public struct INDSControllerLayout: Codable, Equatable {
     /// normalized entries, in a stable order. Clamped because a container
     /// smaller than the band itself would otherwise produce negative
     /// fractions that `clampedFrame` can only partially rescue.
+    /// `scale` is the multiplier the CENTRES were authored against, so a
+    /// caller that had to shrink the buttons to make its arrangement fit
+    /// (`DSFoldableLayout` puts the touch panel between the thumb clusters)
+    /// gets frames that match its own measurements.
     static func entries(from centers: [INDSControllerButtonID: CGPoint],
-                        in containerSize: CGSize) -> [INDSButtonLayoutEntry] {
+                        in containerSize: CGSize,
+                        scale: CGFloat = 1) -> [INDSButtonLayoutEntry] {
         guard containerSize.width > 1, containerSize.height > 1 else { return [] }
         return INDSControllerButtonID.allCases.compactMap { id in
             guard let center = centers[id] else { return nil }
             return INDSButtonLayoutEntry(id: id,
                                          normalizedX: max(0, min(1, center.x / containerSize.width)),
-                                         normalizedY: max(0, min(1, center.y / containerSize.height)))
+                                         normalizedY: max(0, min(1, center.y / containerSize.height)),
+                                         scale: scale)
         }
     }
 

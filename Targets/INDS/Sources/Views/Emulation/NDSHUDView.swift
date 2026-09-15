@@ -179,9 +179,17 @@ final class NDSHUDView: UIView {
     private func updateBadgePlacement() {
         let content = bounds.inset(by: safeAreaInsets)
         guard content.width > 1, content.height > 1 else { return }
-        let console = DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
-                                               stretch: DSScreenLayoutPreferences.stretchEnabled)
-        let isPortrait = content.height >= content.width && console == nil
+        let foldable = DSFoldableLayout.current(in: content.size, mode: screenLayoutMode,
+                                                stretch: DSScreenLayoutPreferences.stretchEnabled)
+        let console = foldable == nil
+            ? DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
+                                      stretch: DSScreenLayoutPreferences.stretchEnabled) : nil
+        // An unfolded foldable in landscape has a control band too — the
+        // bottom of the display, either side of the touch panel — so the
+        // badges belong in the column between the thumb clusters there as
+        // well, not floating in the middle of the game.
+        let foldableBand = foldable?.controls != nil
+        let isPortrait = foldableBand || (content.height >= content.width && console == nil)
 
         // Portrait: the column between the thumb clusters, where Menu and
         // Layout already live. Landscape: plain centre, nothing is there.
@@ -193,9 +201,10 @@ final class NDSHUDView: UIView {
         badgeWidthConstraint.isActive = isPortrait || console != nil
         // Console chrome occupies the top row; transient messages go below
         // that row so a save/speed toast never covers the pause button.
-        toastTopConstraint.constant = console != nil ? INDSControllerButtonID.menu.baseSize(for: bandIdiom).height + 20 : 10
-        toastBelowBadgesConstraint.isActive = !isPortrait && console == nil
-        toastTopConstraint.isActive = isPortrait || console != nil
+        let hasTopChromeRow = console != nil || foldableBand
+        toastTopConstraint.constant = hasTopChromeRow ? INDSControllerButtonID.menu.baseSize(for: bandIdiom).height + 20 : 10
+        toastBelowBadgesConstraint.isActive = !isPortrait && !hasTopChromeRow
+        toastTopConstraint.isActive = isPortrait || hasTopChromeRow
 
         guard badgesArePortrait != isPortrait else { return }
         badgesArePortrait = isPortrait
@@ -216,11 +225,20 @@ final class NDSHUDView: UIView {
         guard content.width > 1, content.height > 1 else { return }
 
         let isPortrait = content.height >= content.width
+        // Same three-way choice `NDSControllerView.layout(in:)` makes, in the
+        // same order, so Menu/Layout/Speed land in the band beside the thumb
+        // controls instead of over the game.
+        let foldable = DSFoldableLayout.current(in: content.size, mode: screenLayoutMode,
+                                                stretch: DSScreenLayoutPreferences.stretchEnabled)
+        let console = foldable == nil
+            ? DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
+                                      stretch: DSScreenLayoutPreferences.stretchEnabled) : nil
         let layout: INDSControllerLayout
         if let custom = INDSControllerLayoutManager.shared.persistedLayout {
             layout = isPortrait ? custom.portrait : custom.landscape
-        } else if let console = DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
-                                                        stretch: DSScreenLayoutPreferences.stretchEnabled) {
+        } else if let foldableControls = foldable?.controls {
+            layout = foldableControls
+        } else if let console {
             layout = console.controls
         } else {
             layout = isPortrait

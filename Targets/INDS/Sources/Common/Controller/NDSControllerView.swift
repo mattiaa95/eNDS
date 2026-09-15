@@ -76,13 +76,24 @@ final class NDSControllerView: UIView {
         if let custom = INDSControllerLayoutManager.shared.persistedLayout {
             return isPortrait ? custom.portrait : custom.landscape
         }
+        let defaults = {
+            isPortrait
+                ? INDSCustomControllerLayout.defaultPortrait(containerSize: containerSize)
+                : INDSCustomControllerLayout.defaultLandscape(containerSize: containerSize)
+        }
+        // An unfolded folding iPhone decides before the classic DS layout
+        // does, and a nil `controls` there means "the default arrangement is
+        // already right for this half" — portrait, where the reserved band is
+        // nowhere near the fold.
+        if let foldable = DSFoldableLayout.current(in: containerSize, mode: screenLayoutMode,
+                                                   stretch: DSScreenLayoutPreferences.stretchEnabled) {
+            return foldable.controls ?? defaults()
+        }
         if let console = DSConsoleLayout.current(in: containerSize, mode: screenLayoutMode,
                                                   stretch: DSScreenLayoutPreferences.stretchEnabled) {
             return console.controls
         }
-        return isPortrait
-            ? INDSCustomControllerLayout.defaultPortrait(containerSize: containerSize)
-            : INDSCustomControllerLayout.defaultLandscape(containerSize: containerSize)
+        return defaults()
     }
 
     // MARK: - Init

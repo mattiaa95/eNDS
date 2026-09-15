@@ -136,7 +136,13 @@ final class DSDualScreenView: UIView {
         }
 
         var content = bounds.inset(by: safeAreaInsets)
-        let console = reservesControlBand
+        // A folding iPhone's own arrangement wins over the classic DS one:
+        // both put one panel above the other, but only this one knows the
+        // hinge is there (`DSFoldableLayout`). It is nil on every container
+        // any current device can produce.
+        let foldable = DSFoldableLayout.current(in: content.size, mode: mode, stretch: stretch,
+                                                controlsReserved: reservesControlBand)
+        let console = foldable == nil && reservesControlBand
             ? DSConsoleLayout.current(in: content.size, mode: mode, stretch: stretch) : nil
         let contentOrigin = content.origin
         // Portrait hands the bottom strip to the on-screen controls. Without
@@ -151,7 +157,7 @@ final class DSDualScreenView: UIView {
         // orientationClass — resolves to "portrait", and if the band is not
         // reserved here the controls land on top of the touch screen.
         var portraitBand = false
-        if content.height >= content.width, reservesControlBand, console == nil {
+        if content.height >= content.width, reservesControlBand, console == nil, foldable == nil {
             // Effective idiom derived from width: in a narrow iPad window
             // the controls switch to iPhone metrics and the reserved band has
             // to shrink with them, or it leaves dead space.
@@ -163,6 +169,10 @@ final class DSDualScreenView: UIView {
         if let console {
             topFrame = (swap ? console.bottom : console.top).offsetBy(dx: contentOrigin.x, dy: contentOrigin.y)
             bottomFrame = (swap ? console.top : console.bottom).offsetBy(dx: contentOrigin.x, dy: contentOrigin.y)
+        }
+        if let foldable {
+            topFrame = (swap ? foldable.bottom : foldable.top).offsetBy(dx: contentOrigin.x, dy: contentOrigin.y)
+            bottomFrame = (swap ? foldable.top : foldable.bottom).offsetBy(dx: contentOrigin.x, dy: contentOrigin.y)
         }
 
         // The stacked pair starts anchored to the top (on a phone the

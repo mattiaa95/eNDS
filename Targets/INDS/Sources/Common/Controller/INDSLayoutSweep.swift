@@ -37,6 +37,12 @@ enum INDSLayoutSweep {
             (CGSize(width: 393, height: 852), true),
             (CGSize(width: 430, height: 932), true),
             (CGSize(width: 440, height: 956), true),
+            // iPhone Duo, Apple's own numbers: 626x890pt inner, 466x678pt
+            // outer. The inner screenshot spec (2007x2853 px) is 669x951pt at
+            // 3x, which is not the same figure, so both candidates are here.
+            (CGSize(width: 626, height: 890), true),
+            (CGSize(width: 669, height: 951), true),
+            (CGSize(width: 466, height: 678), true),
             // Unfolded foldable: 4:3-ish / near-square aspects
             (CGSize(width: 600, height: 700), true),
             (CGSize(width: 640, height: 840), true),
@@ -68,6 +74,7 @@ enum INDSLayoutSweep {
 
         var failures = 0
         var informationalFailures = 0
+
         var total = 0
         var report: [String] = []
         let adaptiveProblems = validateAdaptiveViews()
@@ -78,6 +85,21 @@ enum INDSLayoutSweep {
             failures += 1
             adaptiveProblems.forEach { report.append("SWEEP FAIL adaptive views: \($0)") }
         }
+        // Unfolded iPhone Duo: the layout that straddles the hinge. Both
+        // published inner sizes, both orientations.
+        for size in [CGSize(width: 626, height: 890), CGSize(width: 890, height: 626),
+                     CGSize(width: 669, height: 951), CGSize(width: 951, height: 669)] {
+            total += 1
+            let problems = validateFoldable(containerSize: size)
+            let tag = "\(Int(size.width))x\(Int(size.height)) unfolded"
+            if problems.isEmpty {
+                report.append("SWEEP PASS \(tag)")
+            } else {
+                failures += 1
+                for p in problems { report.append("SWEEP FAIL \(tag): \(p)") }
+            }
+        }
+
         for (base, mustPass) in cases {
             for size in [base, CGSize(width: base.height, height: base.width)] {
                 for idiom in [UIUserInterfaceIdiom.phone, .pad] {
@@ -113,6 +135,64 @@ enum INDSLayoutSweep {
     /// exemption as the production assertion.
     private static let faceCluster: Set<INDSControllerButtonID> = [.a, .b, .x, .y]
 
+    /// The hinge layout for a container only a folding iPhone can produce.
+    /// Pure geometry plus the real views, so it is checked without the
+    /// device — including that an iPad window of the same size never takes
+    /// this path. The view half only means anything on a phone simulator.
+    private static func validateFoldable(containerSize size: CGSize) -> [String] {
+        var problems: [String] = []
+        let isPortrait = size.height >= size.width
+        let mode: DSScreenLayoutMode = isPortrait ? .stacked : .sideBySide
+        if DSFoldableLayout.current(in: size, mode: mode, idiom: .pad) != nil {
+            problems.append("the foldable exception fired for an iPad window")
+        }
+        guard let foldable = DSFoldableLayout.current(in: size, mode: mode, idiom: .phone) else {
+            return problems + ["no hinge layout for an unfolded phone"]
+        }
+        let fold = ((isPortrait ? size.height : size.width) / 2).rounded()
+        let againstHinge = isPortrait
+            ? abs(foldable.top.maxY - fold) <= 1 && abs(foldable.bottom.minY - fold) <= 1
+            : abs(foldable.top.maxX - fold) <= 1 && abs(foldable.bottom.minX - fold) <= 1
+        if !againstHinge {
+            problems.append("a panel does not sit against the hinge: \(foldable.top) \(foldable.bottom)")
+        }
+        if min(foldable.top.width, foldable.bottom.width) < 192 {
+            problems.append("a panel is under 0.75x native: \(foldable.top.size) \(foldable.bottom.size)")
+        }
+
+        guard UIDevice.current.userInterfaceIdiom == .phone else { return problems }
+        let screens = DSDualScreenView(frame: CGRect(origin: .zero, size: size))
+        screens.applyLayout(mode: mode, swap: false, animated: false)
+        let upper = screens.topScreenView.frame
+        let lower = screens.bottomScreenView.frame
+        if upper != foldable.top || lower != foldable.bottom {
+            problems.append("the screens ignore the hinge layout: \(upper) \(lower)")
+        }
+        let controller = NDSControllerView(frame: screens.bounds)
+        let hud = NDSHUDView(frame: screens.bounds)
+        // Both take the arrangement from the owning controller in the app;
+        // here it has to be handed over, or they lay out for `.stacked`.
+        controller.screenLayoutMode = mode
+        hud.setLayoutIcon(mode)
+        controller.layoutIfNeeded()
+        hud.layoutIfNeeded()
+        for button in (controller.subviews + hud.subviews.filter { $0 is UIButton }) where !button.isHidden {
+            if !screens.bounds.contains(button.frame) || button.frame.intersects(upper) || button.frame.intersects(lower) {
+                problems.append("a control covers a panel or clips: \(button.accessibilityLabel ?? "HUD") at \(button.frame)")
+            }
+        }
+        for y in [lower.minY + 1, lower.midY, lower.maxY - 1] {
+            for x in [lower.minX + 1, lower.midX, lower.maxX - 1] {
+                if controller.hitTest(CGPoint(x: x, y: y), with: nil) != nil {
+                    problems.append("controller intercepts the DS stylus")
+                }
+            }
+        }
+        print("DUO \(Int(size.width))x\(Int(size.height)) top=\(foldable.top) touch=\(foldable.bottom)"
+              + " controls=\(foldable.controls == nil ? "default" : "hinge")")
+        return problems
+    }
+
     /// Exercise the actual views, including a resize that doesn't recreate
     /// the controller. Copying the geometry formula here missed these bugs.
     private static func validateAdaptiveViews() -> [String] {
@@ -146,7 +226,11 @@ enum INDSLayoutSweep {
             if upper.midY >= size.height / 2 || lower.midY <= size.height / 2 {
                 problems.append("expanded DS must put one display above and one below the middle: \(size)")
             }
-            if lower.minX < 208 || lower.maxX > size.width - 208 {
+            // The classic DS layout's own requirement: the thumb clusters go
+            // beside the touch panel. A foldable puts them below/around it
+            // instead (`DSFoldableLayout`), and is checked separately.
+            if DSFoldableLayout.current(in: size, mode: .stacked) == nil,
+               lower.minX < 208 || lower.maxX > size.width - 208 {
                 problems.append("expanded DS must leave room beside the touch display for controls: \(size)")
             }
             let controller = NDSControllerView(frame: screens.bounds)
@@ -165,6 +249,23 @@ enum INDSLayoutSweep {
                         problems.append("controller intercepts the DS stylus at \(size)")
                     }
                 }
+            }
+        }
+        // The foldable exception must stay unreachable for every device that
+        // exists: content rects of the largest iPhones (both orientations,
+        // safe areas already off) and any iPad window, which is `.pad`.
+        for size in [CGSize(width: 440, height: 924), CGSize(width: 924, height: 440),
+                     CGSize(width: 430, height: 900), CGSize(width: 900, height: 430),
+                     CGSize(width: 393, height: 820), CGSize(width: 820, height: 393),
+                     CGSize(width: 375, height: 635), CGSize(width: 635, height: 375)] {
+            if DSFoldableLayout.isUnfolded(size, idiom: .phone) {
+                problems.append("a candybar iPhone takes the foldable path: \(size)")
+            }
+        }
+        for size in [CGSize(width: 626, height: 890), CGSize(width: 890, height: 626),
+                     CGSize(width: 1024, height: 1366), CGSize(width: 639, height: 1024)] {
+            if DSFoldableLayout.isUnfolded(size, idiom: .pad) {
+                problems.append("an iPad window takes the foldable path: \(size)")
             }
         }
         for size in [CGSize(width: 390, height: 780), CGSize(width: 700, height: 840),
