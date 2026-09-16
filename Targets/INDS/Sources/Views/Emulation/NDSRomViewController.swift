@@ -68,12 +68,6 @@ final class NDSRomViewController: UIViewController {
     /// notification while it stays engaged.
     private var wasSpeedClamped = false
 
-    /// Volume to restore once other audio stops (Settings > Audio's "Mute
-    /// While Other Audio Plays") — `nil` unless this feature is the one
-    /// that muted, so a game paused/quit mid-duck can't misreport its own
-    /// pre-mute state as this one's.
-    private var volumeBeforeOtherAudioMute: Double?
-
     /// Mirrors whatever was last pushed to `dualScreenView.applyDisplayFilter`
     /// — kept around purely so `presentPauseMenu()` has a current value to
     /// hand the pause menu's filter card (there's no core-side equivalent to
@@ -103,6 +97,10 @@ final class NDSRomViewController: UIViewController {
     /// swipe-back) doesn't autosave/pause a second time on a torn-down core.
     private var didExplicitlyQuit = false
 
+    /// `viewDidAppear` fires again after a cancelled swipe-back; the deferred
+    /// ROM load must only ever be queued once.
+    private var hasScheduledCoreLoad = false
+
     init(rom: ROMFile) {
         self.rom = rom
         super.init(nibName: nil, bundle: nil)
@@ -131,7 +129,24 @@ final class NDSRomViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
-        loadCore()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // One run-loop turn after the push has landed. The ROM load is
+        // synchronous on the main thread (deliberately: the core is
+        // main-thread only), and running it from viewDidLoad meant the
+        // "Loading…" HUD never painted and the push itself stalled on large
+        // carts. viewWillAppear has already run against the unloaded core
+        // (resume/display link are no-ops there), so start for real here.
+        guard !hasScheduledCoreLoad else { return }
+        hasScheduledCoreLoad = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self, !self.didExplicitlyQuit else { return }
+            self.loadCore()
+            self.core.resumeEmulation()
+            self.startDisplayLink()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -157,17 +172,25 @@ final class NDSRomViewController: UIViewController {
         stopPeriodicAutosave()
         UIApplication.shared.isIdleTimerDisabled = false
 
+        // A full-screen modal presented over the game (the ReplayKit clip
+        // preview; the pause sheet itself in compact height) lands here too,
+        // and we'll be back: the session record and the exit bookkeeping
+        // belong to a real pop/dismiss only.
+        let coveredByModal = presentedViewController != nil
+
         // Coming back to the library after playing is the moment to ask for a
         // rating: never mid-game, which is where it annoys and where people
         // tap three stars just to make the prompt go away. Queued, so it does
         // not fight the exit animation itself.
-        if sessionPlayed > 0 {
+        if !coveredByModal, sessionPlayed > 0 {
             INDSReviewPrompt.recordSession(playedFor: sessionPlayed)
             sessionPlayed = 0
             DispatchQueue.main.async { INDSReviewPrompt.askIfEarned() }
         }
         guard !didExplicitlyQuit else { return }
-        runExitBookkeeping()
+        if !coveredByModal {
+            runExitBookkeeping()
+        }
         // Pause, not stop: this also fires when a full-screen modal (the
         // ReplayKit clip preview) covers us and we'll be back. The real
         // teardown is `stopForTeardown()`.
@@ -185,6 +208,9 @@ final class NDSRomViewController: UIViewController {
         clipRecorder.stopIfNeeded()
         autosaveIfNeeded()
         saveThumbnail()
+        // Never leave the other-audio duck on across an exit that skipped
+        // the `.end` hint (see handleSilenceSecondaryAudioHint).
+        core.outputDucked = false
     }
 
     /// The SwiftUI pop — edge swipe-back or `dismiss()` — as opposed to the
@@ -208,7 +234,7 @@ final class NDSRomViewController: UIViewController {
     /// without this the whole session is lost. A DS core is a fat target: this
     /// fires far more often here than it would in a GBA emulator.
     ///
-    /// ponytail: autosave only. Freeing caches would be the textbook response,
+    /// Note: autosave only. Freeing caches would be the textbook response,
     /// but the memory is the core's working set — there is nothing to drop.
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -482,13 +508,17 @@ final class NDSRomViewController: UIViewController {
         }
     }
 
-    private func loadCore(allowAutoResume: Bool = true) {
+    /// Returns whether the ROM booted. On failure the HUD already shows the
+    /// error card, so callers must not resume or announce success.
+    @discardableResult
+    private func loadCore(allowAutoResume: Bool = true) -> Bool {
         let baseName = rom.baseName
         guard registeredBaseName == baseName || !Self.openROMs.contains(baseName) else {
             hudView.showError(NSLocalizedString("This game is already open in another window.", comment: "Emulator error: same ROM running in a second iPad window"))
             revealGameContent()
-            return
+            return false
         }
+        var booted = false
         do {
             // New session: this game is allowed one fresh battery-save snapshot
             // before whatever state load comes next.
@@ -498,6 +528,9 @@ final class NDSRomViewController: UIViewController {
             // baked into the firmware image, which is read once during boot
             // (unlike the clock below, which the core can be told at any time).
             INDSConsolePreferences.apply(to: core)
+            // A session never starts ducked; the other-audio hint re-ducks it
+            // if it has to (see handleSilenceSecondaryAudioHint).
+            core.outputDucked = false
             try core.loadROM(atPath: rom.fileURL.path, biosDirectory: biosDirectory.path)
             Self.openROMs.insert(baseName)
             registeredBaseName = baseName
@@ -519,6 +552,9 @@ final class NDSRomViewController: UIViewController {
                     // battery save first so "Recover Cartridge Save" can undo it.
                     INDSSaveBackup.backupBeforeStateLoad(baseName: rom.baseName)
                     try core.loadState(fromPath: autoPath)
+                    // The state carries the RTC as it was when saved: re-seed,
+                    // or the console clock rolls back with every resume.
+                    applyConsoleClock()
                     hudView.showToast(NSLocalizedString("Resumed", comment: "Auto-resume HUD toast"))
                 } catch {
                     debugLog("Auto-load save state failed: \(error.localizedDescription)")
@@ -526,11 +562,13 @@ final class NDSRomViewController: UIViewController {
             }
             hudView.hideStatus()
             maybeShowFirstSessionHint()
+            booted = true
         } catch {
             debugLog("ROM load failed: \(error.localizedDescription)")
             hudView.showError(error.localizedDescription)
         }
         revealGameContent()
+        return booted
     }
 
     /// One-shot fade-in for the dual-screen container + HUD chrome once
@@ -893,13 +931,15 @@ final class NDSRomViewController: UIViewController {
 
     // MARK: - Mute While Other Audio Plays (Settings > Audio)
     //
-    // Deliberately mutes via `core.audioVolume` (a plain output-level pause,
-    // — an output-level pause) instead of
+    // Deliberately mutes via `core.outputDucked` — a transient output-level
+    // gain that is never persisted, unlike `audioVolume`, which is the user's
+    // own setting and used to survive a quit mid-duck as a silent app —
+    // instead of
     // switching the session to `.soloAmbient` — MelonDSCoreBridge.mm already
     // owns every `AVAudioSession` category change (.ambient at rest,
     // .playAndRecord for the Mic_Start...Mic_Stop window, see its
     // Microphone section) and documents that category switch as funneling
-    // through one call site; going through `audioVolume` instead never
+    // through one call site; going through `outputDucked` instead never
     // touches the category at all, so there's nothing here for the bridge's
     // own switching to race against.
 
@@ -909,19 +949,16 @@ final class NDSRomViewController: UIViewController {
 
         switch hintType {
         case .begin:
-            guard INDSAudioPreferences.muteWithOtherAudioEnabled, volumeBeforeOtherAudioMute == nil else { return }
+            guard INDSAudioPreferences.muteWithOtherAudioEnabled, !core.outputDucked else { return }
             // Cede priority to the DS mic: don't duck output out from under
             // a game that's actively listening right now.
             guard !core.microphoneActive else { return }
-            volumeBeforeOtherAudioMute = core.audioVolume
-            core.audioVolume = 0
+            core.outputDucked = true
         case .end:
             // Restored unconditionally (not re-gated on the toggle still
             // being on) so flipping it off mid-duck can never leave the
             // game stuck silent.
-            guard let restoredVolume = volumeBeforeOtherAudioMute else { return }
-            core.audioVolume = restoredVolume
-            volumeBeforeOtherAudioMute = nil
+            core.outputDucked = false
         @unknown default:
             break
         }
@@ -1089,7 +1126,9 @@ final class NDSRomViewController: UIViewController {
     // MARK: - Pause menu
 
     private func presentPauseMenu() {
-        guard pauseMenuController == nil, presentedViewController == nil else { return }
+        // `core.loaded`: nothing to pause, save or resume behind the
+        // load-error card — its own Back button is the only way out.
+        guard core.loaded, pauseMenuController == nil, presentedViewController == nil else { return }
 
         core.pauseEmulation()
         stopDisplayLink()
@@ -1099,7 +1138,10 @@ final class NDSRomViewController: UIViewController {
         let controller = NDSPauseMenuHostingController(
             romTitle: rom.displayName,
             romBaseName: rom.baseName,
-            currentSpeed: core.speedMultiplier,
+            // The user's own choice, not `core.speedMultiplier`: that is the
+            // effective speed after Fast Forward / Battery Saver, and seeding
+            // the slider with it recorded the transient value as a request.
+            currentSpeed: requestedSpeed,
             saveSlots: saveStateSlotInfos(includeAuto: false),
             loadSlots: saveStateSlotInfos(includeAuto: true),
             currentVolume: core.audioVolume,
@@ -1191,13 +1233,28 @@ final class NDSRomViewController: UIViewController {
     private func toggleClipRecording() {
         clipRecorder.toggle { [weak self] preview in
             preview.previewControllerDelegate = self
-            // Stopping is always triggered from inside the pause menu sheet
-            // (the only place this row exists), which is already `self`'s
-            // presentedViewController — present the preview *from* that
-            // sheet, not from `self`, so it chains on top instead of UIKit
-            // rejecting a second concurrent presentation from `self`.
-            (self?.pauseMenuController ?? self)?.present(preview, animated: true)
+            self?.presentClipPreview(preview)
         }
+    }
+
+    /// Presents the finished clip from whichever controller is on top right
+    /// now. Stopping is triggered from inside the pause menu sheet, but
+    /// ReplayKit finishes asynchronously — by then the user may already have
+    /// tapped Resume, leaving the sheet mid-dismissal: presenting from it,
+    /// or from `self` while it still has a presented controller, is refused
+    /// by UIKit and the preview silently never shows. Wait for the dismissal
+    /// to settle instead.
+    private func presentClipPreview(_ preview: RPPreviewViewController) {
+        guard !didExplicitlyQuit else { return }
+        var top: UIViewController = self
+        while let next = top.presentedViewController { top = next }
+        if top !== self, top.isBeingDismissed {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                self?.presentClipPreview(preview)
+            }
+            return
+        }
+        top.present(preview, animated: true)
     }
 
     private func quitToLibrary() {
@@ -1275,7 +1332,7 @@ final class NDSRomViewController: UIViewController {
     /// 15 pulses per second: each phase lasts ~2 of the 60 frames at which
     /// the game reads the keypad, so none is lost. Any faster and some games
     /// start dropping presses.
-    // ponytail: a Timer, not the display link — frame accuracy is not needed
+    // Note: a Timer, not the display link — frame accuracy is not needed
     // here and coupling it to the video loop complicates it for nothing.
     private func startTurboTimer() {
         guard turboTimer == nil else { return }
@@ -1304,7 +1361,7 @@ final class NDSRomViewController: UIViewController {
     /// Saves the top screen's frame next to the slot's `.mln`. Four identical
     /// rows with nothing but a date do not say which to load or which can be
     /// sacrificed. `slot < 0` is the auto-save.
-    // ponytail: the periodic auto-save calls in here with the display link
+    // Note: the periodic auto-save calls in here with the display link
     // alive, so `topBuffer` can be read mid-write. The worst that comes out is
     // a thumbnail with a band of two different frames; pausing the loop just
     // for this would cost more than it fixes. If it ever becomes a nuisance,
@@ -1332,7 +1389,9 @@ final class NDSRomViewController: UIViewController {
             return
         }
         hudView.showLoading(NSLocalizedString("Loading…", comment: ""))
-        loadCore(allowAutoResume: false)
+        // A failed reload has already put up the error card; there is
+        // nothing to resume and no recovery to announce.
+        guard loadCore(allowAutoResume: false) else { return }
         core.resumeEmulation()
         startDisplayLink()
         hudView.showToast(NSLocalizedString("Cartridge save recovered", comment: "Recover cartridge save success toast"))
@@ -1346,6 +1405,9 @@ final class NDSRomViewController: UIViewController {
             // will land on the .sav at the core's next flush.
             INDSSaveBackup.backupBeforeStateLoad(baseName: rom.baseName)
             try core.loadState(fromPath: path)
+            // The state carries the RTC as it was when saved: re-seed, or
+            // the console clock rolls back with every load.
+            applyConsoleClock()
         } catch {
             debugLog("Load from slot \(slot) failed: \(error.localizedDescription)")
             hudView.showToast(String(format: NSLocalizedString("Couldn't load state: %@", comment: ""), error.localizedDescription))

@@ -78,18 +78,20 @@ public final class INDSControllerLayoutManager {
         get {
             guard let stored = persistedLayout else { return .defaultLayout() }
             let (healedLayout, changed) = stored.healed()
-            if changed { activeLayout = healedLayout }
+            if changed { persist(healedLayout) }
             return healedLayout
         }
-        set {
-            queue.async { [weak self] in
-                guard let self else { return }
-                self.didLoad = true
-                self._persisted = newValue
-                self.saveToDisk(layout: newValue, url: self.activeLayoutURL)
-                DispatchQueue.main.async {
-                    NotificationCenter.default.post(name: Self.layoutDidChangeNotification, object: newValue)
-                }
+        set { persist(newValue) }
+    }
+
+    private func persist(_ layout: INDSCustomControllerLayout) {
+        queue.async { [weak self] in
+            guard let self else { return }
+            self.didLoad = true
+            self._persisted = layout
+            self.saveToDisk(layout: layout, url: self.activeLayoutURL)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Self.layoutDidChangeNotification, object: layout)
             }
         }
     }

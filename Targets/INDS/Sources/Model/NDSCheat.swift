@@ -26,22 +26,58 @@ struct NDSCheat: Identifiable, Equatable {
 }
 
 enum NDSCheatValidation {
-    /// melonDS's own AR data-line grammar (ARCodeFile.cpp: each line is read
-    /// with `sscanf(line, "%08X %08X", &c0, &c1)`): two 8-digit hex words —
-    /// address then value — separated by one space.
-    private static let hexPairPattern = "^[0-9A-Fa-f]{8} [0-9A-Fa-f]{8}$"
+    private static let hexDigits = Set("0123456789abcdefABCDEF")
 
     /// `code`'s non-blank lines, trimmed. Blank lines are just spacing and
-    /// are dropped, not treated as errors.
+    /// are dropped, not treated as errors. Split on *any* newline, not just
+    /// `\n`: a code list pasted from a web page or a note arrives with CRLF
+    /// (or a lone CR, or U+2028) at least as often as with a bare LF, and a
+    /// stray `\r` left at the end of a line is invisible in the editor but
+    /// makes the line fail every check below.
     static func codeLines(_ code: String) -> [String] {
         code
-            .components(separatedBy: "\n")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
     }
 
+    /// One data line in melonDS's own canonical form — `"AAAAAAAA VVVVVVVV"`,
+    /// uppercase, exactly one space — or nil if it isn't a code line at all.
+    ///
+    /// Deliberately liberal about the input: published AR lists separate the
+    /// two words with a tab, several spaces or a non-breaking space, or run
+    /// them together as 16 hex digits. All of those are the same code, so all
+    /// of them are accepted — but only ever written out in the one shape
+    /// `ARCodeFile::Load`'s `sscanf(line, "%08X %08X", ...)` accepts, and only
+    /// with ASCII hex digits (`Character.isHexDigit` would also say yes to
+    /// full-width forms, which survive `uppercased()` and would then fail that
+    /// `sscanf`). The word lengths are checked as 8 + 8 rather than just
+    /// "16 hex in total" so a typo like `023FE0 0000000063` is rejected
+    /// instead of silently becoming a write to a different address.
+    static func normalizedLine(_ line: String) -> String? {
+        let words = line.split(whereSeparator: \.isWhitespace)
+        let hex: String
+        switch words.count {
+        case 1 where words[0].count == 16: hex = String(words[0])
+        case 2 where words[0].count == 8 && words[1].count == 8: hex = words.joined()
+        default: return nil
+        }
+        guard hex.allSatisfy(hexDigits.contains) else { return nil }
+        let upper = hex.uppercased()
+        return "\(upper.prefix(8)) \(upper.suffix(8))"
+    }
+
+    /// The canonical data lines of `code`, with anything that isn't a code
+    /// line dropped. This is what gets written to disk: `ARCodeFile::Load`
+    /// bails out on the *first* malformed data line and reports the whole
+    /// file as an error, so one bad line in one cheat would silently kill
+    /// every cheat for that game.
+    static func normalizedLines(_ code: String) -> [String] {
+        codeLines(code).compactMap(normalizedLine)
+    }
+
     static func isValidLine(_ line: String) -> Bool {
-        line.range(of: hexPairPattern, options: .regularExpression) != nil
+        normalizedLine(line) != nil
     }
 
     /// True only if every non-blank line is a valid hex pair *and* at least
@@ -94,7 +130,7 @@ enum NDSCheatFileStore {
     private static func serialize(_ cheats: [NDSCheat]) -> String {
         var text = "ROOT\n\n"
         for cheat in cheats {
-            let lines = NDSCheatValidation.codeLines(cheat.code)
+            let lines = NDSCheatValidation.normalizedLines(cheat.code)
             // Same empty-code guard as -reloadCheatsFromFile:enabled: below
             // — never write a code as enabled if it has no valid lines.
             let enabled = cheat.enabled && !lines.isEmpty
@@ -103,7 +139,7 @@ enum NDSCheatFileStore {
                 .replacingOccurrences(of: "\r", with: " ")
             text += "CODE \(enabled ? 1 : 0) \(name)\n"
             for line in lines {
-                text += "\(line.uppercased())\n"
+                text += "\(line)\n"
             }
             text += "\n"
         }
@@ -138,8 +174,8 @@ enum NDSCheatFileStore {
                     pendingEnabled = false
                     pendingName = rest.isEmpty ? nil : String(rest)
                 }
-            } else if NDSCheatValidation.isValidLine(line) {
-                pendingLines.append(line.uppercased())
+            } else if let dataLine = NDSCheatValidation.normalizedLine(line) {
+                pendingLines.append(dataLine)
             }
             // ROOT / CAT / DESC / blank / garbage: ignored.
         }

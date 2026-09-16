@@ -30,6 +30,15 @@ struct Sz7zArchive {
 /// `Util/7z/7zMain.c`'s `kInputBufSize`.
 static const size_t kSz7zInputBufSize = (size_t)1 << 18;
 
+/// Largest solid block (`7z.h`: "folder") this shim will decode. A `.7z`
+/// entry is not decompressed on its own: `SzArEx_Extract` unpacks the whole
+/// folder that contains it into `outBuffer` (see the "Extracting cache"
+/// comment in `7z.h`), so a small entry inside a multi-GB solid block still
+/// costs the block. 512 MB is the ceiling of a DS card, i.e. the largest
+/// single file anything legitimate can hold; `NDS7zExtractor` applies the
+/// same limit per entry.
+static const UInt64 kSz7zMaxFolderUnpackSize = (UInt64)512 << 20;
+
 Sz7zArchive *Sz7zArchive_Open(const char *path)
 {
     if (!path) {
@@ -156,6 +165,15 @@ int Sz7zArchive_ExtractToBuffer(Sz7zArchive *archive, uint32_t index, uint8_t **
     *outData = NULL;
     *outSize = 0;
     if (!archive || index >= archive->db.NumFiles || SzArEx_IsDir(&archive->db, index)) {
+        return 0;
+    }
+
+    /* (UInt32)-1 marks an empty file with no folder; SzArEx_Extract handles
+       that itself. Anything else is refused up front if its block would not
+       fit the cap, before a byte is allocated. */
+    const UInt32 folderIndex = archive->db.FileToFolder[index];
+    if (folderIndex != (UInt32)-1
+        && SzAr_GetFolderUnpackSize(&archive->db.db, folderIndex) > kSz7zMaxFolderUnpackSize) {
         return 0;
     }
 

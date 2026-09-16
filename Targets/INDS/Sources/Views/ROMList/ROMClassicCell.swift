@@ -13,6 +13,13 @@ struct ROMClassicCell: View {
     private let shellColor = Color(red: 0.16, green: 0.16, blue: 0.19)
     private let labelColor = Color(red: 0.24, green: 0.24, blue: 0.30)
 
+    // Below every text style, so scaled metrics rather than styles: the
+    // cartridge's point sizes stay, but follow Dynamic Type (capped at AX1
+    // below, same as the grid cell, so the shell keeps its proportions).
+    @ScaledMetric(relativeTo: .caption2) private var titleSize: CGFloat = 10
+    @ScaledMetric(relativeTo: .caption2) private var playTimeSize: CGFloat = 8
+    @ScaledMetric(relativeTo: .caption2) private var gameCodeSize: CGFloat = 7
+
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
@@ -40,7 +47,7 @@ struct ROMClassicCell: View {
                                 .padding(.horizontal, 8)
 
                             Text(rom.displayName)
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .font(.system(size: titleSize, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.center)
@@ -52,7 +59,7 @@ struct ROMClassicCell: View {
                     .padding(.top, 2)
 
                     Text(rom.gameCode)
-                        .font(.system(size: 7, weight: .heavy, design: .monospaced))
+                        .font(.system(size: gameCodeSize, weight: .heavy, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.75))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 3)
@@ -75,18 +82,22 @@ struct ROMClassicCell: View {
             HStack(spacing: 4) {
                 HStack(spacing: 2) {
                     Image(systemName: "clock.fill")
-                        .font(.system(size: 7))
+                        .font(.system(size: gameCodeSize))
+                        .accessibilityHidden(true)
                     Text(rom.formattedPlayTime)
-                        .font(.system(size: 8, weight: .medium))
+                        .font(.system(size: playTimeSize, weight: .medium))
                 }
                 .foregroundStyle(.secondary)
 
                 Spacer()
 
                 if rom.hasAnySaveState {
+                    // The only save-state cue in this layout, so it gets the
+                    // grid badge's label instead of being hidden.
                     Image(systemName: "arrow.counterclockwise.circle.fill")
                         .font(.system(size: 9))
                         .foregroundStyle(.green)
+                        .accessibilityLabel("Resume")
                 }
 
                 Button(action: onFavoriteToggle) {
@@ -106,5 +117,6 @@ struct ROMClassicCell: View {
             .padding(.horizontal, 4)
             .padding(.top, 4)
         }
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 }

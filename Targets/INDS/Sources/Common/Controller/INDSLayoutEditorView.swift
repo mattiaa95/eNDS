@@ -40,6 +40,9 @@ struct INDSLayoutEditorView: View {
     @State private var selectedButton: INDSControllerButtonID?
     @State private var showResetAlert = false
     @State private var showStyleSheet = false
+    /// Set by "Reset to Defaults" so `save()` can tell a reset apart from a
+    /// hand-made layout that merely looks like one.
+    @State private var didReset = false
 
     private var currentLayout: Binding<INDSControllerLayout> {
         isPortrait ? $layout.portrait : $layout.landscape
@@ -123,6 +126,7 @@ struct INDSLayoutEditorView: View {
             Button("Reset", role: .destructive) {
                 layout = .defaultLayout(portraitContainer: referenceSizes.portrait,
                                         landscapeContainer: referenceSizes.landscape)
+                didReset = true
                 selectedButton = nil
                 INDSHaptics.medium()
             }
@@ -155,7 +159,17 @@ struct INDSLayoutEditorView: View {
     private func save() {
         // Opening and saving an untouched preview must preserve Automatic.
         if layout != initialLayout {
-            INDSControllerLayoutManager.shared.activeLayout = layout
+            let defaults = INDSCustomControllerLayout.defaultLayout(portraitContainer: referenceSizes.portrait,
+                                                                    landscapeContainer: referenceSizes.landscape)
+            if didReset && layout == defaults {
+                // A reset left untouched means "back to Automatic": drop the
+                // saved file rather than freezing today's defaults into one,
+                // which every other container (an unfolded phone, an iPad
+                // window) would then be stuck with.
+                INDSControllerLayoutManager.shared.resetToDefault()
+            } else {
+                INDSControllerLayoutManager.shared.activeLayout = layout
+            }
         }
         INDSHaptics.medium()
         dismiss()
@@ -190,10 +204,10 @@ struct INDSLayoutEditorView: View {
 
         return ZStack {
             if let top = frames.top {
-                screenRect(top, label: "TOP")
+                screenRect(top, label: NSLocalizedString("TOP", comment: "Layout editor: label on the top screen silhouette"))
             }
             if let bottom = frames.bottom {
-                screenRect(bottom, label: "TOUCH")
+                screenRect(bottom, label: NSLocalizedString("TOUCH", comment: "Layout editor: label on the touch screen silhouette"))
             }
         }
     }

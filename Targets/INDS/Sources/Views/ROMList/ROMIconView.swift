@@ -11,6 +11,10 @@ struct ROMIconView: View {
     var cornerRadius: CGFloat = 10
 
     @State private var icon: UIImage?
+    /// `ROMFile.contentKey` the current `icon` was decoded for. The cell's
+    /// identity is the filename, which a "Replace" import keeps, so without
+    /// this the old art would survive the new file.
+    @State private var loadedKey: String?
 
     var body: some View {
         ZStack {
@@ -27,10 +31,13 @@ struct ROMIconView: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .onAppear(perform: loadIconIfNeeded)
+        .onChange(of: rom.contentKey) { loadIconIfNeeded() }
     }
 
     private func loadIconIfNeeded() {
-        guard icon == nil else { return }
+        let key = rom.contentKey
+        guard loadedKey != key else { return }
+        loadedKey = key
         DispatchQueue.global(qos: .userInitiated).async {
             let loaded = ROMIconStore.icon(for: rom)
             DispatchQueue.main.async {

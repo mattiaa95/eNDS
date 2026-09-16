@@ -54,6 +54,10 @@ final class NDSControllerView: UIView {
     private var buttonFrames: [INDSControllerButtonID: CGRect] = [:]
     private var joystickView: INDSVirtualJoystickView?
     private var touchButtons: [UITouch: Set<INDSButton>] = [:]
+    /// What the delegate currently believes is down from touches: the union
+    /// of every live touch's set. Diffed in `syncHeldButtons`, so a button
+    /// held by two fingers stays down until the last one lifts.
+    private var heldTouchButtons: Set<INDSButton> = []
     private var currentJoystickDirections: Set<INDSButton> = []
 
     /// Last layout actually laid out, kept so touch handling reads exactly the
@@ -201,6 +205,9 @@ final class NDSControllerView: UIView {
                 let dpad = INDSDPadShapeView(frame: .zero)
                 dpad.alpha = skinOpacity
                 dpad.isUserInteractionEnabled = false
+                dpad.onAccessibilityDirection = { [weak self] button in
+                    self?.momentaryPress(button, duration: 0.15)
+                }
                 addSubview(dpad)
                 buttonViews[.dpad] = dpad
             } else {
@@ -239,8 +246,14 @@ final class NDSControllerView: UIView {
     /// screen (see `DSDualScreenView`).
     private func momentaryPress(_ id: INDSControllerButtonID) {
         guard let button = id.indsButton else { return }
+        momentaryPress(button, duration: 0.1)
+    }
+
+    /// Same press-and-release for a single engine button — the d-pad's
+    /// VoiceOver custom actions (Up/Down/Left/Right) come through here.
+    private func momentaryPress(_ button: INDSButton, duration: TimeInterval) {
         delegate?.controllerView(self, setButton: button, pressed: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
             guard let self else { return }
             self.delegate?.controllerView(self, setButton: button, pressed: false)
         }
@@ -352,13 +365,8 @@ final class NDSControllerView: UIView {
             currentJoystickDirections = []
         }
 
-        var allHeld: Set<INDSButton> = []
-        for (_, buttons) in touchButtons { allHeld.formUnion(buttons) }
         touchButtons.removeAll()
-
-        for button in allHeld {
-            delegate?.controllerView(self, setButton: button, pressed: false)
-        }
+        syncHeldButtons()
 
         joystickView?.cancelTracking()
     }
@@ -398,62 +406,52 @@ final class NDSControllerView: UIView {
     }
 
     private func pressButtons(for touches: Set<UITouch>) {
-        var allPressed: Set<INDSButton> = []
-
         for touch in touches {
             if let joystickView {
                 let joyPoint = touch.location(in: joystickView)
                 if joystickView.point(inside: joyPoint, with: nil) { continue }
             }
-            let buttons = buttonsForTouch(touch)
-            touchButtons[touch] = buttons
-            allPressed.formUnion(buttons)
+            touchButtons[touch] = buttonsForTouch(touch)
         }
-
-        guard !allPressed.isEmpty else { return }
-        INDSHaptics.light()
-        for button in allPressed { delegate?.controllerView(self, setButton: button, pressed: true) }
+        syncHeldButtons()
     }
 
     private func updateButtons(for touches: Set<UITouch>) {
-        var newlyPressed: Set<INDSButton> = []
-        var newlyReleased: Set<INDSButton> = []
-
         for touch in touches {
             if let joystickView {
                 let joyPoint = touch.location(in: joystickView)
                 if joystickView.point(inside: joyPoint, with: nil) {
-                    if let previous = touchButtons[touch], !previous.isEmpty {
-                        newlyReleased.formUnion(previous)
-                    }
                     touchButtons[touch] = nil
                     continue
                 }
             }
-
-            let current = buttonsForTouch(touch)
-            let previous = touchButtons[touch] ?? []
-            newlyPressed.formUnion(current.subtracting(previous))
-            newlyReleased.formUnion(previous.subtracting(current))
-            touchButtons[touch] = current
+            touchButtons[touch] = buttonsForTouch(touch)
         }
-
-        for button in newlyReleased { delegate?.controllerView(self, setButton: button, pressed: false) }
-        if !newlyPressed.isEmpty {
-            INDSHaptics.light()
-            for button in newlyPressed { delegate?.controllerView(self, setButton: button, pressed: true) }
-        }
+        syncHeldButtons()
     }
 
     private func releaseButtons(for touches: Set<UITouch>) {
-        var allReleased: Set<INDSButton> = []
-        for touch in touches {
-            if let buttons = touchButtons[touch] {
-                allReleased.formUnion(buttons)
-                touchButtons[touch] = nil
-            }
+        for touch in touches { touchButtons[touch] = nil }
+        syncHeldButtons()
+    }
+
+    /// The one place touch bookkeeping turns into delegate calls. Diffing the
+    /// union of every live touch against what was last reported means a
+    /// button is released only when no finger holds it any more — a per-touch
+    /// diff released it as soon as either of two fingers on it lifted.
+    private func syncHeldButtons() {
+        var held: Set<INDSButton> = []
+        for buttons in touchButtons.values { held.formUnion(buttons) }
+
+        let released = heldTouchButtons.subtracting(held)
+        let pressed = held.subtracting(heldTouchButtons)
+        heldTouchButtons = held
+
+        for button in released { delegate?.controllerView(self, setButton: button, pressed: false) }
+        if !pressed.isEmpty {
+            INDSHaptics.light()
+            for button in pressed { delegate?.controllerView(self, setButton: button, pressed: true) }
         }
-        for button in allReleased { delegate?.controllerView(self, setButton: button, pressed: false) }
     }
 
     /// Maps a touch point to the set of engine buttons it activates.
@@ -522,7 +520,13 @@ final class NDSControllerView: UIView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard isUserInteractionEnabled, !isHidden, alpha > 0.01 else { return nil }
 
-        if let joystickView, joystickView.frame.contains(point) { return self }
+        // The joystick tracks its own touches: it only ever sees them when it
+        // is the hit-test view. Answering `self` here handed them to
+        // `pressButtons`, which skips anything inside the ring — the stick
+        // drew but never moved.
+        if let joystickView, joystickView.point(inside: convert(point, to: joystickView), with: event) {
+            return joystickView
+        }
 
         let layout = currentLayout
         for entry in layout.buttons {

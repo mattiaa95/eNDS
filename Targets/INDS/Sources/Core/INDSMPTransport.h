@@ -41,6 +41,10 @@ constexpr uint64_t kStaleWindow = 32;
 /// What melonDS uses by default. Every millisecond here is a millisecond
 /// the emulator spends stalled.
 constexpr int kRecvTimeoutMs = 25;
+/// Largest frame a transport accepts, header included — `LocalMP`'s
+/// `kMaxFrameSize`. `Wifi.cpp` can hand over up to 12+0x1FF4 bytes, and the
+/// receiving side copies a frame straight into its 2 KB `RXBuffer`.
+constexpr int kMaxFrameSize = 0x948;
 
 class MPTransport {
 public:

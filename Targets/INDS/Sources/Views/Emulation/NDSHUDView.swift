@@ -16,6 +16,13 @@ final class NDSHUDView: UIView {
 
     private var screenLayoutMode: DSScreenLayoutMode = .stacked
 
+    /// Mirrors `DSDualScreenView.reservesControlBand`: false while a gamepad
+    /// drives input and the touch overlay is hidden. The arrangements below
+    /// change shape with it (an unfolded phone gives the whole lower half to
+    /// the touch panel), so the pills must ask with the same value or they
+    /// land on the panel.
+    private var controlsReserved = true
+
     var onPauseTapped: (() -> Void)?
     var onCycleLayoutTapped: (() -> Void)?
     var onErrorBackTapped: (() -> Void)?
@@ -180,8 +187,9 @@ final class NDSHUDView: UIView {
         let content = bounds.inset(by: safeAreaInsets)
         guard content.width > 1, content.height > 1 else { return }
         let foldable = DSFoldableLayout.current(in: content.size, mode: screenLayoutMode,
-                                                stretch: DSScreenLayoutPreferences.stretchEnabled)
-        let console = foldable == nil
+                                                stretch: DSScreenLayoutPreferences.stretchEnabled,
+                                                controlsReserved: controlsReserved)
+        let console = foldable == nil && controlsReserved
             ? DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
                                       stretch: DSScreenLayoutPreferences.stretchEnabled) : nil
         // An unfolded foldable in landscape has a control band too — the
@@ -229,8 +237,9 @@ final class NDSHUDView: UIView {
         // same order, so Menu/Layout/Speed land in the band beside the thumb
         // controls instead of over the game.
         let foldable = DSFoldableLayout.current(in: content.size, mode: screenLayoutMode,
-                                                stretch: DSScreenLayoutPreferences.stretchEnabled)
-        let console = foldable == nil
+                                                stretch: DSScreenLayoutPreferences.stretchEnabled,
+                                                controlsReserved: controlsReserved)
+        let console = foldable == nil && controlsReserved
             ? DSConsoleLayout.current(in: content.size, mode: screenLayoutMode,
                                       stretch: DSScreenLayoutPreferences.stretchEnabled) : nil
         let layout: INDSControllerLayout
@@ -254,6 +263,25 @@ final class NDSHUDView: UIView {
             ? INDSCustomControllerLayout.defaultPortrait(containerSize: content.size)
             : INDSCustomControllerLayout.defaultLandscape(containerSize: content.size)
 
+        // Every other visible control, as the overlay will draw it (its
+        // global scale included): the room a pill may widen into for its
+        // caption is whatever these leave free, see `fitPill`.
+        let globalScale = CGFloat(max(0.5, min(2.0, UserDefaults.standard.object(forKey: "eNDSControllerScale") as? Double ?? 1.0)))
+        let occupied: [(id: INDSControllerButtonID, frame: CGRect)] = layout.buttons
+            .filter(\.isVisible)
+            .map { other in
+                var frame = other.clampedFrame(in: content.size)
+                if !other.id.isHUDChrome {
+                    frame = frame.insetBy(dx: -frame.width * (globalScale - 1) / 2,
+                                          dy: -frame.height * (globalScale - 1) / 2)
+                }
+                return (other.id, frame.offsetBy(dx: content.minX, dy: content.minY))
+            }
+
+        // Pills are fitted in order and each fitted frame replaces its base
+        // frame for the pills after it: two neighbours may otherwise each
+        // clear the other's base while growing into each other.
+        var fittedFrames: [INDSControllerButtonID: CGRect] = [:]
         for (id, button) in [(INDSControllerButtonID.layout, layoutButton), (.menu, pauseButton),
                              (.fastForward, fastForwardButton)] {
             var resolved = layout.entry(for: id)
@@ -268,9 +296,63 @@ final class NDSHUDView: UIView {
             var frame = entry.clampedFrame(in: content.size)
             frame.origin.x += content.minX
             frame.origin.y += content.minY
-            button.frame = frame
+            let others = occupied.filter { $0.id != id }.map { fittedFrames[$0.id] ?? $0.frame }
+            button.frame = fitPill(button, base: frame, content: content, avoiding: others)
+            fittedFrames[id] = button.frame
             button.isHidden = false
         }
+    }
+
+    /// Caption size the pills are authored at (`makeCircleButton`).
+    private static let captionPointSize: CGFloat = 9
+
+    /// Caption size last applied per pill. Writing `configuration` relayouts
+    /// the button, so only an actual change goes through.
+    private var captionPointSizes: [ObjectIdentifier: CGFloat] = [:]
+
+    /// Sizes a pill to its caption. The base width matches the icon plus a
+    /// short English word; "Geschwindigkeit" or "Disposição" ran off both
+    /// ends of it. The pill grows around its centre, up to twice its base
+    /// width, as long as it stays inside the content rect and clear of every
+    /// other visible control — in portrait that is the column between the
+    /// d-pad and the diamond, in landscape the gap before SELECT/START. Where
+    /// it cannot grow enough, the caption shrinks to what fits instead of
+    /// overlapping a neighbour.
+    private func fitPill(_ button: UIButton, base: CGRect, content: CGRect, avoiding others: [CGRect]) -> CGRect {
+        guard let caption = button.configuration?.title, !caption.isEmpty else { return base }
+        let insets = button.configuration?.contentInsets ?? .zero
+        let horizontal = insets.leading + insets.trailing
+        let font = UIFont.systemFont(ofSize: Self.captionPointSize, weight: .semibold)
+        let textWidth = ceil((caption as NSString).size(withAttributes: [.font: font]).width)
+        let needed = textWidth + horizontal
+
+        var frame = base
+        if needed > base.width {
+            let grown = base.insetBy(dx: -(min(needed, base.width * 2) - base.width) / 2, dy: 0)
+            let clear = content.contains(grown)
+                && !others.contains { $0.intersects(grown.insetBy(dx: -2, dy: 0)) }
+            if clear { frame = grown }
+        }
+
+        let available = frame.width - horizontal
+        let pointSize = textWidth > available
+            ? max(6, (Self.captionPointSize * available / textWidth * 10).rounded(.down) / 10)
+            : Self.captionPointSize
+        setCaptionPointSize(pointSize, on: button)
+        return frame
+    }
+
+    private func setCaptionPointSize(_ pointSize: CGFloat, on button: UIButton) {
+        let key = ObjectIdentifier(button)
+        guard (captionPointSizes[key] ?? Self.captionPointSize) != pointSize,
+              var config = button.configuration else { return }
+        captionPointSizes[key] = pointSize
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var out = incoming
+            out.font = UIFont.systemFont(ofSize: pointSize, weight: .semibold)
+            return out
+        }
+        button.configuration = config
     }
 
     /// Whether the pause button is currently on screen — drives the one-time
@@ -398,6 +480,10 @@ final class NDSHUDView: UIView {
     /// for as long as a gamepad is actually connected.
     func setGamepadConnected(_ connected: Bool) {
         setBadge(gamepadBadge, visible: connected)
+        if controlsReserved != !connected {
+            controlsReserved = !connected
+            setNeedsLayout()
+        }
     }
 
     /// Shows/hides the discrete "Listening" badge. No auto-hide, same as

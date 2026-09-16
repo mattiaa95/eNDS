@@ -66,6 +66,12 @@ private:
         bool connected = false;
     };
 
+    /// Per-queue cap. A peer that never drains (not polling, or gone quiet)
+    /// must not grow its queues forever; past this the oldest frame is
+    /// dropped, and anything that old is stale by the time it could be read.
+    /// `LocalMP` bounds the same thing with a 64 KB ring per FIFO.
+    static constexpr size_t kMaxQueueDepth = 64;
+
     /// Drops the packet into everyone's queue except the sender's.
     int broadcast(int from, const uint8_t *data, int len, uint64_t timestamp,
                   bool toReplyQueue, bool fromHost, uint16_t aid);

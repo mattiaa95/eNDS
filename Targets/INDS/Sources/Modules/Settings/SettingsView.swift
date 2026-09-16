@@ -22,6 +22,8 @@ private struct SettingsHubRow: View {
     // language. Literals at the call sites keep working unchanged.
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey
+    /// Fixed point size that still follows Dynamic Type.
+    @ScaledMetric(relativeTo: .subheadline) private var iconSize: CGFloat = 15
 
     var body: some View {
         HStack(spacing: 12) {
@@ -30,7 +32,7 @@ private struct SettingsHubRow: View {
                     .fill(iconColor.opacity(0.18))
                     .frame(width: 32, height: 32)
                 Image(systemName: icon)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: iconSize, weight: .semibold))
                     .foregroundColor(iconColor)
             }
 
@@ -54,6 +56,10 @@ struct SettingsView: View {
     @State private var showProSheet = false
     @State private var showManageSubscription = false
     @Environment(\.dismiss) private var dismiss
+    // Fixed point sizes that still follow Dynamic Type; the values are the
+    // default-size look.
+    @ScaledMetric(relativeTo: .body) private var proIconSize: CGFloat = 18
+    @ScaledMetric(relativeTo: .footnote) private var chevronSize: CGFloat = 13
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -194,7 +200,7 @@ struct SettingsView: View {
                                 .frame(width: 42, height: 42)
 
                             Image(systemName: "crown.fill")
-                                .font(.system(size: 18))
+                                .font(.system(size: proIconSize))
                                 .foregroundColor(.white)
                         }
 
@@ -210,7 +216,7 @@ struct SettingsView: View {
                         Spacer()
 
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.system(size: chevronSize, weight: .semibold))
                             .foregroundColor(.indsCrimsonLight)
                     }
                     .padding(.vertical, 4)
@@ -232,7 +238,7 @@ struct SettingsView: View {
                                 .frame(width: 42, height: 42)
 
                             Image(systemName: "checkmark.seal.fill")
-                                .font(.system(size: 18))
+                                .font(.system(size: proIconSize))
                                 .foregroundColor(.white)
                         }
 
@@ -254,7 +260,7 @@ struct SettingsView: View {
                         Spacer()
 
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.system(size: chevronSize, weight: .semibold))
                             .foregroundColor(.indsCrimsonLight)
                     }
                     .padding(.vertical, 4)

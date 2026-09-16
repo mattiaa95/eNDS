@@ -68,7 +68,10 @@ struct LicensesView: View {
         }
     }
 
-    private static func bundledText(named name: String, ext: String) -> String {
+    // `nonisolated`: `View` types are main-actor isolated, so without it the
+    // detached task above would hop back to the main actor for each read —
+    // the exact stall the detached task exists to avoid.
+    private nonisolated static func bundledText(named name: String, ext: String) -> String {
         guard let url = Bundle.main.url(forResource: name, withExtension: ext),
               let text = try? String(contentsOf: url, encoding: .utf8) else {
             // Should be impossible (both files are bundled resources), but a

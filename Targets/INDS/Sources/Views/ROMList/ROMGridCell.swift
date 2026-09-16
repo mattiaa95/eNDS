@@ -36,11 +36,12 @@ struct ROMGridCell: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(rom.displayName)
-                    // relativeTo: lets this grow with Dynamic Type instead of
-                    // sitting at 12pt from XS all the way to AX5. A fixed
+                    // A text style (12pt at the default size) so this grows
+                    // with Dynamic Type instead of sitting at 12pt from XS all
+                    // the way to AX5; `.system(size:)` never scales. A fixed
                     // minHeight clipped the second line as soon as the text
                     // grew.
-                    .font(.system(size: 12, weight: .semibold, design: .default).width(.standard))
+                    .font(.system(.caption, design: .default, weight: .semibold).width(.standard))
                     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                     .foregroundStyle(.white)
                     .lineLimit(2)
@@ -51,6 +52,7 @@ struct ROMGridCell: View {
                 HStack(spacing: 4) {
                     Image(systemName: "clock.fill")
                         .font(.caption2)
+                        .accessibilityHidden(true)
                     Text(rom.playTime > 0 ? rom.formattedPlayTime : rom.gameCode)
                         .font(.caption2.weight(.medium))
                 }
@@ -98,6 +100,7 @@ struct ROMGridCell: View {
             HStack(spacing: 3) {
                 Image(systemName: "arrow.counterclockwise.circle.fill")
                     .font(.caption2)
+                    .accessibilityHidden(true)
                 Text("Resume")
                     .font(.caption2.weight(.bold))
             }

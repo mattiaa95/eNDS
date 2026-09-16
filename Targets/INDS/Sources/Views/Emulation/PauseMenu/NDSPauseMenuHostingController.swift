@@ -110,7 +110,7 @@ final class NDSPauseMenuHostingController: UIViewController, UIGestureRecognizer
         // the ones that leave the sheet open (Save State, cheats, filters) — so
         // skipping the resume here left the game frozen forever after a save.
         // The flag can't protect against a double resume in this path anyway:
-        // viewWillDisappear removes this recognizer as soon as an action-driven
+        // viewWillDisappear disables this recognizer as soon as an action-driven
         // dismissal starts, and resumeEmulation is idempotent regardless.
         onDismissWithoutAction?()
         dismiss(animated: true)
@@ -123,11 +123,29 @@ final class NDSPauseMenuHostingController: UIViewController, UIGestureRecognizer
         return startPoint.x > edgeInset && startPoint.x < view.bounds.width - edgeInset
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Re-armed on every appearance: a full-screen cover presented from
+        // inside the sheet (the paywall, the clip preview) runs
+        // viewWillDisappear/viewWillAppear without dismissing the sheet.
+        swipeDownGesture?.isEnabled = true
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if let swipeDownGesture {
-            view.removeGestureRecognizer(swipeDownGesture)
-        }
+        // Disabled rather than removed: an action-driven dismissal must not
+        // let a swipe trigger a second resume mid-transition, but the sheet
+        // may be coming back (see viewWillAppear).
+        swipeDownGesture?.isEnabled = false
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        // Only when the sheet is actually going away. A full-screen cover
+        // presented from within (the Pro paywall) also lands here with the
+        // sheet still presented — tearing the SwiftUI child down then left an
+        // empty sheet behind that `isModalInPresentation` made undismissable.
+        guard isBeingDismissed || isMovingFromParent else { return }
         if let hosting = hostingController {
             hosting.willMove(toParent: nil)
             hosting.view.removeFromSuperview()

@@ -47,19 +47,30 @@ void MPLoopback::end(int inst) {
 
 int MPLoopback::broadcast(int from, const uint8_t *data, int len, uint64_t timestamp,
                           bool toReplyQueue, bool fromHost, uint16_t aid) {
-    if (from < 0 || from >= kMaxInstances || !data || len <= 0) return 0;
+    if (from < 0 || from >= kMaxInstances || len < 0) return 0;
+    // Same cap as LocalMP::SendPacketGeneric: the core copies a received
+    // frame straight into a fixed buffer, so anything larger is refused
+    // here rather than truncated or spilled on the other side.
+    if (len > kMaxFrameSize) return 0;
+    if (len > 0 && !data) return 0;
+    // `len == 0` is a real frame, not an error: a client with nothing ready
+    // answers a CMD with a header-only reply (Wifi.cpp,
+    // `MP_SendReply(nullptr, 0, ...)`) and the host counts that as "this
+    // client has answered" — see recvReplies.
     {
         std::lock_guard<std::mutex> guard(_lock);
         if (!_queues[from].connected) return 0;
         Packet packet;
-        packet.data.assign(data, data + len);
+        if (len > 0) packet.data.assign(data, data + len);
         packet.timestamp = timestamp;
         packet.sender = from;
         packet.aid = aid;
         packet.fromHost = fromHost;
         for (int i = 0; i < kMaxInstances; ++i) {
             if (i == from || !_queues[i].connected) continue;
-            (toReplyQueue ? _queues[i].replies : _queues[i].packets).push_back(packet);
+            auto &queue = toReplyQueue ? _queues[i].replies : _queues[i].packets;
+            if (queue.size() >= kMaxQueueDepth) queue.pop_front();   // drop the oldest
+            queue.push_back(packet);
         }
     }
     _arrived.notify_all();
@@ -100,7 +111,7 @@ int MPLoopback::receive(int inst, uint8_t *out, uint64_t *timestamp, bool hostOn
             queue.pop_front();
             if (hostOnly && !packet.fromHost) continue;   // not what this wait is for
             const int len = static_cast<int>(packet.data.size());
-            std::memcpy(out, packet.data.data(), packet.data.size());
+            if (len > 0) std::memcpy(out, packet.data.data(), packet.data.size());
             if (timestamp) *timestamp = packet.timestamp;
             return len;
         }
@@ -128,6 +139,18 @@ uint16_t MPLoopback::recvReplies(int inst, uint8_t *out, uint64_t timestamp, uin
     std::unique_lock<std::mutex> lock(_lock);
     if (!_queues[inst].connected) return 0;
 
+    // Same bookkeeping as LocalMP::RecvReplies: the wait ends when every AID
+    // in `aidmask` has answered OR when every connected peer has sent
+    // something — a header-only "nothing to send" reply included. Without
+    // the second condition the host eats the full timeout every frame a
+    // client is idle.
+    uint16_t connectedMask = 0;
+    for (int i = 0; i < kMaxInstances; ++i) {
+        if (_queues[i].connected) connectedMask |= static_cast<uint16_t>(1u << i);
+    }
+    uint16_t repliedMask = static_cast<uint16_t>(1u << inst);
+    if ((repliedMask & connectedMask) == connectedMask) return 0;   // nobody else is here
+
     const auto deadline = std::chrono::steady_clock::now() +
                           std::chrono::milliseconds(kRecvTimeoutMs);
     auto &queue = _queues[inst].replies;
@@ -137,15 +160,22 @@ uint16_t MPLoopback::recvReplies(int inst, uint8_t *out, uint64_t timestamp, uin
             Packet packet = std::move(queue.front());
             queue.pop_front();
             if (packet.sender == inst || isStale(packet.timestamp, timestamp)) continue;
-            if (packet.aid == 0 || packet.aid > 15) continue;   // outside the buffer
-            // FIXED per-AID slot: the core imposes it and then reads each
-            // reply from its own place. Truncate rather than spill into the
-            // neighbour.
-            const size_t room = static_cast<size_t>(kReplyStride);
-            const size_t len = std::min(packet.data.size(), room);
-            std::memcpy(out + (packet.aid - 1) * kReplyStride, packet.data.data(), len);
-            received |= static_cast<uint16_t>(1u << packet.aid);
-            if ((received & aidmask) == aidmask) return received;   // everyone has replied
+            if (!packet.data.empty() && packet.aid >= 1 && packet.aid <= 15) {
+                // FIXED per-AID slot: the core imposes it and then reads
+                // each reply from its own place. Truncate rather than spill
+                // into the neighbour.
+                const size_t room = static_cast<size_t>(kReplyStride);
+                const size_t len = std::min(packet.data.size(), room);
+                std::memcpy(out + (packet.aid - 1) * kReplyStride, packet.data.data(), len);
+                received |= static_cast<uint16_t>(1u << packet.aid);
+            }
+            if (packet.sender >= 0 && packet.sender < kMaxInstances) {
+                repliedMask |= static_cast<uint16_t>(1u << packet.sender);
+            }
+            if ((repliedMask & connectedMask) == connectedMask ||
+                (received & aidmask) == aidmask) {
+                return received;   // everyone has replied
+            }
         }
         if (_arrived.wait_until(lock, deadline) == std::cv_status::timeout) return received;
         if (!_queues[inst].connected) return received;
@@ -186,6 +216,30 @@ void MPLoopback::selfCheck() {
     // wrap.
     mp.sendReply(1, reply, sizeof(reply), 0, 2);
     assert(mp.recvReplies(0, buffer, 1, 1 << 2) == (1 << 2));
+
+    // A header-only reply (a client with nothing ready) still counts as that
+    // client answering: with every peer heard from, the host returns at once
+    // — leaving the data reply queued behind it for the next call.
+    assert(mp.sendReply(1, nullptr, 0, 1000, 0) == 0);
+    assert(mp.sendReply(1, reply, sizeof(reply), 1000, 2) == (int)sizeof(reply));
+    assert(mp.recvReplies(0, buffer, 1000, 1 << 2) == 0);
+    assert(mp.recvReplies(0, buffer, 1000, 1 << 2) == (1 << 2));
+
+    // A frame over the cap is refused outright; one exactly at it goes through.
+    static uint8_t big[kMaxFrameSize + 1] = {};
+    assert(mp.sendPacket(0, big, sizeof(big), 1000) == 0);
+    assert(mp.sendPacket(0, big, kMaxFrameSize, 1000) == kMaxFrameSize);
+    assert(mp.recvPacket(1, buffer, &ts) == kMaxFrameSize);
+
+    // A peer that never drains keeps only the newest kMaxQueueDepth frames.
+    for (uint8_t i = 0; i < kMaxQueueDepth + 8; ++i) {
+        assert(mp.sendPacket(0, &i, 1, 1000) == 1);
+    }
+    assert(mp.recvPacket(1, buffer, &ts) == 1 && buffer[0] == 8);   // the oldest 8 are gone
+    for (size_t i = 1; i < kMaxQueueDepth; ++i) {
+        assert(mp.recvPacket(1, buffer, &ts) == 1);
+    }
+    assert(mp.recvPacket(1, buffer, &ts) == 0);
 
     // If the host leaves, the client gets -1 instead of waiting.
     mp.end(0);

@@ -135,13 +135,25 @@ final class ROMListViewModel: ObservableObject {
         }
     }
 
+    /// Case, accent and width folded (`pokemon` finds "Pokémon", half-width
+    /// kana finds a full-width title) so the search matches how people type,
+    /// not how the banner was encoded. NFKC first: `.widthInsensitive` maps
+    /// half-width kana but leaves the half-width (semi-)voiced marks alone,
+    /// so "ﾎﾟ" would never equal "ポ" without it.
+    private static func searchFold(_ text: String) -> String {
+        text.precomposedStringWithCompatibilityMapping
+            .folding(options: [.diacriticInsensitive, .caseInsensitive, .widthInsensitive], locale: .current)
+    }
+
     private func applyFiltersAndSort() {
-        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let query = Self.searchFold(searchQuery.trimmingCharacters(in: .whitespacesAndNewlines))
         filteredROMs = romFiles.filter { rom in
             query.isEmpty
-                || rom.filename.lowercased().contains(query)
-                || rom.displayName.lowercased().contains(query)
-                || rom.gameCode.lowercased().contains(query)
+                || Self.searchFold(rom.filename).contains(query)
+                || Self.searchFold(rom.displayName).contains(query)
+                // The "----" placeholder would make every ROM without a game
+                // code match a "-" query.
+                || (rom.gameCode != ROMFile.unknownGameCode && Self.searchFold(rom.gameCode).contains(query))
         }
 
         switch sortOption {

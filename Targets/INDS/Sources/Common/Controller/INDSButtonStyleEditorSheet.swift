@@ -74,7 +74,8 @@ struct INDSButtonStyleEditorSheet: View {
     // MARK: - Sections
 
     private var buttonTitle: String {
-        "Button Style: \(buttonID.defaultStyleLabel)"
+        String(format: NSLocalizedString("Button Style: %@", comment: "Style sheet title; %@ is the button's label"),
+               buttonID.defaultStyleLabel)
     }
 
     private var previewSection: some View {

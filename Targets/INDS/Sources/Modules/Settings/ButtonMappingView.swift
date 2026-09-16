@@ -143,7 +143,7 @@ struct ButtonMappingView: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(.accentColor)
             } else if let key {
-                Text(key)
+                Text(physicalDisplayName(key))
                     .font(.caption.weight(.bold))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
@@ -155,6 +155,7 @@ struct ButtonMappingView: View {
                 }
                 .buttonStyle(.borderless)
                 .foregroundColor(.secondary)
+                .accessibilityLabel(NSLocalizedString("Clear Mapping", comment: "Removes the controller button assigned to this row"))
             } else {
                 Text("Unassigned")
                     .foregroundColor(.secondary)
@@ -214,6 +215,12 @@ struct ButtonMappingView: View {
         guard let key = physicalKey(for: target) else { return }
         INDSControllerMappingStore.setTarget(.none, forPhysical: key, controller: controller)
         mapping = INDSControllerMappingStore.activeMapping()
+    }
+
+    /// Physical keys are storage identifiers (`INDSControllerElements`);
+    /// the letters read the same everywhere, the one word does not.
+    private func physicalDisplayName(_ key: String) -> String {
+        key == "Options" ? NSLocalizedString("Options", comment: "Physical gamepad button") : key
     }
 
     /// Reverse lookup against the locally-cached `mapping` snapshot (not a

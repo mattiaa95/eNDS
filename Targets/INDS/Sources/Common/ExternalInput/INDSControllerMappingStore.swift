@@ -96,8 +96,8 @@ enum INDSMappingTarget: Int, CaseIterable, Identifiable, Codable {
         case .y: return "Y"
         case .l: return "L"
         case .r: return "R"
-        case .start: return "Start"
-        case .select: return "Select"
+        case .start: return NSLocalizedString("Start", comment: "Mapping target")
+        case .select: return NSLocalizedString("Select", comment: "Mapping target")
         case .up: return NSLocalizedString("Up", comment: "Mapping target")
         case .down: return NSLocalizedString("Down", comment: "Mapping target")
         case .left: return NSLocalizedString("Left", comment: "Mapping target")

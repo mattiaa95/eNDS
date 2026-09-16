@@ -28,7 +28,7 @@ struct ROMListView: View {
     /// Slow ambient pulse behind the empty-state icon.
     @State private var emptyStateGlowPulse = false
 
-    // ponytail: `.data` instead of our own `.ndsROM` on purpose. If another
+    // Note: `.data` instead of our own `.ndsROM` on purpose. If another
     // emulator that also exports `.nds` is installed (or the file comes from a
     // cloud provider that types it as plain `public.data`), the system types
     // the dumped ROM as *that* UTI and the picker greys it out — the file the
@@ -213,6 +213,12 @@ struct ROMListView: View {
         .onReceive(NotificationCenter.default.publisher(for: .biosFilesChanged)) { _ in
             viewModel.reload()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .emulationSessionEnded)) { _ in
+            // "Continue Playing", play time and the Resume badge all read
+            // UserDefaults/disk inside `body`; nothing republishes them on
+            // the way back from a game otherwise.
+            viewModel.reload()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .romImportNeedsReplaceConfirm)) { note in
             // An externally opened .sav would clobber a live battery save —
             // reuse the picker's "Already Exists" alert instead of overwriting.
@@ -305,6 +311,7 @@ struct ROMListView: View {
                 Image(systemName: "play.circle.fill")
                     .font(.system(size: 30))
                     .foregroundStyle(Color.accentColor)
+                    .accessibilityHidden(true)
             }
             .padding(12)
             .background(Color(red: 0.14, green: 0.14, blue: 0.19), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -426,6 +433,7 @@ struct ROMListView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 36))
                 .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
             Text("No games match \u{201C}\(viewModel.searchQuery)\u{201D}")
                 .font(.headline)
                 .multilineTextAlignment(.center)

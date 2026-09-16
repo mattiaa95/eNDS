@@ -35,6 +35,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// persisted to UserDefaults under the "eNDSAudioVolume" key.
 @property (nonatomic) double audioVolume;
 
+/// Transient output mute layered over `audioVolume` (Settings > Audio's
+/// "Mute While Other Audio Plays"). Applied in the audio render callback as a
+/// zero gain; never persisted, so a session that ends mid-duck cannot come
+/// back silent. Defaults to NO on every new instance.
+@property (nonatomic) BOOL outputDucked;
+
 /// Emulation speed multiplier. 1.0 is normal speed, 2.0 runs two console
 /// frames per paced tick, etc.; 0.5 is slow motion (one console frame every
 /// other paced tick — see EmuThreadMain's frame accumulator). Clamped to

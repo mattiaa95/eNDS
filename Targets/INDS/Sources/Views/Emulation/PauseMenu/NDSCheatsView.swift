@@ -251,14 +251,18 @@ private struct NDSCheatEditorView: View {
     }
 
     private func save() {
-        // New cheats start disabled (matches melonDS's own Qt "new AR code"
-        // default) — editing an existing one preserves whatever it was;
-        // `canSave` already guarantees `code` is valid either way, so this
-        // can never persist an enabled-but-invalid cheat.
+        // A cheat the user just typed in starts ON. melonDS's Qt frontend
+        // defaults a new AR code to off, but there the code list is a desktop
+        // window kept open next to the game; here it's a sheet the user opened
+        // to make something happen right now, and a new row landing with its
+        // toggle off reads as "I added the cheat and nothing happened".
+        // Editing an existing one preserves whatever it was; `canSave`
+        // already guarantees `code` is valid either way, so this can never
+        // persist an enabled-but-invalid cheat.
         var updated = NDSCheat(
             name: name.trimmingCharacters(in: .whitespaces),
             code: code,
-            enabled: cheat?.enabled ?? false
+            enabled: cheat?.enabled ?? true
         )
         if let existingID = cheat?.id {
             updated.id = existingID

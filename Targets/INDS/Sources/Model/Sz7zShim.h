@@ -55,8 +55,14 @@ int Sz7zArchive_CopyFileNameUTF16(const Sz7zArchive *archive, uint32_t index, ui
 /// must release it with `Sz7zArchive_FreeMemory`. Returns 0 on failure --
 /// bad index, a directory entry, an unsupported coder (AES-256 encryption
 /// isn't linked into this SDK subset, so an encrypted entry fails exactly
-/// like any other unsupported codec would), a CRC mismatch, or OOM -- in
-/// which case `*outData`/`*outSize` are left as NULL/0.
+/// like any other unsupported codec would), a CRC mismatch, OOM, or a
+/// solid block larger than 512 MB (the SDK decodes the entry's whole block,
+/// not just the entry; see `kSz7zMaxFolderUnpackSize`) -- in which case
+/// `*outData`/`*outSize` are left as NULL/0.
+///
+/// Memory: the returned buffer is a private copy of the entry; the decoded
+/// block itself stays cached in the archive handle for the next entry of
+/// the same block and is released by `Sz7zArchive_Close`.
 int Sz7zArchive_ExtractToBuffer(Sz7zArchive *archive, uint32_t index, uint8_t **outData, size_t *outSize);
 
 /// Frees a buffer returned by `Sz7zArchive_CopyFileNameUTF16` or

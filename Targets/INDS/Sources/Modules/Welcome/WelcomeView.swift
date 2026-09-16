@@ -63,6 +63,13 @@ struct WelcomeView: View {
 
     private let totalPages = 4
 
+    // Fixed point sizes that still follow Dynamic Type. Each value is the
+    // default-size look, so nothing changes at the standard setting.
+    @ScaledMetric(relativeTo: .largeTitle) private var welcomeTitleSize: CGFloat = 34
+    @ScaledMetric(relativeTo: .title) private var pageTitleSize: CGFloat = 28
+    @ScaledMetric(relativeTo: .caption2) private var cardBadgeSize: CGFloat = 9
+    @ScaledMetric(relativeTo: .subheadline) private var formatBadgeSize: CGFloat = 14
+
     var body: some View {
         ZStack {
             // Dark gaming background (matching the splash screen)
@@ -177,6 +184,9 @@ struct WelcomeView: View {
                 .padding(.bottom, 40)
             }
         }
+        // The page titles above scale with the setting, but past this point
+        // a page no longer fits between the Skip bar and the buttons.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .onChange(of: currentPage) { _, newPage in
             triggerPageAnimation(newPage)
         }
@@ -228,7 +238,7 @@ struct WelcomeView: View {
             Spacer().frame(height: 36)
 
             Text("Welcome to eNDS")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .font(.system(size: welcomeTitleSize, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .opacity(animatedPages.contains(0) ? 1 : 0)
                 .offset(y: animatedPages.contains(0) ? 0 : 20)
@@ -279,7 +289,7 @@ struct WelcomeView: View {
             Spacer().frame(height: 26)
 
             Text("Add Your Games")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.system(size: pageTitleSize, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .opacity(animatedPages.contains(1) ? 1 : 0)
                 .offset(y: animatedPages.contains(1) ? 0 : 20)
@@ -337,7 +347,7 @@ struct WelcomeView: View {
             Spacer().frame(height: 20)
 
             Text("Made for DS")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.system(size: pageTitleSize, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .opacity(animatedPages.contains(2) ? 1 : 0)
                 .offset(y: animatedPages.contains(2) ? 0 : 20)
@@ -391,7 +401,7 @@ struct WelcomeView: View {
             Spacer().frame(height: 24)
 
             Text("Your Way to Play")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.system(size: pageTitleSize, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .opacity(animatedPages.contains(3) ? 1 : 0)
                 .offset(y: animatedPages.contains(3) ? 0 : 20)
@@ -457,7 +467,7 @@ struct WelcomeView: View {
                         .foregroundColor(.white)
                     if let badge {
                         Text(badge.uppercased())
-                            .font(.system(size: 9, weight: .bold))
+                            .font(.system(size: cardBadgeSize, weight: .bold))
                             .foregroundColor(.white.opacity(0.6))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
@@ -483,7 +493,7 @@ struct WelcomeView: View {
 
     private func formatBadge(_ text: String, color: Color) -> some View {
         Text(text)
-            .font(.system(size: 14, weight: .bold, design: .monospaced))
+            .font(.system(size: formatBadgeSize, weight: .bold, design: .monospaced))
             .foregroundColor(color)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)

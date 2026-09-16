@@ -34,6 +34,7 @@
 //
 
 import GameController
+import UIKit
 
 /// Where a controller's physical elements actually live.
 ///
@@ -136,9 +137,20 @@ final class INDSGamepadManager {
     /// Mapped face/shoulder buttons currently down, plus a held Fast-Forward
     /// trigger: a pad that drops mid-press (Bluetooth, flat battery) never
     /// sends the release, so `releaseAllInputs` has to send it instead —
-    /// otherwise Mario keeps walking with nothing on screen to stop him.
+    /// otherwise the character keeps walking with nothing on screen to stop it.
     private var heldButtons: Set<INDSButton> = []
     private var fastForwardHeld = false
+    /// Last `pressed` state seen per physical key. `valueChangedHandler`
+    /// fires on every analog change of a trigger while `pressed` stays the
+    /// same, so without this edge check a remapped R2 cycled the layout (or
+    /// wrote a quick save) several times per squeeze.
+    private var physicalPressed: [String: Bool] = [:]
+
+    /// The manager whose handlers are currently installed on the shared
+    /// `GCController`. Two managers can overlap briefly (one game screen torn
+    /// down after the next was set up); the older one must not clear the
+    /// handlers the newer one just installed.
+    private static weak var handlerOwner: INDSGamepadManager?
 
     private static let stickThreshold: Float = 0.5
 
@@ -151,6 +163,13 @@ final class INDSGamepadManager {
         observers.append(center.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main) { [weak self] note in
             guard let controller = note.object as? GCController else { return }
             self?.handleDisconnect(of: controller)
+        })
+        // A button held while the app is suspended never delivers its
+        // release: the pad's state moves on without us. Let go of everything
+        // on the way out so nothing is still down on return.
+        observers.append(center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil,
+                                            queue: .main) { [weak self] _ in
+            self?.releaseHeldInputs()
         })
 
         // A controller can already be connected before this manager exists
@@ -170,7 +189,12 @@ final class INDSGamepadManager {
     // MARK: - Connect / disconnect
 
     private func attach(_ controller: GCController) {
-        guard current == nil else { return }
+        if let current {
+            // Keep the pad in use — unless it wired nothing, in which case a
+            // usable one replacing it is the only way to get input at all.
+            guard wiredInputCount == 0, controller !== current else { return }
+            releaseAllInputs(current)
+        }
         current = controller
         INDSControllerMappingStore.activateProfile(for: controller)
         configureHandlers(controller)
@@ -192,14 +216,26 @@ final class INDSGamepadManager {
     }
 
     private func releaseAllInputs(_ controller: GCController) {
-        controller.controllerPausedHandler = nil
-        INDSControllerElements.directionPad(on: controller)?.valueChangedHandler = nil
-        INDSControllerElements.thumbstick(on: controller)?.valueChangedHandler = nil
-        for (_, button) in INDSControllerElements.buttons(on: controller) {
-            button.valueChangedHandler = nil
+        // Only the manager that installed the handlers may clear them: a
+        // `GCController` is shared, and an older instance deallocating after
+        // a newer one attached would otherwise silence the new game's pad.
+        if Self.handlerOwner === self {
+            Self.handlerOwner = nil
+            controller.controllerPausedHandler = nil
+            INDSControllerElements.directionPad(on: controller)?.valueChangedHandler = nil
+            INDSControllerElements.thumbstick(on: controller)?.valueChangedHandler = nil
+            for (_, button) in INDSControllerElements.buttons(on: controller) {
+                button.valueChangedHandler = nil
+            }
         }
         wiredInputCount = 0
+        releaseHeldInputs()
+    }
 
+    /// Reports a release for everything currently down without unwiring the
+    /// pad — the disconnect path and the background path both end here.
+    private func releaseHeldInputs() {
+        physicalPressed = [:]
         let held = dpadDirections.union(stickDirections).union(heldButtons)
         dpadDirections = []
         stickDirections = []
@@ -214,6 +250,7 @@ final class INDSGamepadManager {
     // MARK: - Handler wiring
 
     private func configureHandlers(_ controller: GCController) {
+        Self.handlerOwner = self
         controller.controllerPausedHandler = { [weak self] _ in
             guard let self else { return }
             self.delegate?.gamepadManager(self, perform: .pause)
@@ -251,6 +288,11 @@ final class INDSGamepadManager {
     // MARK: - Physical input -> mapping target
 
     private func handlePhysical(_ key: String, pressed: Bool) {
+        // Edge only: an analog trigger reports every value change, most of
+        // them with `pressed` unchanged.
+        guard (physicalPressed[key] ?? false) != pressed else { return }
+        physicalPressed[key] = pressed
+
         let target = INDSControllerMappingStore.target(forPhysical: key)
 
         if let button = target.indsButton {

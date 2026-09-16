@@ -176,6 +176,65 @@
         }
       }
     },
+    "\"%1$@\" is open in another window. Close it first." : {
+      "comment" : "Alert: the user tried to rename, delete or replace a ROM that is running in another iPad window. %1$@ is the ROM's name.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%1$@“ ist in einem anderen Fenster geöffnet. Schließe es zuerst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%1$@» está abierto en otra ventana. Ciérralo primero."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« %1$@ » est ouvert dans une autre fenêtre. Fermez-le d'abord."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%1$@” è aperto in un'altra finestra. Chiudilo prima."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」は別のウィンドウで開いています。先に閉じてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%1$@”이(가) 다른 창에서 열려 있습니다. 먼저 닫아 주세요."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%1$@» está aberto noutra janela. Feche-o primeiro."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%1$@» открыта в другом окне. Сначала закройте её."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%1$@”已在另一个窗口中打开。请先将其关闭。"
+          }
+        }
+      }
+    },
     "\"ROM Only\" keeps its battery save and save states in case you re-import it later. \"ROM + Save Data\" removes everything for this game." : {
       "localizations" : {
         "de" : {
@@ -4119,6 +4178,65 @@
         }
       }
     },
+    "Button Style: %@" : {
+      "comment" : "Style sheet title; %@ is the button's label",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tastenstil: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estilo del botón: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style du bouton : %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stile del pulsante: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボタンのスタイル：%@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버튼 스타일: %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estilo do botão: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стиль кнопки: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按键样式：%@"
+          }
+        }
+      }
+    },
     "Buttons" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4466,6 +4584,124 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "请检查您的网络连接，然后重试。在此期间您可以继续游戏——除 PRO 附加功能外，此页面不会锁定任何内容。"
+          }
+        }
+      }
+    },
+    "Clear Mapping" : {
+      "comment" : "Removes the controller button assigned to this row",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belegung löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar asignación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer l'attribution"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi mappatura"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "割り当てを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "매핑 해제"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar mapeamento"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сбросить назначение"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除映射"
+          }
+        }
+      }
+    },
+    "Close" : {
+      "comment" : "Paywall close button",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiudi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "닫기"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрыть"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
           }
         }
       }
@@ -8624,71 +8860,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "字体"
-          }
-        }
-      }
-    },
-    "Free trial — then %@ / %@, auto-renewing. Cancel anytime." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kostenlos testen — danach %@ / %@, verlängert sich automatisch. Jederzeit kündbar. Die Zahlung wird bei der Kaufbestätigung von deiner Apple-ID abgebucht."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Free trial — then %1$@ / %2$@, auto-renewing. Cancel anytime. Payment is charged to your Apple ID at confirmation of purchase."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prueba gratis — después %@ / %@, con renovación automática. Cancela cuando quieras. El pago se carga a tu ID de Apple al confirmar la compra."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Essai gratuit — ensuite %@ / %@, renouvellement automatique. Annulable à tout moment. Le paiement est débité de votre identifiant Apple lors de la confirmation de l'achat."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prova gratuita — poi %@ / %@, con rinnovo automatico. Disdici quando vuoi. Il pagamento viene addebitato sul tuo ID Apple alla conferma dell'acquisto."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無料トライアル後は %@／%@、自動更新。いつでもキャンセル可能。 購入の確認時に、支払いは Apple ID に請求されます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "무료 체험 후 %@ / %@, 자동 갱신. 언제든지 취소 가능. 구매 확인 시 Apple ID로 요금이 청구됩니다."
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Teste grátis — depois %@ / %@, com renovação automática. Cancele quando quiser. O pagamento é cobrado no seu ID Apple na confirmação da compra."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Бесплатный период — затем %@ / %@, автопродление. Отмена в любой момент. Оплата списывается с вашего Apple ID при подтверждении покупки."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "免费试用后 %@／%@，自动续订。可随时取消。 确认购买后，将从您的 Apple ID 中扣款。"
           }
         }
       }
@@ -13863,6 +14034,65 @@
         }
       }
     },
+    "Options" : {
+      "comment" : "Physical gamepad button",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optionen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Options"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opzioni"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オプション"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "옵션"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opções"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Опции"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选项"
+          }
+        }
+      }
+    },
     "Orientation" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -14036,65 +14266,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "覆盖此存档位？"
-          }
-        }
-      }
-    },
-    "Pair a game controller in iOS Settings → Bluetooth, then come back here to customize its buttons." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopple einen Gamecontroller in den iOS-Einstellungen → Bluetooth und komm anschließend hierher zurück, um die Tasten anzupassen."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Empareja un mando de videojuegos en Ajustes de iOS → Bluetooth y, a continuación, vuelve aquí para personalizar sus botones."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Associez une manette de jeu dans les Réglages iOS → Bluetooth, puis revenez ici pour personnaliser ses boutons."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Associa un controller di gioco nelle Impostazioni di iOS → Bluetooth, poi torna qui per personalizzarne i pulsanti."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOSの「設定」→「Bluetooth」でゲームコントローラーをペアリングしてから、ここに戻ってボタンの設定をカスタマイズしてください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS 설정 → 블루투스에서 게임 컨트롤러를 페어링한 다음, 다시 이곳으로 돌아와 버튼을 사용자 지정하세요."
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emparelhe um comando de jogos em «Definições» → «Bluetooth» no iOS e, em seguida, volte aqui para personalizar os seus botões."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подключите игровой контроллер в «Настройках» iOS → «Bluetooth», а затем вернитесь сюда, чтобы настроить его кнопки."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在 iOS“设置”→“蓝牙”中配对游戏手柄，然后返回此处自定义其按键。"
           }
         }
       }
@@ -18201,6 +18372,65 @@
         }
       }
     },
+    "Select" : {
+      "comment" : "Mapping target",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SELECT"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        }
+      }
+    },
     "Select button" : {
       "comment" : "VoiceOver label",
       "localizations" : {
@@ -19604,6 +19834,65 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "堆叠"
+          }
+        }
+      }
+    },
+    "Start" : {
+      "comment" : "Mapping target",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "START"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
           }
         }
       }
@@ -22009,6 +22298,65 @@
         }
       }
     },
+    "TOP" : {
+      "comment" : "Layout editor: label on the top screen silhouette",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OBEN"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SUPERIOR"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HAUT"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SUPERIORE"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上画面"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상단"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SUPERIOR"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ВЕРХ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上屏"
+          }
+        }
+      }
+    },
     "Top Screen Only" : {
       "comment" : "DS screen layout: only the top screen",
       "localizations" : {
@@ -22064,6 +22412,65 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "仅限顶部屏幕"
+          }
+        }
+      }
+    },
+    "TOUCH" : {
+      "comment" : "Layout editor: label on the touch screen silhouette",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOUCH"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TÁCTIL"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TACTILE"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOUCH"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タッチ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터치"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TÁTIL"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "СЕНСОР"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触摸屏"
           }
         }
       }

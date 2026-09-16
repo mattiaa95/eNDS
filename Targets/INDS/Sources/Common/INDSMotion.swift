@@ -87,7 +87,6 @@ enum INDSMotion {
 /// animation) for the requested animation when Reduce Motion is enabled. Use
 /// this instead of calling `withAnimation` directly for any *new* imperative
 /// state change introduced during the motion pass.
-@discardableResult
 // Non-generic and never inlined on purpose: the generic `rethrows` version
 // of this wrapper crashed the Swift optimizer (SIL "OwnershipModelEliminator"
 // verification failure) when archiving Release — triggered from

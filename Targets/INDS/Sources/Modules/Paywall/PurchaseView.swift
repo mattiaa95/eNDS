@@ -74,6 +74,20 @@ struct PurchaseView: View {
     /// ties the CTA back to whichever plan/lifetime row was just tapped.
     @State private var ctaPulse = false
 
+    // Fixed point sizes that still follow Dynamic Type. Each value is the
+    // default-size look, so nothing changes at the standard setting.
+    @ScaledMetric(relativeTo: .largeTitle) private var celebrationIconSize: CGFloat = 64
+    @ScaledMetric(relativeTo: .title) private var celebrationTitleSize: CGFloat = 26
+    @ScaledMetric(relativeTo: .largeTitle) private var heroIconSize: CGFloat = 44
+    @ScaledMetric(relativeTo: .largeTitle) private var heroTitleSize: CGFloat = 32
+    @ScaledMetric(relativeTo: .body) private var featureIconSize: CGFloat = 18
+    @ScaledMetric(relativeTo: .body) private var featureCheckSize: CGFloat = 16
+    @ScaledMetric(relativeTo: .caption2) private var saveBadgeSize: CGFloat = 9
+    @ScaledMetric(relativeTo: .subheadline) private var savePercentSize: CGFloat = 14
+    @ScaledMetric(relativeTo: .headline) private var ctaTextSize: CGFloat = 18
+    @ScaledMetric(relativeTo: .headline) private var ctaIconSize: CGFloat = 16
+    @ScaledMetric(relativeTo: .caption) private var closeIconSize: CGFloat = 12
+
     // No delay: holding someone inside a sales screen is a dark pattern
     // under the EU unfair-commercial-practices directive, and Apple requires
     // a way out. This used to be up to 5 s.
@@ -148,6 +162,12 @@ struct PurchaseView: View {
         purchaseModel.productDetails.first(where: { $0.productId == selectedProductId })
     }
 
+    /// StoreKit answered and gave us nothing — the plan cards and the CTA
+    /// have nothing to sell, so the layout shows the retry state instead.
+    private var productsUnavailable: Bool {
+        !purchaseModel.isFetchingProducts && purchaseModel.productDetails.isEmpty
+    }
+
     /// Lifetime shows for former subscribers and long-time non-subscribers —
     /// the people for whom a pay-once option is genuinely the better fit.
     var shouldOfferLifetime: Bool {
@@ -176,11 +196,19 @@ struct PurchaseView: View {
                         featuresSection
                             .padding(.top, 28)
 
-                        planSelector
-                            .padding(.top, 28)
+                        if productsUnavailable {
+                            // Inline, not an overlay: an empty plan selector
+                            // has no height, so an overlay centred on it
+                            // spilled over the features card and the CTA.
+                            unavailableProductsState
+                                .padding(.top, 28)
+                        } else {
+                            planSelector
+                                .padding(.top, 28)
 
-                        ctaButton
-                            .padding(.top, 24)
+                            ctaButton
+                                .padding(.top, 24)
+                        }
 
                         footerSection
                             .padding(.top, 20)
@@ -190,6 +218,9 @@ struct PurchaseView: View {
                 }
             }
         }
+        // Fixed-size titles and icons above scale with the setting, but past
+        // this point the hero title and plan rows no longer fit the screen.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .onAppear(perform: onAppearActions)
         .onChange(of: purchaseModel.purchaseSuccess) { _, success in
             if success {
@@ -223,11 +254,11 @@ struct PurchaseView: View {
             Spacer()
 
             Image(systemName: "crown.fill")
-                .font(.system(size: 64))
+                .font(.system(size: celebrationIconSize))
                 .foregroundStyle(brandGradient)
 
             Text(NSLocalizedString("Welcome to eNDS PRO!", comment: "Purchase success title"))
-                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .font(.system(size: celebrationTitleSize, weight: .bold, design: .rounded))
                 .foregroundStyle(brandGradient)
 
             Text(NSLocalizedString("Thank you for your support!\nEnjoy the full experience.", comment: "Purchase success message"))
@@ -296,7 +327,7 @@ struct PurchaseView: View {
                     .frame(width: 100, height: 100)
 
                 Image(systemName: "crown.fill")
-                    .font(.system(size: 44))
+                    .font(.system(size: heroIconSize))
                     .foregroundStyle(brandGradient)
             }
             .scaleEffect(heroScale)
@@ -304,7 +335,7 @@ struct PurchaseView: View {
 
             VStack(spacing: 6) {
                 Text("eNDS PRO")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(.system(size: heroTitleSize, weight: .bold, design: .rounded))
                     .foregroundStyle(brandGradient)
 
                 Text(NSLocalizedString("The ultimate DS experience", comment: ""))
@@ -380,7 +411,7 @@ struct PurchaseView: View {
     private func featureRow(icon: String, iconColor: Color, title: String, subtitle: String, index: Int) -> some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: featureIconSize, weight: .semibold))
                 .foregroundColor(iconColor)
                 .frame(width: 32, height: 32)
 
@@ -398,7 +429,7 @@ struct PurchaseView: View {
 
             Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(.green.opacity(0.8))
-                .font(.system(size: 16))
+                .font(.system(size: featureCheckSize))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -452,17 +483,14 @@ struct PurchaseView: View {
             if purchaseModel.isFetchingProducts {
                 ProgressView()
                     .scaleEffect(1.2)
-            } else if purchaseModel.productDetails.isEmpty {
-                // Never leave a spinner forever: StoreKit returns an empty set
-                // whenever the products aren't approved yet, the device is
-                // offline, or the sandbox account is wrong — and a paywall that
-                // spins for eternity is exactly what a reviewer will screenshot.
-                unavailableProductsState
             }
         }
     }
 
-    /// Shown in place of the plan cards when StoreKit gave us nothing.
+    /// Shown in place of the plan cards when StoreKit gave us nothing (see
+    /// `productsUnavailable`). Never leave a spinner forever: StoreKit
+    /// returns an empty set whenever the products aren't approved yet, the
+    /// device is offline, or the sandbox account is wrong.
     private var unavailableProductsState: some View {
         VStack(spacing: 10) {
             Image(systemName: "wifi.exclamationmark")
@@ -516,7 +544,7 @@ struct PurchaseView: View {
 
                             if isYearly, let saved = calculatePercentageSaved {
                                 Text(String(format: NSLocalizedString("SAVE %d%%", comment: "Savings badge"), saved))
-                                    .font(.system(size: 9, weight: .heavy))
+                                    .font(.system(size: saveBadgeSize, weight: .heavy))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
@@ -545,7 +573,7 @@ struct PurchaseView: View {
 
                     if isYearly, let saved = calculatePercentageSaved {
                         Text(String(format: NSLocalizedString("-%d%%", comment: ""), saved))
-                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .font(.system(size: savePercentSize, weight: .heavy, design: .rounded))
                             .foregroundColor(Color.indsCrimsonLight)
                     }
                 }
@@ -620,9 +648,9 @@ struct PurchaseView: View {
                     HStack(spacing: 8) {
                         Spacer()
                         Text(callToActionText)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.system(size: ctaTextSize, weight: .bold, design: .rounded))
                         Image(systemName: "arrow.right")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: ctaIconSize, weight: .bold))
                         Spacer()
                     }
                     .foregroundColor(.white)
@@ -632,6 +660,10 @@ struct PurchaseView: View {
                     .shadow(color: Color.indsCrimsonDark.opacity(0.35), radius: 12, x: 0, y: 6)
                 }
                 .opacity(purchaseModel.isPurchasing ? 0 : 1)
+                // Invisible while loading, but `.opacity(0)` still takes
+                // taps — and with no products a tap ends in "Product not
+                // found".
+                .disabled(purchaseModel.productDetails.isEmpty)
             }
             // Brief pulse whenever a plan/lifetime row is tapped — see
             // `pulseCTA()`.
@@ -741,12 +773,13 @@ struct PurchaseView: View {
                     isPresented = false
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: closeIconSize, weight: .bold))
                         .foregroundColor(.secondary)
                         .padding(8)
                         .background(Color(UIColor.tertiarySystemFill))
                         .clipShape(Circle())
                 }
+                .accessibilityLabel(NSLocalizedString("Close", comment: "Paywall close button"))
             }
         }
         .padding(.top, 12)

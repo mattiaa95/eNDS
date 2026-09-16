@@ -35,9 +35,18 @@ enum NDSPauseMenuAction {
 // hold is the same flat 2x (see `NDSRomViewController.setFastForwardHold`).
 
 private struct NDSSpeedSliderView: View {
-    @Binding var speedIndex: Double
+    // Seeded in init, not onAppear: seeding an already-live @State goes
+    // through `.onChange(of: speedIndex)` below and reported the current
+    // speed back as a user change on every open of the menu.
+    @State private var speedIndex: Double
     let speeds: [Double]
     let onSpeedChanged: (Double) -> Void
+
+    init(currentSpeed: Double, speeds: [Double], onSpeedChanged: @escaping (Double) -> Void) {
+        _speedIndex = State(initialValue: Double(speeds.firstIndex(of: currentSpeed) ?? 0))
+        self.speeds = speeds
+        self.onSpeedChanged = onSpeedChanged
+    }
 
     // "%.0fx" reads fine for 1x/2x/4x but would print "0x" for 0.5 — only
     // that one non-integral speed needs the decimal place.
@@ -329,7 +338,6 @@ struct NDSPauseMenuView: View {
     let onDisplayFilterChanged: (NDSDisplayFilter) -> Void
     let onToggleClipRecording: () -> Void
 
-    @State private var speedIndex: Double = 0
     @State private var volume: Double = 0.7
     @State private var layoutMode: DSScreenLayoutMode = .stacked
     @State private var swapEnabled = false
@@ -385,7 +393,7 @@ struct NDSPauseMenuView: View {
                         clipRecordingRow
                     }
 
-                    NDSSpeedSliderView(speedIndex: $speedIndex, speeds: Self.speeds, onSpeedChanged: onSpeedChanged)
+                    NDSSpeedSliderView(currentSpeed: currentSpeed, speeds: Self.speeds, onSpeedChanged: onSpeedChanged)
 
                     NDSScreenLayoutCard(mode: $layoutMode, swapEnabled: $swapEnabled, stretchEnabled: $stretchEnabled,
                                        onCycle: onCycleLayout, onToggleSwap: onToggleSwap, onToggleStretch: onToggleStretch)
@@ -478,7 +486,6 @@ struct NDSPauseMenuView: View {
         }
         .background(Color(UIColor.systemGroupedBackground))
         .onAppear {
-            speedIndex = Double(Self.speeds.firstIndex(of: currentSpeed) ?? 0)
             volume = initialVolume
             layoutMode = initialLayoutMode
             swapEnabled = initialSwapEnabled

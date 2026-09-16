@@ -33,7 +33,14 @@ struct ProfileSettingsView: View {
                         // Clamp as it is typed rather than silently dropping
                         // the tail on save — the console has room for ten
                         // characters and the field should feel like it.
-                        let clamped = String(newValue.prefix(INDSConsolePreferences.maxNicknameLength))
+                        // The firmware field is ten UTF-16 code units, not
+                        // ten grapheme clusters: ten emoji would otherwise
+                        // reach the console as five. Dropping whole
+                        // characters never splits a surrogate pair.
+                        var clamped = newValue
+                        while clamped.utf16.count > INDSConsolePreferences.maxNicknameLength {
+                            clamped.removeLast()
+                        }
                         if clamped != newValue { nickname = clamped }
                         INDSConsolePreferences.nickname = clamped
                     }

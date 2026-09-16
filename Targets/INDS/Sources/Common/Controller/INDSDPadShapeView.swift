@@ -18,6 +18,34 @@ final class INDSDPadShapeView: UIView {
     private let strokeLayer = CAShapeLayer()
     private let arrowsLayer = CAShapeLayer()
 
+    /// VoiceOver: this view is a focusable element (`NDSControllerView` names
+    /// it) but takes no touches, so without custom actions it could be
+    /// selected and never pressed. Each action fires one direction through
+    /// the owner's press-and-release path.
+    var onAccessibilityDirection: ((INDSButton) -> Void)? {
+        didSet { configureAccessibilityActions() }
+    }
+
+    private func configureAccessibilityActions() {
+        guard onAccessibilityDirection != nil else {
+            accessibilityCustomActions = nil
+            return
+        }
+        let directions: [(name: String, button: INDSButton)] = [
+            (NSLocalizedString("Up", comment: "Mapping target"), .up),
+            (NSLocalizedString("Down", comment: "Mapping target"), .down),
+            (NSLocalizedString("Left", comment: "Mapping target"), .left),
+            (NSLocalizedString("Right", comment: "Mapping target"), .right),
+        ]
+        accessibilityCustomActions = directions.map { direction in
+            UIAccessibilityCustomAction(name: direction.name) { [weak self] _ in
+                guard let handler = self?.onAccessibilityDirection else { return false }
+                handler(direction.button)
+                return true
+            }
+        }
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear

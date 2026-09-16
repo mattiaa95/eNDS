@@ -26,6 +26,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         EntitlementManager.shared.startTransactionListener()
         EntitlementManager.shared.refreshEntitlementsAsync()
 
+        // Before the first import can start, so it never races a live one.
+        ROMStorageManager.removeStaleImportDirectories()
+
         if let url = launchOptions?[.url] as? URL {
             Self.handleFileURL(url)
         }
@@ -71,11 +74,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     /// a plain double-tap on a `.nds`/`.zip`/`.7z`/`.sav`) through the same import
     /// dispatcher the in-app "+" picker uses.
     ///
-    /// A duplicate `.nds` is replaced silently (worst case the user re-imports a
-    /// game they already had). A duplicate `.sav` is NOT: it would overwrite the
-    /// live battery save, so it goes through the same "Already Exists / Replace?"
-    /// alert the in-app picker uses. Someone double-tapping a `.sav` in Files to
-    /// see what it is must not lose their progress for it.
+    /// A duplicate `.nds` is replaced silently only when it is the same game
+    /// (`ROMReplacePolicy.ifSameGame`: identical header and size). A different
+    /// file under a known name — a hack, a randomizer output — goes through the
+    /// same "Already Exists / Replace?" alert the in-app picker uses, and on
+    /// confirmation the old save states are set aside rather than resumed into
+    /// it. A duplicate `.sav` always asks: it would overwrite the live battery
+    /// save, and someone double-tapping a `.sav` in Files to see what it is
+    /// must not lose their progress for it.
     @MainActor
     static func handleFileURL(_ url: URL) {
         let ext = url.pathExtension.lowercased()
@@ -99,7 +105,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     private static func importExternal(_ url: URL, isSave: Bool) async {
         do {
-            let outcome = try ROMStorageManager.importAny(from: url, replaceExisting: !isSave)
+            let outcome = try ROMStorageManager.importAny(from: url, replacePolicy: isSave ? .never : .ifSameGame)
             await MainActor.run {
                 NotificationCenter.default.post(
                     name: .romImported,
@@ -115,9 +121,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                 }
             }
         } catch ROMStorageError.duplicateFile {
-            // Only reachable for .sav (ROMs import with replaceExisting: true).
-            // Stage a copy in tmp: the security-scoped grant on `url` is tied
-            // to this open, and the user's answer can be seconds away.
+            // A `.sav`, or a `.nds` that is not the same game as the one it
+            // would replace. Stage a copy in tmp: the security-scoped grant on
+            // `url` is tied to this open, and the user's answer can be seconds
+            // away.
             let staged = FileManager.default.temporaryDirectory
                 .appendingPathComponent(url.lastPathComponent)
             try? FileManager.default.removeItem(at: staged)

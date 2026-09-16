@@ -108,6 +108,74 @@ bool ReadFixedFile(const std::string& path, std::array<u8, N>& out) {
     return true;
 }
 
+// Same as ReadFile, but into a buffer the caller can hand straight to
+// NDSCart::ParseROM's owning overload. The pointer overload copies the whole
+// image (CopyToUnique), so going through a std::vector kept two copies of
+// the cart alive for the rest of the load. `new` rather than make_unique: no
+// point zero-filling up to 512 MB that is overwritten on the next line.
+std::unique_ptr<u8[]> ReadFileOwned(const std::string& path, u32& outLength) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) return nullptr;
+    std::streamsize size = file.tellg();
+    if (size <= 0 || size > kMaxReadFileSize) return nullptr;
+    file.seekg(0, std::ios::beg);
+    std::unique_ptr<u8[]> out(new u8[static_cast<size_t>(size)]);
+    if (!file.read(reinterpret_cast<char*>(out.get()), size).good()) return nullptr;
+    outLength = static_cast<u32>(size);
+    return out;
+}
+
+// Initial capacity for a serialized state. Savestate's own DEFAULT_SIZE
+// mallocs 32 MB up front; a DS state is ~6 MB and the buffer doubles itself
+// when a write would overflow (Savestate::VarArray -> Resize), so starting
+// smaller costs at most one realloc for an unusually large state.
+constexpr u32 kSavestateInitialSize = 8 * 1024 * 1024;
+
+// How long the mic capture pipeline outlives the game's mic window. The DS
+// mic has no explicit open/close: the core closes it two frames after the
+// last TSC AUX sample and reopens it on the next one (Mic.cpp Advance /
+// SPI.cpp), so a game that polls the mic in bursts produces a
+// Mic_Stop/Mic_Start pair every few frames. Each edge acted on immediately
+// means a full engine stop, session category swap and restart.
+constexpr int64_t kMicCloseDebounceNanoseconds = 2 * NSEC_PER_SEC;
+
+// Latest battery-save snapshot waiting to be written, shared between the
+// thread that produced it (the emulation thread, inside RunFrame, or the
+// main thread flushing SRAM on a state load) and the serial save queue that
+// writes it. Only ever one snapshot: a newer one replaces a pending one
+// outright, so a burst of page writes (one Platform::WriteNDSSave per SPI
+// transaction, per 0x800-byte block on NAND carts) collapses into a single
+// file write of the final contents. Owned by a shared_ptr so a queued write
+// block never needs the bridge or its Runtime to still exist.
+struct SaveWriter {
+    std::mutex mutex;
+    std::string path;        // destination, captured with the snapshot
+    std::vector<u8> pending; // empty once the queue has taken it
+    bool queued = false;     // a drain block is already queued for `pending`
+};
+
+// Runs on the serial save queue. Takes the pending snapshot (clearing
+// `queued` under the lock, so a write arriving during the file I/O queues a
+// fresh drain that runs after this one) and writes it atomically.
+void DrainPendingSave(const std::shared_ptr<SaveWriter>& writer) {
+    std::vector<u8> bytes;
+    std::string path;
+    {
+        std::lock_guard<std::mutex> lock(writer->mutex);
+        bytes.swap(writer->pending);
+        path = writer->path;
+        writer->queued = false;
+    }
+    if (bytes.empty() || path.empty()) return;
+
+    NSData *data = [NSData dataWithBytesNoCopy:bytes.data() length:bytes.size() freeWhenDone:NO];
+    NSString *nsPath = [NSString stringWithUTF8String:path.c_str()];
+    NSError *error = nil;
+    if (![data writeToFile:nsPath options:NSDataWritingAtomic error:&error]) {
+        NSLog(@"[melonDS] Failed to write NDS save: %@", error.localizedDescription); // no path in Release logs
+    }
+}
+
 /// `message` doubles as the catalog key: every call site's literal has an
 /// entry in Localizable.xcstrings, since these surface verbatim in HUD
 /// toasts ("Couldn't load state: %@") and the ROM-load error screen.
@@ -132,6 +200,11 @@ struct Runtime {
     std::string romFileName;  // ROM filename incl. extension, for direct boot
     std::string romBaseName;  // ROM filename without extension, for save states
 
+    // Battery-save write coalescing (see SaveWriter above). Shared with every
+    // queued write block, so those outlive neither the Runtime nor the bridge
+    // by accident.
+    std::shared_ptr<SaveWriter> saveWriter = std::make_shared<SaveWriter>();
+
     // Input: written from whichever thread handles UI events, read once per
     // frame by the emulation thread. Buttons are independent bits so a plain
     // atomic bitmask is lock-free; touch is a small struct guarded by a mutex
@@ -146,6 +219,8 @@ struct Runtime {
     // written from the main thread on user changes. Plain atomics are
     // sufficient (single scalar, no cross-field consistency needed).
     std::atomic<double> volume{1.0};
+    // Transient mute over `volume` (see -outputDucked). Never persisted.
+    std::atomic<bool> outputDucked{false};
     std::array<s16, kAudioScratchFrames * 2> audioScratch{};
 
     // Fast-forward multiplier, read once per paced tick.
@@ -384,7 +459,7 @@ OSStatus RenderAudio(Runtime *r, AVAudioFrameCount frameCount, AudioBufferList *
         framesRead = nds->SPU.ReadOutput(r->audioScratch.data(), static_cast<int>(framesToRequest));
     }
 
-    const float volume = static_cast<float>(r->volume.load());
+    const float volume = r->outputDucked.load() ? 0.0f : static_cast<float>(r->volume.load());
     for (AVAudioFrameCount i = 0; i < frameCount; i++) {
         float l = 0.0f, rr = 0.0f;
         if (static_cast<int>(i) < framesRead) {
@@ -712,15 +787,28 @@ void* DynamicLibrary_LoadFunction(DynamicLibrary*, const char*) { return nullptr
     CFTimeInterval _lastAudioWatchdogTime;
     // Set at the top of -dealloc. melonDS re-enters this object while the
     // core shuts down, and a __weak self formed then is a fatal error — see
-    // -micCoreDidClose. Same thread as the teardown (the emu thread is joined
-    // before `nds->Stop()` runs), so a plain BOOL is enough.
-    BOOL _tearingDown;
+    // -micCoreDidClose. Written on the deallocating thread, read wherever
+    // the core calls back in (the emulation thread for Mic_Start/Mic_Stop,
+    // whichever thread AVFoundation posts its notifications on), hence
+    // atomic rather than a plain BOOL.
+    std::atomic<bool> _tearingDown;
+    // Serial, utility QoS: every battery-save and autosave write goes
+    // through here, in order, off the emulation thread. Draining it
+    // (-flushPendingSaveWrites) is what "the file is on disk" means.
+    dispatch_queue_t _saveQueue;
+    // The armed "stop capture" half of -refreshMicrophoneCaptureState,
+    // while the game's mic window is closed but the debounce hasn't run out
+    // (see kMicCloseDebounceNanoseconds). Main-thread-confined; nil when
+    // nothing is pending.
+    dispatch_block_t _pendingMicrophoneTeardown;
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
         _runtime = new Runtime();
+        dispatch_queue_attr_t saveQueueAttr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INITIATED, 0);
+        _saveQueue = dispatch_queue_create("com.mls.inds.melonds.save", saveQueueAttr);
         // -1, not 0: 0 is a real Firmware::Language (Japanese), so the
         // "caller never set one" default has to sit outside the enum.
         _firmwareLanguage = -1;
@@ -735,8 +823,10 @@ void* DynamicLibrary_LoadFunction(DynamicLibrary*, const char*) { return nullptr
     // Must be set BEFORE -stopEmulation: tearing the core down re-enters this
     // object from melonDS (see -micCoreDidClose), and anything that forms a
     // __weak self from there would abort the process.
-    _tearingDown = YES;
+    _tearingDown.store(true);
     [NSNotificationCenter.defaultCenter removeObserver:self];
+    // -stopEmulation drains the save queue after the core is gone, so no
+    // queued write can outlive the Runtime deleted right after.
     [self stopEmulation];
     delete _runtime;
 }
@@ -768,6 +858,16 @@ void* DynamicLibrary_LoadFunction(DynamicLibrary*, const char*) { return nullptr
     double clamped = std::clamp(audioVolume, 0.0, 1.0);
     _runtime->volume.store(clamped);
     [[NSUserDefaults standardUserDefaults] setDouble:clamped forKey:@"eNDSAudioVolume"];
+}
+
+- (BOOL)outputDucked {
+    return _runtime->outputDucked.load();
+}
+
+- (void)setOutputDucked:(BOOL)outputDucked {
+    // Deliberately not written to UserDefaults: this is a live-session mute,
+    // unlike `audioVolume`, which is the user's own setting.
+    _runtime->outputDucked.store(outputDucked);
 }
 
 - (double)speedMultiplier {
@@ -856,8 +956,9 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     // NDS instance it's about to replace.
     [self stopEmulation];
 
-    std::vector<u8> romData;
-    if (!ReadFile(romPath.fileSystemRepresentation, romData)) {
+    u32 romLength = 0;
+    std::unique_ptr<u8[]> romData = ReadFileOwned(romPath.fileSystemRepresentation, romLength);
+    if (!romData) {
         if (error) *error = MakeError(1, @"Unable to read ROM data.");
         return NO;
     }
@@ -913,9 +1014,11 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
         cartArgs.SRAM = std::make_unique<u8[]>(saveData.size());
         memcpy(cartArgs.SRAM.get(), saveData.data(), saveData.size());
     }
+    // The owning overload: the cart takes this buffer as-is instead of
+    // copying it, so the image exists exactly once from here on.
     auto cart = melonDS::NDSCart::ParseROM(
-        romData.data(),
-        static_cast<u32>(romData.size()),
+        std::move(romData),
+        romLength,
         (__bridge void *)self,
         std::make_optional(std::move(cartArgs))
     );
@@ -1071,7 +1174,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 // about what exactly changed.
 
 - (void)handleAudioEngineConfigurationChange:(NSNotification *)notification {
-    if (_tearingDown) return;
+    if (_tearingDown.load()) return;
     // Posted "on a thread other than the thread on which the engine was
     // stopped" (AVAudioEngine.h); everything it leads to is main-thread-only.
     __weak MelonDSCoreBridge *weakSelf = self;
@@ -1091,7 +1194,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 // the hardware-change path already does — so this costs five lines and closes
 // the last of the three.
 - (void)handleMediaServicesWereReset:(NSNotification *)notification {
-    if (_tearingDown) return;
+    if (_tearingDown.load()) return;
     __weak MelonDSCoreBridge *weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         [weakSelf rebuildAudioGraphAfterHardwareChange];
@@ -1099,7 +1202,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 }
 
 - (void)handleAudioSessionInterruption:(NSNotification *)notification {
-    if (_tearingDown) return;
+    if (_tearingDown.load()) return;
     NSNumber *rawType = notification.userInfo[AVAudioSessionInterruptionTypeKey];
     if (rawType.unsignedIntegerValue != AVAudioSessionInterruptionTypeEnded) return;
     // ShouldResume is the system's permission to take the session back; it is
@@ -1213,8 +1316,12 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 }
 
 - (void)pauseEmulation {
-    _runtime->wantActive.store(false);
-    _runtime->syncCV.notify_all();
+    // Wait for the in-flight tick, not just the flag: a battery write issued
+    // by a RunFrame still finishing would otherwise land on the save queue
+    // after the flush below, and this pause is what the background/exit path
+    // relies on for "the .sav is on disk".
+    PauseAndWaitIdle(_runtime);
+    [self flushPendingSaveWrites];
     // Stop listening the moment the game pauses, even though melonDS's own
     // mic state (invisible to us) stays logically open — never keep the mic
     // hot behind a paused/backgrounded game. -refreshMicrophoneCaptureState
@@ -1235,6 +1342,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     _runtime->threadAlive.store(false);
 
     _runtime->micCoreOpen.store(false);
+    [self cancelDeferredMicrophoneTeardown];
     [self removeMicrophoneTapAndRevertToPlayback];
 
     [self.audioEngine stop];
@@ -1243,6 +1351,10 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
         _runtime->nds->Stop();
         _runtime->nds.reset();
     }
+    // After the core is gone, so anything it wrote on the way out is
+    // included: this is the exit path, and -dealloc deletes the Runtime
+    // right after.
+    [self flushPendingSaveWrites];
     _runtime->fbLatest = -1;
 }
 
@@ -1287,7 +1399,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 // this is a defensive guard, not the primary teardown path).
 - (void)micCoreDidOpen {
     _runtime->micCoreOpen.store(true);
-    if (_tearingDown) return;
+    if (_tearingDown.load()) return;
     __weak MelonDSCoreBridge *weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         [weakSelf refreshMicrophoneCaptureState];
@@ -1304,7 +1416,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 // -removeMicrophoneTapAndRevertToPlayback synchronously.
 - (void)micCoreDidClose {
     _runtime->micCoreOpen.store(false);
-    if (_tearingDown) return;
+    if (_tearingDown.load()) return;
     __weak MelonDSCoreBridge *weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         [weakSelf refreshMicrophoneCaptureState];
@@ -1327,17 +1439,64 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 // rather than trusting whatever edge triggered it (see the section comment
 // above).
 - (void)refreshMicrophoneCaptureState {
-    BOOL desired = _runtime->micCoreOpen.load()
-        && _runtime->wantActive.load()
-        && [self isMicrophoneToggleEnabled];
+    const BOOL sessionWantsCapture = _runtime->wantActive.load() && [self isMicrophoneToggleEnabled];
+    const BOOL desired = _runtime->micCoreOpen.load() && sessionWantsCapture;
 
     if (desired) {
+        [self cancelDeferredMicrophoneTeardown];
         if (!_microphoneCaptureActive) {
             [self attemptStartMicrophoneCapture];
         }
+    } else if (_microphoneCaptureActive && sessionWantsCapture) {
+        // Only the game's mic window closed. Every close acted on right here
+        // stops the engine, swaps the session category and starts it again —
+        // an audible dropout, and on iPad usually a hardware-rate change on
+        // top — and the core closes and reopens that window every few frames
+        // for a game that polls the mic in bursts (see
+        // kMicCloseDebounceNanoseconds). Keep the tap and .playAndRecord
+        // alive briefly instead; a Mic_Start in the meantime cancels the
+        // teardown and costs nothing.
+        [self scheduleDeferredMicrophoneTeardown];
     } else {
+        // Paused, toggle off, or nothing to keep alive: tear down right away.
+        // Never keep the mic hot behind a paused/backgrounded game.
+        [self cancelDeferredMicrophoneTeardown];
         [self stopMicrophoneCaptureAndRestorePlaybackSession];
     }
+}
+
+// Main-thread only. Arms the delayed "stop" half of
+// -refreshMicrophoneCaptureState; one already pending keeps its deadline.
+// The block re-derives the decision when it fires rather than blindly
+// stopping: the emulation thread flips micCoreOpen before its own refresh
+// hop reaches the main queue, so the window may already be open again.
+- (void)scheduleDeferredMicrophoneTeardown {
+    if (_pendingMicrophoneTeardown) return;
+    __weak MelonDSCoreBridge *weakSelf = self;
+    dispatch_block_t teardown = dispatch_block_create((dispatch_block_flags_t)0, ^{
+        MelonDSCoreBridge *strongSelf = weakSelf;
+        if (!strongSelf) return;
+        strongSelf->_pendingMicrophoneTeardown = nil;
+        if (strongSelf->_runtime->micCoreOpen.load()
+            && strongSelf->_runtime->wantActive.load()
+            && [strongSelf isMicrophoneToggleEnabled]) {
+            return;
+        }
+        [strongSelf stopMicrophoneCaptureAndRestorePlaybackSession];
+    });
+    _pendingMicrophoneTeardown = teardown;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kMicCloseDebounceNanoseconds),
+                   dispatch_get_main_queue(), teardown);
+}
+
+// Main-thread only. No-op when nothing is pending. Called from every path
+// that decides capture's fate itself — a Mic_Start, pause, ROM unload — so a
+// stale timer can never stop a window that was legitimately reopened or fire
+// against a torn-down core.
+- (void)cancelDeferredMicrophoneTeardown {
+    if (!_pendingMicrophoneTeardown) return;
+    dispatch_block_cancel(_pendingMicrophoneTeardown);
+    _pendingMicrophoneTeardown = nil;
 }
 
 // "eNDSMicEnabled" — the same literal UserDefaults key Settings > Audio's
@@ -1686,8 +1845,11 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     // DoSavestate touches the entire NDS state (RAM, CPU, GPU, SPU, cart...),
     // so it must not run concurrently with the emulation thread's RunFrame.
     bool wasActive = PauseAndWaitIdle(_runtime);
+    // The battery save this state was taken against must be on disk before
+    // the state is; the thread is idle now, so nothing can queue behind us.
+    [self flushPendingSaveWrites];
 
-    melonDS::Savestate state(melonDS::Savestate::DEFAULT_SIZE);
+    melonDS::Savestate state(kSavestateInitialSize);
     // NDS::DoSavestate calls file->Finish() internally (both for saving and
     // loading) and always returns true unless the console-type header word
     // itself mismatches, so state.Error must be checked separately to catch
@@ -1702,8 +1864,16 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
         return NO;
     }
 
-    NSError *writeError = nil;
-    if (![data writeToFile:path options:NSDataWritingAtomic error:&writeError]) {
+    // On the save queue, synchronously: a periodic autosave of the same file
+    // (-autosaveStateToPath:) may still be queued ahead of this newer
+    // snapshot, and the serial queue is what keeps the older write from
+    // renaming over it.
+    __block NSError *writeError = nil;
+    __block BOOL written = NO;
+    dispatch_sync(_saveQueue, ^{
+        written = [data writeToFile:path options:NSDataWritingAtomic error:&writeError];
+    });
+    if (!written) {
         if (error) *error = writeError ?: MakeError(7, @"Failed to write save state file.");
         return NO;
     }
@@ -1723,7 +1893,8 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     // and must not race RunFrame. It is also the cheap half (a few MB of
     // memcpy, one frame's worth of stall at most).
     bool wasActive = PauseAndWaitIdle(_runtime);
-    melonDS::Savestate state(melonDS::Savestate::DEFAULT_SIZE);
+    [self flushPendingSaveWrites];
+    melonDS::Savestate state(kSavestateInitialSize);
     bool ok = !state.Error && _runtime->nds->DoSavestate(&state) && !state.Error;
     NSData *data = ok ? [NSData dataWithBytes:state.Buffer() length:state.Length()] : nil;
     ResumeIfNeeded(_runtime, wasActive);
@@ -1733,8 +1904,10 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     // The write is the expensive half and nothing is waiting on it: a periodic
     // autosave that hitched the game every couple of minutes would be worse
     // than the jetsam it protects against. Atomic, so a crash mid-write leaves
-    // the previous autosave intact rather than a truncated one.
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+    // the previous autosave intact rather than a truncated one. On the same
+    // serial queue as the synchronous -saveStateToPath:error:, so the exit
+    // autosave that follows a periodic one can never be overtaken by it.
+    dispatch_async(_saveQueue, ^{
         [data writeToFile:path options:NSDataWritingAtomic error:nil];
     });
     return YES;
@@ -1753,6 +1926,9 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     }
 
     bool wasActive = PauseAndWaitIdle(_runtime);
+    // CartRetail::DoSavestate flushes the loaded SRAM through WriteNDSSave;
+    // let whatever the game wrote before this jump reach disk first.
+    [self flushPendingSaveWrites];
 
     // Snapshot first (melonDS's own frontend keeps the same backup for its
     // "undo load"): the header check only catches a truncated/foreign file.
@@ -1762,7 +1938,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
     // load regardless, so a half-loaded state could take the battery save
     // down with it. Restoring the snapshot keeps the game exactly where the
     // user left it.
-    melonDS::Savestate backup(melonDS::Savestate::DEFAULT_SIZE);
+    melonDS::Savestate backup(kSavestateInitialSize);
     bool haveBackup = !backup.Error && _runtime->nds->DoSavestate(&backup) && !backup.Error;
 
     melonDS::Savestate state(buffer.data(), static_cast<u32>(buffer.size()), false);
@@ -1780,6 +1956,10 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
         std::lock_guard<std::mutex> lock(_runtime->fbMutex);
         _runtime->fbLatest = -1;
     }
+    // The SRAM the state carried was just queued for writing; callers that
+    // stamp the .sav right after a load (the pre-load backup policy) need it
+    // on disk before this returns.
+    [self flushPendingSaveWrites];
 
     ResumeIfNeeded(_runtime, wasActive);
 
@@ -1792,14 +1972,38 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 
 #pragma mark - Battery saves
 
+// Platform::WriteNDSSave lands here once per SPI transaction (CartRetail::
+// SPIRelease; per 0x800-byte block on NAND carts), always with the whole
+// SRAM, from inside RunFrame on the emulation thread — or from the main
+// thread when a state load flushes SRAM. Never blocks on I/O: copies the
+// bytes into the single pending snapshot (replacing one not yet written) and
+// queues one drain if none is queued. The drain writes whatever is pending
+// when it runs, so a burst of writes becomes one file write of the final
+// contents, and there is no delay before it: a crash right after a save
+// loses no more than it did with the synchronous write.
 - (void)writeNDSSaveBytes:(const void *)bytes length:(uint32_t)length {
     if (!_runtime || _runtime->savePath.empty()) return;
-    NSData *data = [NSData dataWithBytes:bytes length:length];
-    NSString *path = [NSString stringWithUTF8String:_runtime->savePath.c_str()];
-    NSError *error = nil;
-    if (![data writeToFile:path options:NSDataWritingAtomic error:&error]) {
-        NSLog(@"[melonDS] Failed to write NDS save: %@", error.localizedDescription); // no path in Release logs
+    std::shared_ptr<SaveWriter> writer = _runtime->saveWriter;
+    {
+        std::lock_guard<std::mutex> lock(writer->mutex);
+        const u8 *data = static_cast<const u8 *>(bytes);
+        writer->pending.assign(data, data + length);
+        writer->path = _runtime->savePath;
+        if (writer->queued) return; // the queued drain will pick this one up
+        writer->queued = true;
     }
+    dispatch_async(_saveQueue, ^{
+        DrainPendingSave(writer);
+    });
+}
+
+// Blocks until every save write queued so far (battery snapshots and
+// autosave states alike) has reached disk. The queue is serial, so an empty
+// block dispatched synchronously runs only after everything ahead of it.
+// Callers pause the emulation thread first where it matters, so nothing
+// new can be queued behind the flush.
+- (void)flushPendingSaveWrites {
+    dispatch_sync(_saveQueue, ^{});
 }
 
 #pragma mark - Cheats (Action Replay)

@@ -12,7 +12,9 @@ enum NDS7zExtractor {
     /// decompressed — a cheap guard against a "decompression bomb" entry
     /// (LZMA's compression ratio can be extreme, more so than deflate)
     /// inside an otherwise-tiny `.7z`. Mirrors `ROMStorageManager`'s own
-    /// `maxROMSize`; any real `.nds`/`.sav` is well under this.
+    /// `maxROMSize`; any real `.nds`/`.sav` is well under this. The shim
+    /// applies the same cap to the entry's whole solid block
+    /// (`kSz7zMaxFolderUnpackSize`), which is what actually gets decoded.
     private static let maxDecompressedEntrySize: UInt64 = 512 * 1024 * 1024
 
     /// Extracts every entry whose lowercased file extension is in
@@ -101,9 +103,11 @@ enum NDS7zExtractor {
               let bytes = dataPtr else {
             return nil
         }
-        // No copy: the shim's buffer is already the full decompressed entry
-        // (up to 512 MB); duplicating it would briefly double the peak and
-        // is exactly the sort of spike that gets a background import jetsammed.
+        // The shim hands over a malloc'd copy of the entry (its decoded solid
+        // block stays cached in the handle for the next entry). Wrap it
+        // without copying again and let `Data` free it: a second copy would
+        // add a third 512 MB peak on top of block + entry, exactly the sort
+        // of spike that gets a background import jetsammed.
         let buffer = Data(bytesNoCopy: UnsafeMutableRawPointer(bytes), count: dataSize,
                           deallocator: .custom { pointer, _ in Sz7zArchive_FreeMemory(pointer) })
 

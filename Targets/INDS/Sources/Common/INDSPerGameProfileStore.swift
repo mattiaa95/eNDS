@@ -38,4 +38,24 @@ enum INDSPerGameProfileStore {
         else { return nil }
         return all[name]?[setting]
     }
+
+    /// Profiles are keyed by the ROM's base name, so they follow a rename
+    /// (`ROMStorageManager.renameROM`) instead of silently detaching.
+    static func rename(fromGame oldName: String, toGame newName: String) {
+        guard !oldName.isEmpty, !newName.isEmpty, oldName != newName,
+              var all = UserDefaults.standard.dictionary(forKey: storageKey) as? [String: [String: Int]],
+              let game = all.removeValue(forKey: oldName)
+        else { return }
+        all[newName] = game
+        UserDefaults.standard.set(all, forKey: storageKey)
+    }
+
+    /// Drops every remembered setting for `name` ("Delete ROM + Save Data").
+    static func remove(forGame name: String) {
+        guard !name.isEmpty,
+              var all = UserDefaults.standard.dictionary(forKey: storageKey) as? [String: [String: Int]],
+              all.removeValue(forKey: name) != nil
+        else { return }
+        UserDefaults.standard.set(all, forKey: storageKey)
+    }
 }

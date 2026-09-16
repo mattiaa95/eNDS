@@ -10,6 +10,17 @@ struct ROMFile: Identifiable, Equatable {
     /// `nil` for ROMs with no valid banner (some homebrew/hacks) — callers
     /// fall back to `header.title` / the filename and an initials placeholder.
     let banner: NDSBanner?
+    /// Size on disk, read once at init: the Size sort compares it twice per
+    /// comparison, and a stat per compare on the main thread is what made
+    /// that sort stutter on a large library.
+    let fileSize: Int64?
+    /// `path|mtime|size` — changes when the file behind this name is
+    /// replaced, so caches keyed by name (parsed header/banner, the icon a
+    /// cell already shows) know to re-read.
+    let contentKey: String
+
+    /// Placeholder shown when the header carries no game code.
+    static let unknownGameCode = "----"
 
     /// Filename without its extension — the shared key used to keep every
     /// per-ROM companion file (`.sav`, save states, cached icon, thumbnail)
@@ -30,7 +41,7 @@ struct ROMFile: Identifiable, Equatable {
     }
 
     var gameCode: String {
-        header?.gameCode.isEmpty == false ? header?.gameCode ?? "----" : "----"
+        header?.gameCode.isEmpty == false ? header?.gameCode ?? Self.unknownGameCode : Self.unknownGameCode
     }
 
     /// Battery save file for this ROM, if `MelonDSCoreBridge` has ever
@@ -64,10 +75,6 @@ struct ROMFile: Identifiable, Equatable {
         set { UserDefaults.standard.set(newValue, forKey: "\(filename)_lastPlayed") }
     }
 
-    var fileSize: Int64? {
-        (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size]) as? Int64
-    }
-
     var formattedFileSize: String {
         guard let fileSize else { return "-" }
         return ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file)
@@ -83,7 +90,7 @@ struct ROMFile: Identifiable, Equatable {
     /// on the main thread after every import/delete/rename/pull-to-refresh
     /// and used to reopen every ROM twice each time — linear in library
     /// size. mtime+size in the key so a replaced ROM (same name, new file)
-    /// is re-parsed. ponytail: unbounded, but it's ~3 KB per ROM.
+    /// is re-parsed. Unbounded, but it's ~3 KB per ROM.
     private static var parsedCache: [String: (NDSHeader?, NDSBanner?)] = [:]
     private static let parsedCacheLock = NSLock()
 
@@ -95,6 +102,8 @@ struct ROMFile: Identifiable, Equatable {
 
         let values = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
         let key = "\(fileURL.path)|\(values?.contentModificationDate?.timeIntervalSince1970 ?? 0)|\(values?.fileSize ?? 0)"
+        self.fileSize = values?.fileSize.map(Int64.init)
+        self.contentKey = key
         Self.parsedCacheLock.lock()
         let cached = Self.parsedCache[key]
         Self.parsedCacheLock.unlock()

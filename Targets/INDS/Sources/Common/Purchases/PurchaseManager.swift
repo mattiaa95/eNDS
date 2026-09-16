@@ -112,11 +112,18 @@ class PurchaseManager: ObservableObject {
         self.purchasedProductIDs.insert(transaction.productID)
         self.entitlementManager.updateProStatus(isPro: true)
         await transaction.finish()
+        // `hasLifetime` is derived from `currentEntitlements` in one place
+        // only; re-read them now so a fresh lifetime purchase is reflected
+        // immediately instead of at the next foreground.
+        await self.entitlementManager.refreshEntitlements()
     }
 
     private func listenForTransactionUpdates() {
-        transactionListenerTask = Task {
+        // `Transaction.updates` never completes: a strong `self` here would
+        // keep the manager (and its listener) alive for the process lifetime.
+        transactionListenerTask = Task { [weak self] in
             for await result in Transaction.updates {
+                guard let self else { return }
                 switch result {
                 case .verified(let transaction):
                     if transaction.revocationDate != nil {

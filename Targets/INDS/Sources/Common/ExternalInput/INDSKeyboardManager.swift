@@ -35,6 +35,7 @@
 //
 
 import GameController
+import UIKit
 
 protocol INDSKeyboardManagerDelegate: AnyObject {
     func keyboardManager(_ manager: INDSKeyboardManager, setButton button: INDSButton, pressed: Bool)
@@ -62,6 +63,11 @@ final class INDSKeyboardManager {
         observers.append(center.addObserver(forName: .GCKeyboardDidDisconnect, object: nil, queue: .main) { [weak self] _ in
             // All physical keys went away with the keyboard — release
             // anything still held so the emulator doesn't get stuck moving.
+            self?.releaseAllActiveButtons()
+        })
+        // A key held while the app is suspended never delivers its key-up.
+        observers.append(center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil,
+                                            queue: .main) { [weak self] _ in
             self?.releaseAllActiveButtons()
         })
 
