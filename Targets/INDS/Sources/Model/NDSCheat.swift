@@ -67,30 +67,68 @@ enum NDSCheatValidation {
         return "\(upper.prefix(8)) \(upper.suffix(8))"
     }
 
-    /// The canonical data lines of `code`, with anything that isn't a code
-    /// line dropped. This is what gets written to disk: `ARCodeFile::Load`
-    /// bails out on the *first* malformed data line and reports the whole
-    /// file as an error, so one bad line in one cheat would silently kill
-    /// every cheat for that game.
+    /// The data lines of `code` exactly as melonDS should run them, with
+    /// anything that isn't a code line dropped. This is what gets written
+    /// to disk: `ARCodeFile::Load` bails out on the *first* malformed data
+    /// line and reports the whole file as an error, so one bad line in one
+    /// cheat would silently kill every cheat for that game.
+    ///
+    /// A CodeBreaker/CodeFreak code comes back translated to Action Replay
+    /// (see `NDSCodeBreaker`); one the translator can't handle comes back
+    /// as typed, and `isValid` is false for it so it is never enabled.
     static func normalizedLines(_ code: String) -> [String] {
-        codeLines(code).compactMap(normalizedLine)
+        let lines = codeLines(code).compactMap(normalizedLine)
+        if let translated = try? NDSCodeBreaker.translate(lines.map(pair)) {
+            return translated.map(NDSCodeBreaker.text)
+        }
+        return lines
     }
 
     static func isValidLine(_ line: String) -> Bool {
         normalizedLine(line) != nil
     }
 
-    /// True only if every non-blank line is a valid hex pair *and* at least
-    /// one such line exists. An empty/all-invalid code must never be
-    /// persisted as `enabled`: melonDS's `AREngine::RunCheat` indexes
-    /// `Code[Code.size() - 1]` unconditionally, which is undefined behavior
-    /// for a zero-length code — the exact shape of iGBA's own historical P0
-    /// cheats crash. This guard is checked independently at every layer
-    /// (the toggle in `NDSCheatsView`, serialization here, and the bridge's
-    /// own filter in `-reloadCheatsFromFile:enabled:`) — belt and suspenders.
-    static func isValid(_ code: String) -> Bool {
+    enum CodeFormat: Equatable {
+        case actionReplay
+        case codeBreaker
+        case codeBreakerUnsupported
+    }
+
+    /// What `code` is, for the editor to say so. nil when it is empty or
+    /// has a line that isn't a hex pair at all.
+    static func format(of code: String) -> CodeFormat? {
         let lines = codeLines(code)
-        return !lines.isEmpty && lines.allSatisfy(isValidLine)
+        guard !lines.isEmpty else { return nil }
+        var pairs: [NDSCodeBreaker.Line] = []
+        for line in lines {
+            guard let canonical = normalizedLine(line) else { return nil }
+            pairs.append(pair(canonical))
+        }
+        do {
+            return try NDSCodeBreaker.translate(pairs) == nil ? .actionReplay : .codeBreaker
+        } catch {
+            return .codeBreakerUnsupported
+        }
+    }
+
+    /// True only if every non-blank line is a valid hex pair, the code is
+    /// something the engine can run (Action Replay, or CodeBreaker the
+    /// translator handles) *and* at least one runnable line results. An
+    /// empty/all-invalid code must never be persisted as `enabled`:
+    /// melonDS's `AREngine::RunCheat` indexes `Code[Code.size() - 1]`
+    /// unconditionally, which is undefined behavior for a zero-length code
+    /// — the exact shape of iGBA's own historical P0 cheats crash. This
+    /// guard is checked independently at every layer (the toggle in
+    /// `NDSCheatsView`, serialization here, and the bridge's own filter in
+    /// `-reloadCheatsFromFile:enabled:`) — belt and suspenders.
+    static func isValid(_ code: String) -> Bool {
+        guard let format = format(of: code), format != .codeBreakerUnsupported else { return false }
+        return !normalizedLines(code).isEmpty
+    }
+
+    /// `canonical` is a `normalizedLine` result, so both words parse.
+    private static func pair(_ canonical: String) -> NDSCodeBreaker.Line {
+        (UInt32(canonical.prefix(8), radix: 16) ?? 0, UInt32(canonical.suffix(8), radix: 16) ?? 0)
     }
 }
 
@@ -125,6 +163,20 @@ enum NDSCheatFileStore {
         try? serialize(cheats).write(to: url, atomically: true, encoding: .utf8)
     }
 
+    /// Rewrites the file in the form `serialize` produces today, if it
+    /// differs. Called before the file is handed to the core: a cheat list
+    /// saved by an earlier version may hold CodeBreaker/CodeFreak codes as
+    /// typed (they were accepted, stored and run as Action Replay — doing
+    /// nothing), and this is what turns them into the working translation
+    /// without the user having to open the sheet and re-save.
+    static func migrateIfNeeded(forBaseName baseName: String) {
+        guard let url = fileURL(forBaseName: baseName),
+              let text = try? String(contentsOf: url, encoding: .utf8) else { return }
+        let fresh = serialize(parse(text))
+        guard fresh != text else { return }
+        try? fresh.write(to: url, atomically: true, encoding: .utf8)
+    }
+
     // MARK: - melonDS ARCodeFile text format
 
     private static func serialize(_ cheats: [NDSCheat]) -> String {
@@ -132,8 +184,10 @@ enum NDSCheatFileStore {
         for cheat in cheats {
             let lines = NDSCheatValidation.normalizedLines(cheat.code)
             // Same empty-code guard as -reloadCheatsFromFile:enabled: below
-            // — never write a code as enabled if it has no valid lines.
-            let enabled = cheat.enabled && !lines.isEmpty
+            // — never write a code as enabled if it has no valid lines, or
+            // if it is a CodeBreaker code the translator couldn't handle
+            // (run as Action Replay it would write garbage).
+            let enabled = cheat.enabled && !lines.isEmpty && NDSCheatValidation.isValid(cheat.code)
             let name = cheat.name
                 .replacingOccurrences(of: "\n", with: " ")
                 .replacingOccurrences(of: "\r", with: " ")

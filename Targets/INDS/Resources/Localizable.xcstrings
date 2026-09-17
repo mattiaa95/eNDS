@@ -24758,6 +24758,122 @@
           }
         }
       }
+    },
+    "CodeBreaker/CodeFreak code detected. It will be saved as the equivalent Action Replay code." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodeBreaker/CodeFreak-Code erkannt. Er wird als gleichwertiger Action-Replay-Code gespeichert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Código CodeBreaker/CodeFreak detectado. Se guardará como el código Action Replay equivalente."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code CodeBreaker/CodeFreak détecté. Il sera enregistré sous forme de code Action Replay équivalent."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rilevato un codice CodeBreaker/CodeFreak. Verrà salvato come codice Action Replay equivalente."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodeBreaker/コードフリークのコードを検出しました。同等のアクションリプレイコードとして保存されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodeBreaker/CodeFreak 코드가 감지되었습니다. 동일한 Action Replay 코드로 저장됩니다."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Código CodeBreaker/CodeFreak detetado. Será guardado como o código Action Replay equivalente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обнаружен код CodeBreaker/CodeFreak. Он будет сохранён как эквивалентный код Action Replay."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检测到 CodeBreaker/CodeFreak 代码，将以等效的 Action Replay 代码保存。"
+          }
+        }
+      }
+    },
+    "This CodeBreaker/CodeFreak code uses a code type eNDS can't convert to Action Replay." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser CodeBreaker/CodeFreak-Code verwendet einen Codetyp, den eNDS nicht in Action Replay umwandeln kann."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este código CodeBreaker/CodeFreak usa un tipo de código que eNDS no puede convertir a Action Replay."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce code CodeBreaker/CodeFreak utilise un type de code qu'eNDS ne peut pas convertir en Action Replay."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo codice CodeBreaker/CodeFreak usa un tipo di codice che eNDS non può convertire in Action Replay."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このCodeBreaker/コードフリークのコードには、eNDSがアクションリプレイに変換できないコードタイプが含まれています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 CodeBreaker/CodeFreak 코드에는 eNDS가 Action Replay로 변환할 수 없는 코드 유형이 포함되어 있습니다."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este código CodeBreaker/CodeFreak usa um tipo de código que o eNDS não consegue converter para Action Replay."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этом коде CodeBreaker/CodeFreak используется тип кода, который eNDS не может преобразовать в Action Replay."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 CodeBreaker/CodeFreak 代码使用了 eNDS 无法转换为 Action Replay 的代码类型。"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

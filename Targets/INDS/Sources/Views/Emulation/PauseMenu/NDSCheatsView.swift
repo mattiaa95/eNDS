@@ -205,6 +205,7 @@ private struct NDSCheatEditorView: View {
     }
 
     private var isCodeValid: Bool { NDSCheatValidation.isValid(code) }
+    private var codeFormat: NDSCheatValidation.CodeFormat? { NDSCheatValidation.format(of: code) }
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && isCodeValid
     }
@@ -227,11 +228,23 @@ private struct NDSCheatEditorView: View {
                 } header: {
                     Text(NSLocalizedString("Code", comment: ""))
                 } footer: {
-                    if !code.isEmpty && !isCodeValid {
-                        Text(NSLocalizedString("Each line must be two 8-digit hex values separated by a space, e.g. 94000130 FFFB0000.", comment: "Cheat code validation error"))
+                    // CodeBreaker/CodeFreak lists look exactly like Action
+                    // Replay ones and the engine runs them without a word
+                    // (doing nothing) — so say what was recognised, and
+                    // what will actually be saved.
+                    switch codeFormat {
+                    case .codeBreaker:
+                        Text(NSLocalizedString("CodeBreaker/CodeFreak code detected. It will be saved as the equivalent Action Replay code.", comment: "Cheat editor note"))
+                    case .codeBreakerUnsupported:
+                        Text(NSLocalizedString("This CodeBreaker/CodeFreak code uses a code type eNDS can't convert to Action Replay.", comment: "Cheat code validation error"))
                             .foregroundColor(.red)
-                    } else {
-                        Text(NSLocalizedString("One code line per pair: address then value, e.g. 94000130 FFFB0000.", comment: "Cheat code format hint"))
+                    case .actionReplay, nil:
+                        if !code.isEmpty && !isCodeValid {
+                            Text(NSLocalizedString("Each line must be two 8-digit hex values separated by a space, e.g. 94000130 FFFB0000.", comment: "Cheat code validation error"))
+                                .foregroundColor(.red)
+                        } else {
+                            Text(NSLocalizedString("One code line per pair: address then value, e.g. 94000130 FFFB0000.", comment: "Cheat code format hint"))
+                        }
                     }
                 }
             }
@@ -259,9 +272,12 @@ private struct NDSCheatEditorView: View {
         // Editing an existing one preserves whatever it was; `canSave`
         // already guarantees `code` is valid either way, so this can never
         // persist an enabled-but-invalid cheat.
+        // Store the lines the engine will run (canonical Action Replay,
+        // translated if the user pasted CodeBreaker) — that is what the
+        // .mch holds and what the list shows after a reload anyway.
         var updated = NDSCheat(
             name: name.trimmingCharacters(in: .whitespaces),
-            code: code,
+            code: NDSCheatValidation.normalizedLines(code).joined(separator: "\n"),
             enabled: cheat?.enabled ?? true
         )
         if let existingID = cheat?.id {

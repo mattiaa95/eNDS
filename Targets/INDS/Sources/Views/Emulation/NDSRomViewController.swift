@@ -797,6 +797,9 @@ final class NDSRomViewController: UIViewController {
     /// (add/edit/delete/toggle), so a toggle takes effect immediately.
     private func applyCheats() {
         guard let url = NDSCheatFileStore.fileURL(forBaseName: rom.baseName) else { return }
+        // A list saved by an earlier version may hold CodeBreaker/CodeFreak
+        // codes as typed; rewrite it in today's (translated) form first.
+        NDSCheatFileStore.migrateIfNeeded(forBaseName: rom.baseName)
         core.reloadCheats(fromFile: url.path, enabled: true)
     }
 
