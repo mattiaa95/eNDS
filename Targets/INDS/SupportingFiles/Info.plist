@@ -10,7 +10,7 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>DS ROM</string>
+			<string>Game ROM</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSHandlerRank</key>
@@ -22,7 +22,7 @@
 		</dict>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>DS Save Data</string>
+			<string>Game Save Data</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSHandlerRank</key>
@@ -71,9 +71,9 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
+	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>38</string>
+	<string>39</string>
 	<key>GCSupportedGameControllers</key>
 	<array>
 		<dict>
@@ -123,7 +123,7 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>DS ROM</string>
+			<string>Game ROM</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.mls.nds-rom</string>
 			<key>UTTypeTagSpecification</key>
@@ -140,7 +140,7 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>DS Save Data</string>
+			<string>Game Save Data</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.mls.nds-save</string>
 			<key>UTTypeTagSpecification</key>

@@ -43,7 +43,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     /// Routes ONLY the external-display role to our scene delegate (AirPlay
-    /// mirroring / HDMI → the TV shows the DS top screen, see
+    /// mirroring / HDMI → the TV shows the Top screen, see
     /// INDSExternalDisplayController). Every other role falls through to a
     /// plain configuration so SwiftUI keeps owning the on-device scene.
     func application(

@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// YES while the DS microphone is actually being captured right now: the
 /// loaded game currently has its mic window open (between its internal
-/// Mic_Start/Mic_Stop), the "DS Microphone" Settings toggle is on, mic
+/// Mic_Start/Mic_Stop), the "Microphone" Settings toggle is on, mic
 /// permission was granted, and emulation isn't paused. Reflects the real
 /// AVAudioEngine capture state, not just whether the game asked for it, so
 /// it never reports YES when permission was denied or the toggle is off.

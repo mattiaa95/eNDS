@@ -48,7 +48,7 @@ final class DSDualScreenView: UIView {
         bottomScreenView.isUserInteractionEnabled = true
 
         // With VoiceOver on, every touch becomes a VoiceOver gesture — so the
-        // DS touch screen, which needs raw taps and drags at exact coordinates,
+        // Touch screen, which needs raw taps and drags at exact coordinates,
         // simply could not be used. `.allowsDirectInteraction` hands touches
         // straight through inside this view's frame, which is the only way a
         // stylus screen can work: no VoiceOver gesture can express "drag from
@@ -56,16 +56,16 @@ final class DSDualScreenView: UIView {
         bottomScreenView.isAccessibilityElement = true
         bottomScreenView.accessibilityTraits = .allowsDirectInteraction
         bottomScreenView.accessibilityLabel = NSLocalizedString(
-            "DS touch screen", comment: "VoiceOver label for the lower, touch-sensitive DS screen")
+            "Touch screen", comment: "VoiceOver label for the lower, touch-sensitive DS screen")
         bottomScreenView.accessibilityHint = NSLocalizedString(
             "Touches here go straight to the game, like a stylus on the real console.",
-            comment: "VoiceOver hint explaining direct interaction on the DS touch screen")
+            comment: "VoiceOver hint explaining direct interaction on the Touch screen")
 
         // Named but not interactive: it is the picture you are looking at.
         topScreenView.isAccessibilityElement = true
         topScreenView.accessibilityTraits = .image
         topScreenView.accessibilityLabel = NSLocalizedString(
-            "DS top screen", comment: "VoiceOver label for the upper DS screen")
+            "Top screen", comment: "VoiceOver label for the upper DS screen")
 
         topScreenView.layer.addSublayer(topScanlineLayer)
         bottomScreenView.layer.addSublayer(bottomScanlineLayer)

@@ -21,7 +21,7 @@ struct NDSHeader: Equatable {
         // 0x200. Anything shorter is a truncated download, and Data's range
         // subscript traps (not throws) past the end.
         guard data.count >= 0x20 else {
-            throw ROMStorageError.invalidROM(NSLocalizedString("The NDS header is incomplete.", comment: "Reason appended to the invalid-ROM import error"))
+            throw ROMStorageError.invalidROM(NSLocalizedString("The ROM header is incomplete.", comment: "Reason appended to the invalid-ROM import error"))
         }
 
         return NDSHeader(

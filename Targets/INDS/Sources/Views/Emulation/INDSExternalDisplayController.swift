@@ -3,7 +3,7 @@
 //  eNDS
 //
 //  External display / AirPlay screen mirroring: when a second screen is
-//  present, it takes over showing the DS top screen fullscreen (letterboxed
+//  present, it takes over showing the Top screen fullscreen (letterboxed
 //  over the Game Background color), freeing the device to become the touch
 //  screen + controls (see `NDSRomViewController.applyCurrentScreenLayout`).
 //

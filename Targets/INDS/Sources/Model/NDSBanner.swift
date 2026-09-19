@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-/// Parses the icon/title "banner" block embedded in every retail NDS ROM,
+/// Parses the icon/title "banner" block embedded in every retail NGame ROM,
 /// and renders the embedded 32x32 game icon. Pure Swift, no dependency on
 /// melonDS — reads directly from the ROM file on disk via `FileHandle`, the
 /// same way `NDSHeader` reads the plain header.

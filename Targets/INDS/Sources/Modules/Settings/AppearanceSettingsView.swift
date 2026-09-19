@@ -43,7 +43,7 @@ struct AppearanceSettingsView: View {
             } header: {
                 Text("🖼️ Emulation")
             } footer: {
-                Text("Fills the space around and between the two DS screens while playing. Applies the next time you open a game.")
+                Text("Fills the space around and between the two screens while playing. Applies the next time you open a game.")
             }
 
             Section {
@@ -53,8 +53,8 @@ struct AppearanceSettingsView: View {
                 Text("🏞️ Background Image")
             } footer: {
                 Text(isEntitled
-                     ? "Pick a photo to sit behind the DS screens and the controls. Each orientation has its own image, and it changes as soon as you rotate. The background colour above shows through wherever no image is set."
-                     : "Set your own photo behind the DS screens and the controls, with a separate image for portrait and landscape. Included in eNDS PRO.")
+                     ? "Pick a photo to sit behind the screens and the controls. Each orientation has its own image, and it changes as soon as you rotate. The background colour above shows through wherever no image is set."
+                     : "Set your own photo behind the screens and the controls, with a separate image for portrait and landscape. Included in eNDS PRO.")
             }
         }
         .navigationTitle("Appearance")
@@ -82,7 +82,7 @@ struct AppearanceSettingsView: View {
                 Button {
                     pendingOffer = ProGateOffer(
                         title: NSLocalizedString("Background Images are PRO", comment: "Background skin gate title"),
-                        message: NSLocalizedString("Go PRO to use your own photos behind the DS screens, with a separate background for portrait and landscape.",
+                        message: NSLocalizedString("Go PRO to use your own photos behind the screens, with a separate background for portrait and landscape.",
                                                    comment: "Background skin gate message")
                     )
                 } label: {

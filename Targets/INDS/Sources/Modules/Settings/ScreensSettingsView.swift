@@ -68,7 +68,7 @@ struct ScreensSettingsView: View {
                         DSScreenLayoutPreferences.stretchEnabled = newValue
                     }
             } footer: {
-                Text("Stretches each DS screen to completely fill its assigned area instead of keeping the original 4:3 shape. Takes effect immediately, in every layout mode.")
+                Text("Stretches each screen to completely fill its assigned area instead of keeping the original 4:3 shape. Takes effect immediately, in every layout mode.")
             }
 
             Section {

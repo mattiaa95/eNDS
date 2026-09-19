@@ -44,7 +44,7 @@ struct DateTimeSettingsView: View {
             } header: {
                 Text("🕹️ Console Clock")
             } footer: {
-                Text("DS games read the console's own clock — day and night cycles, daily events and once-a-day unlocks all run on it. Applies the next time you open a game.")
+                Text("Games read the console's own clock — day and night cycles, daily events and once-a-day unlocks all run on it. Applies the next time you open a game.")
             }
 
             if !syncToDevice {
@@ -57,7 +57,7 @@ struct DateTimeSettingsView: View {
                             INDSRTCPreferences.setConsoleDate(INDSRTCPreferences.clamped(newValue))
                         }
                 } footer: {
-                    Text("Set once and it keeps running from there — the console clock ticks forward on its own, it doesn't freeze at this moment. The DS can only store years from 2000 to 2099.")
+                    Text("Set once and it keeps running from there — the console clock ticks forward on its own, it doesn't freeze at this moment. The console can only store years from 2000 to 2099.")
                 }
             }
 

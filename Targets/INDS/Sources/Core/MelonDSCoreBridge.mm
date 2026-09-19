@@ -1500,7 +1500,7 @@ static void ApplyConsoleProfile(melonDS::Firmware &firmware, NSString *nickname,
 }
 
 // "eNDSMicEnabled" — the same literal UserDefaults key Settings > Audio's
-// "DS Microphone" toggle reads/writes (AudioSettingsView.swift), default ON
+// "Microphone" toggle reads/writes (AudioSettingsView.swift), default ON
 // like this app's other toggles (INDSHaptics, INDSSavingPreferences). No
 // shared Swift/C++ constant on purpose: this file already duplicates
 // "eNDSAudioVolume" the exact same way (see -init and -setAudioVolume:

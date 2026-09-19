@@ -11,7 +11,7 @@
 //   - No turbo, A+B combo, macro slots, or menu button — DS has X/Y instead,
 //     and pause lives in a separate floating HUD button (see `NDSHUDView`).
 //   - `hitTest` only claims points that land on a visible button/joystick, so
-//     touches elsewhere fall through to the DS touch screen underneath this
+//     touches elsewhere fall through to the Touch screen underneath this
 //     full-bleed overlay — the key trick that lets an iGBA-style overlay
 //     coexist with a real stylus screen (GBA never needed this).
 //

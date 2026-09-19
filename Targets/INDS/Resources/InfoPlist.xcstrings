@@ -89,130 +89,130 @@
         }
       }
     },
-    "DS ROM" : {
+    "Game ROM" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS-ROM"
+            "value" : "Spiel-ROM"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS ROM"
+            "value" : "Game ROM"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ROM de DS"
+            "value" : "ROM de juego"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ROM DS"
+            "value" : "ROM de jeu"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ROM DS"
+            "value" : "ROM di gioco"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS ROM"
+            "value" : "ゲームROM"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS ROM"
+            "value" : "게임 ROM"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ROM de DS"
+            "value" : "ROM de jogo"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ROM для DS"
+            "value" : "Игровой ROM"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS ROM"
+            "value" : "游戏 ROM"
           }
         }
       }
     },
-    "DS Save Data" : {
+    "Game Save Data" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS-Speicherdaten"
+            "value" : "Spielstand"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS Save Data"
+            "value" : "Game Save Data"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Datos guardados de DS"
+            "value" : "Datos guardados de juego"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sauvegarde DS"
+            "value" : "Sauvegarde de jeu"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvataggio DS"
+            "value" : "Salvataggio di gioco"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DSセーブデータ"
+            "value" : "セーブデータ"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS 저장 데이터"
+            "value" : "게임 저장 데이터"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dados guardados de DS"
+            "value" : "Dados guardados de jogo"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сохранение DS"
+            "value" : "Сохранение игры"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DS 存档"
+            "value" : "游戏存档"
           }
         }
       }
@@ -287,31 +287,31 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS nutzt das Mikrofon nur, damit DS-Spiele dich hören können – Pusten oder Sprechen, wenn ein Spiel danach fragt. Audio verlässt dein Gerät nie."
+            "value" : "eNDS nutzt das Mikrofon nur, damit Spiele dich hören können – Pusten oder Sprechen, wenn ein Spiel danach fragt. Audio verlässt dein Gerät nie."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS uses the microphone only to let DS games hear you — blowing or speaking when a game asks for it. Audio never leaves your device."
+            "value" : "eNDS uses the microphone only to let games hear you — blowing or speaking when a game asks for it. Audio never leaves your device."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS usa el micrófono solo para que los juegos de DS puedan oírte: soplar o hablar cuando un juego lo pide. El audio nunca sale de tu dispositivo."
+            "value" : "eNDS usa el micrófono solo para que los juegos puedan oírte: soplar o hablar cuando un juego lo pide. El audio nunca sale de tu dispositivo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS n'utilise le micro que pour que les jeux DS puissent vous entendre — souffler ou parler quand un jeu le demande. L'audio ne quitte jamais votre appareil."
+            "value" : "eNDS n'utilise le micro que pour que les jeux puissent vous entendre — souffler ou parler quand un jeu le demande. L'audio ne quitte jamais votre appareil."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS usa il microfono solo perché i giochi DS possano sentirti: soffiare o parlare quando un gioco lo richiede. L'audio non lascia mai il tuo dispositivo."
+            "value" : "eNDS usa il microfono solo perché i giochi possano sentirti: soffiare o parlare quando un gioco lo richiede. L'audio non lascia mai il tuo dispositivo."
           }
         },
         "ja" : {
@@ -323,19 +323,19 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS는 DS 게임이 소리를 들을 수 있도록 할 때만 마이크를 사용합니다. 게임이 요청할 때 불거나 말하세요. 오디오는 절대 기기를 떠나지 않습니다."
+            "value" : "eNDS는 게임이 소리를 들을 수 있도록 할 때만 마이크를 사용합니다. 게임이 요청할 때 불거나 말하세요. 오디오는 절대 기기를 떠나지 않습니다."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O eNDS usa o microfone apenas para que os jogos DS o possam ouvir — soprar ou falar quando um jogo o pede. O áudio nunca sai do seu dispositivo."
+            "value" : "O eNDS usa o microfone apenas para que os jogos o possam ouvir — soprar ou falar quando um jogo o pede. O áudio nunca sai do seu dispositivo."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "eNDS использует микрофон только для того, чтобы игры DS могли вас слышать: дуйте или говорите, когда игра просит. Звук никогда не покидает ваше устройство."
+            "value" : "eNDS использует микрофон только для того, чтобы игры могли вас слышать: дуйте или говорите, когда игра просит. Звук никогда не покидает ваше устройство."
           }
         },
         "zh-Hans" : {

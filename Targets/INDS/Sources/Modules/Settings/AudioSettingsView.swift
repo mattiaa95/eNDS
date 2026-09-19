@@ -82,7 +82,7 @@ struct AudioSettingsView: View {
 
             Section {
                 Toggle(isOn: $micEnabled) {
-                    Label("DS Microphone", systemImage: micBlockedBySystem ? "mic.slash.fill" : "mic.fill")
+                    Label("Microphone", systemImage: micBlockedBySystem ? "mic.slash.fill" : "mic.fill")
                 }
                 .onChange(of: micEnabled) { _, newValue in
                     UserDefaults.standard.set(newValue, forKey: Self.micEnabledKey)
@@ -105,7 +105,7 @@ struct AudioSettingsView: View {
                 if micBlockedBySystem {
                     Text("iOS is blocking microphone access for eNDS, so games that use the mic won't hear you. Turn it back on in iOS Settings › Privacy & Security › Microphone.")
                 } else {
-                    Text("Lets DS games listen — blowing into the mic in some games, or speaking in others. eNDS only asks for microphone access the first time a game actually needs it, never at launch, and audio never leaves your device. Turn this off to keep the DS mic silent.")
+                    Text("Lets games listen — blowing into the mic in some games, or speaking in others. eNDS only asks for microphone access the first time a game actually needs it, never at launch, and audio never leaves your device. Turn this off to keep the mic silent.")
                 }
             }
 
@@ -117,7 +117,7 @@ struct AudioSettingsView: View {
                     INDSAudioPreferences.muteWithOtherAudioEnabled = newValue
                 }
             } footer: {
-                Text("When on, eNDS silences itself while music or another app's audio is playing, instead of mixing with it. Takes effect immediately, even in an open game. Yields to the DS microphone whenever a game is actively listening.")
+                Text("When on, eNDS silences itself while music or another app's audio is playing, instead of mixing with it. Takes effect immediately, even in an open game. Yields to the microphone whenever a game is actively listening.")
             }
         }
         .navigationTitle("Audio")

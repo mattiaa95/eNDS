@@ -246,7 +246,7 @@ struct WelcomeView: View {
 
             Spacer().frame(height: 12)
 
-            Text("Your DS games, back in your pocket.")
+            Text("Your games, back in your pocket.")
                 .font(.body)
                 .foregroundColor(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
@@ -340,13 +340,13 @@ struct WelcomeView: View {
         }
     }
 
-    // MARK: - Page 3: Made for DS
+    // MARK: - Page 3: Made for two screens
 
     private var madeForDSPage: some View {
         VStack(spacing: 0) {
             Spacer().frame(height: 20)
 
-            Text("Made for DS")
+            Text("Made for two screens")
                 .font(.system(size: pageTitleSize, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .opacity(animatedPages.contains(2) ? 1 : 0)
@@ -360,7 +360,7 @@ struct WelcomeView: View {
                     featureCard(
                         icon: "rectangle.grid.1x2.fill", color: .indsCrimsonLight,
                         title: "Dual-Screen Layouts",
-                        description: "Stack both DS screens, place them side by side, or focus on just one — switch anytime.",
+                        description: "Stack both screens, place them side by side, or focus on just one — switch anytime.",
                         page: 2, delay: 0.05
                     )
                     featureCard(
@@ -423,13 +423,13 @@ struct WelcomeView: View {
                     featureCard(
                         icon: "gamecontroller", color: .purple,
                         title: "Physical Controllers",
-                        description: "Connect any MFi or Bluetooth gamepad — buttons map automatically to a real DS layout.",
+                        description: "Connect any MFi or Bluetooth gamepad — buttons map automatically to the original layout.",
                         page: 3, delay: 0.1
                     )
                     featureCard(
                         icon: "keyboard", color: .blue,
                         title: "Keyboard Support",
-                        description: "Arrow keys move, with the rest of the DS pad mapped across the keys next to them.",
+                        description: "Arrow keys move, with the rest of the pad mapped across the keys next to them.",
                         page: 3, delay: 0.15
                     )
                 }
@@ -442,7 +442,7 @@ struct WelcomeView: View {
     // MARK: - Components
 
     // `title`/`description` are LocalizedStringKey, not String: `Text(someString)`
-    // renders verbatim, so every card on the "Made for DS" and "Your Way to Play"
+    // renders verbatim, so every card on the "Made for two screens" and "Your Way to Play"
     // pages shipped in English no matter the device language. Literals at the call
     // sites keep working unchanged.
     private func featureCard(

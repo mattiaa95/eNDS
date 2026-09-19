@@ -338,7 +338,7 @@ struct PurchaseView: View {
                     .font(.system(size: heroTitleSize, weight: .bold, design: .rounded))
                     .foregroundStyle(brandGradient)
 
-                Text(NSLocalizedString("The ultimate DS experience", comment: ""))
+                Text(NSLocalizedString("The ultimate dual-screen experience", comment: ""))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 

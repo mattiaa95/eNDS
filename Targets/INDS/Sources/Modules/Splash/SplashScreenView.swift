@@ -105,7 +105,7 @@ struct SplashScreenView: View {
                 Spacer().frame(height: 8)
 
                 // Subtitle
-                Text("NDS & DS Retro Emulator")
+                Text("Retro Game Emulator")
                     .font(.system(size: 13, weight: .medium, design: .monospaced))
                     .foregroundStyle(.white.opacity(0.45))
                     .opacity(subtitleOpacity)

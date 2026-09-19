@@ -9,7 +9,7 @@ import Foundation
 /// is always 0 or 1 URLs.
 enum NDSGzExtractor {
     /// 512MB cap: same decompression-bomb guard as the `.7z` extractor. A
-    /// real NDS ROM tops out at 512MB (rare) — anything past that is hostile.
+    /// real NGame ROM tops out at 512MB (rare) — anything past that is hostile.
     private static let maxDecompressedBytes = 512 * 1024 * 1024
 
     static func extractEntries(fromGz gzURL: URL, matchingExtensions extensions: Set<String>, to directory: URL) -> [URL] {

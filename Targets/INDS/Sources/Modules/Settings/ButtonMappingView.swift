@@ -55,7 +55,7 @@ struct ButtonMappingView: View {
                         row(for: target)
                     }
                 } header: {
-                    Text("DS Button / Action → Controller Button")
+                    Text("Button / Action → Controller Button")
                 } footer: {
                     Text("Tap a row, then press the controller button you want to trigger it. The D-pad, left stick, and system Menu button always control movement and pause, and can't be reassigned.")
                 }

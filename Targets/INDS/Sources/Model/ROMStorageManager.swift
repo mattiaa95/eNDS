@@ -34,7 +34,7 @@ enum ROMStorageError: LocalizedError {
         case .invalidROM(let reason):
             return String(
                 format: NSLocalizedString(
-                    "Invalid NDS ROM. %1$@",
+                    "Invalid ROM. %1$@",
                     comment: "Import Failed alert: the user imported a .nds file that failed header validation. %1$@ is the reason."
                 ),
                 reason
@@ -46,7 +46,7 @@ enum ROMStorageError: LocalizedError {
             )
         case .fileTooLarge:
             return NSLocalizedString(
-                "This file is too large to be a DS ROM.",
+                "This file is too large to be a ROM.",
                 comment: "Import Failed alert: the user imported a ROM bigger than the supported size limit."
             )
         case .unavailableDocumentsDirectory:
