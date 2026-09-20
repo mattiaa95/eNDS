@@ -26,13 +26,16 @@ enum NDSPauseMenuAction {
     case recoverCartridgeSave
 }
 
-// MARK: - Speed slider (0.5x / 1x / 2x, all free)
+// MARK: - Speed slider (0.5x … 3x, all free)
 //
-// 4x used to be here, PRO-gated. It is gone: on a real game the melonDS
-// interpreter cannot deliver it on an iPhone (2x measures at exactly 2.00x,
-// 4x does not), so it was a paid promise the app could not keep — and the
-// gate made it look broken rather than unavailable. The gamepad Fast Forward
-// hold is the same flat 2x (see `NDSRomViewController.setFastForwardHold`).
+// The ladder is `INDSSpeedPreferences.speeds`, the same one the GBA app
+// offers, so the steps match for anyone who plays both. It used to stop at
+// 2x because a PRO-gated 4x was a paid promise the interpreter could not
+// keep on a phone; nothing above is sold now, so the higher steps are just
+// "go as fast as this device manages" and a slow one simply falls short.
+// Fast Forward is a separate, faster ladder (`fastForwardSpeeds`), reached
+// from the on-screen Speed button and a controller's hold — see
+// `NDSRomViewController.setFastForwardHold`.
 
 private struct NDSSpeedSliderView: View {
     // Seeded in init, not onAppear: seeding an already-live @State goes
@@ -48,11 +51,7 @@ private struct NDSSpeedSliderView: View {
         self.onSpeedChanged = onSpeedChanged
     }
 
-    // "%.0fx" reads fine for 1x/2x/4x but would print "0x" for 0.5 — only
-    // that one non-integral speed needs the decimal place.
-    private func label(for speed: Double) -> String {
-        speed.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0fx", speed) : String(format: "%.1fx", speed)
-    }
+    private func label(for speed: Double) -> String { INDSSpeedPreferences.label(speed) }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -354,7 +353,7 @@ struct NDSPauseMenuView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     private var isIPad: Bool { horizontalSizeClass == .regular }
 
-    private static let speeds: [Double] = [0.5, 1.0, 2.0]
+    private static let speeds: [Double] = INDSSpeedPreferences.speeds
 
     var body: some View {
         VStack(spacing: 0) {

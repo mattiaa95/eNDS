@@ -875,9 +875,13 @@ void* DynamicLibrary_LoadFunction(DynamicLibrary*, const char*) { return nullptr
 }
 
 - (void)setSpeedMultiplier:(double)speedMultiplier {
-    // Ceiling is 2x: 4x was removed from the UI because the interpreter
-    // cannot actually deliver it on a phone (see NDSPauseMenuView).
-    _runtime->speed.store(std::clamp(speedMultiplier, 0.5, 2.0));
+    // Ceiling is 4x, the fastest rate the Fast Forward button offers. It is
+    // a target, not a promise: the interpreter does not reach 4x on a phone
+    // in a heavy game, and the frame loop simply runs as many frames as the
+    // tick allows. That is the difference from the old PRO-gated 4x this
+    // replaces — that one was sold, this one is "as fast as this device
+    // goes". The 8-frames-per-tick cap in EmuThreadMain is the real fence.
+    _runtime->speed.store(std::clamp(speedMultiplier, 0.5, 4.0));
 }
 
 - (BOOL)microphoneActive {

@@ -38,9 +38,17 @@ final class NDSRomViewController: UIViewController {
     /// mutating or persisting over this value.
     private var requestedSpeed: Double = 1.0
 
-    /// Gamepad-only Fast Forward hold (`INDSControllerAppAction.fastForward`)
-    /// — forces 2x while held, restoring `requestedSpeed` on release.
+    /// Fast Forward: a controller's `INDSControllerAppAction.fastForward`
+    /// hold, or the HUD's Speed button (a latch, cycled by tapping). Forces
+    /// `activeFastForwardSpeed` while on, restoring `requestedSpeed` when it
+    /// goes off.
     private var isFastForwardHeld = false
+
+    /// The rate the line above runs at — the user's pick, whether it was
+    /// made in Settings > Controls or by tapping the HUD's Speed button,
+    /// which writes the same stored value. Never persisted from here: it is
+    /// read at the moment Fast Forward switches on.
+    private var activeFastForwardSpeed = INDSSpeedPreferences.defaultFastForwardSpeed
     private var periodicAutosaveTimer: Timer?
 
     /// The turbo buttons being held right now, and the pulse that switches
@@ -450,7 +458,7 @@ final class NDSRomViewController: UIViewController {
         hudView.onPauseTapped = { [weak self] in self?.presentPauseMenu() }
         hudView.onCycleLayoutTapped = { [weak self] in self?.cycleScreenLayout() }
         hudView.onErrorBackTapped = { [weak self] in self?.quitToLibrary() }
-        hudView.onFastForwardToggled = { [weak self] active in self?.setFastForwardHold(active) }
+        hudView.onFastForwardTapped = { [weak self] in self?.cycleFastForward() }
         view.addSubview(hudView)
 
         gamepadManager.delegate = self
@@ -743,12 +751,13 @@ final class NDSRomViewController: UIViewController {
         if let speed = INDSPerGameProfileStore.value("speedMultiplier", forGame: name) {
             // INDSPerGameProfileStore only stores Int, but 0.5x needs a
             // fractional value — recordProfile below stores speed*2 (a clean
-            // Int for every value in {0.5, 1, 2, 4}) specifically so this
-            // divide-back-out round-trips exactly instead of truncating 0.5
-            // down to Int(0.5) == 0.
-            // Clamped to the speeds the UI still offers: profiles written by
-            // 1.0(12) and earlier can hold a 4x that no longer exists.
-            let resolvedSpeed = min(max(Double(speed) / 2.0, 0.5), 2.0)
+            // Int for every half step) specifically so this divide-back-out
+            // round-trips exactly instead of truncating 0.5 down to
+            // Int(0.5) == 0.
+            // Clamped to the speeds the UI still offers, so a profile
+            // written by an older build cannot hold one that is gone.
+            let resolvedSpeed = min(max(Double(speed) / 2.0, 0.5),
+                                    INDSSpeedPreferences.speeds.last ?? 2.0)
             requestedSpeed = resolvedSpeed
             applyEffectiveSpeed()
         }
@@ -880,10 +889,10 @@ final class NDSRomViewController: UIViewController {
     /// The only place `core.speedMultiplier` is ever written outside of
     /// this method's three callers (`setSpeed`, `setFastForwardHold`,
     /// `refreshBatterySaverState`) composing `requestedSpeed` with Fast
-    /// Forward's flat 2x and then the Battery Saver clamp, in that order —
-    /// the clamp always wins, even while Fast Forward is held.
+    /// Forward's chosen rate and then the Battery Saver clamp, in that
+    /// order — the clamp always wins, even while Fast Forward is held.
     private func applyEffectiveSpeed() {
-        var speed = isFastForwardHeld ? 2.0 : requestedSpeed
+        var speed = isFastForwardHeld ? activeFastForwardSpeed : requestedSpeed
         if isBatterySpeedClampActive {
             speed = min(speed, 1.0)
         }
@@ -895,7 +904,8 @@ final class NDSRomViewController: UIViewController {
     /// picking 2x with Low Power Mode on (or a warm device) simply did
     /// nothing and looked like a broken feature.
     private var isSpeedBeingClamped: Bool {
-        isBatterySpeedClampActive && max(requestedSpeed, isFastForwardHeld ? 2.0 : 0) > 1.0
+        isBatterySpeedClampActive
+            && max(requestedSpeed, isFastForwardHeld ? activeFastForwardSpeed : 0) > 1.0
     }
 
     private func warnIfSpeedClamped() {
@@ -1096,17 +1106,39 @@ final class NDSRomViewController: UIViewController {
         }
     }
 
-    /// While held: forces 2x speed (still subject to Battery Saver's clamp,
-    /// same as every other speed source — see `applyEffectiveSpeed()`). On
-    /// release: restores `requestedSpeed` (0.5x/1x/2x from the pause menu
-    /// slider or a per-game profile) — never compounds with it.
-    private func setFastForwardHold(_ active: Bool) {
-        guard isFastForwardHeld != active else { return }
+    /// While on: forces the chosen Fast Forward rate (still subject to
+    /// Battery Saver's clamp, same as every other speed source — see
+    /// `applyEffectiveSpeed()`). When it goes off: restores `requestedSpeed`
+    /// (the pause menu slider or a per-game profile) — never compounds with
+    /// it. `speed` is the rate to run at; omitted means the stored pick,
+    /// which is what a controller's hold always uses.
+    private func setFastForwardHold(_ active: Bool, speed: Double? = nil) {
+        let rate = speed ?? INDSSpeedPreferences.fastForwardSpeed
+        // Also runs when only the rate changed (the HUD button cycling from
+        // 2x to 3x): same `active`, different speed, and the core still has
+        // to hear about it.
+        guard isFastForwardHeld != active || (active && activeFastForwardSpeed != rate) else { return }
         isFastForwardHeld = active
+        if active { activeFastForwardSpeed = rate }
         // Keep the HUD pill in step whichever input drove this — a gamepad hold
-        // and the on-screen toggle share one piece of state.
-        hudView.setFastForwardActive(active)
+        // and the on-screen button share one piece of state.
+        hudView.setFastForwardSpeed(active ? rate : nil)
         applyEffectiveSpeed()
+    }
+
+    /// The on-screen Speed button is a latch, not a hold: each tap steps to
+    /// the next rate and the one after the fastest switches it off. The rate
+    /// it lands on is stored, so a controller's Fast Forward hold runs at
+    /// whatever was last picked here and Settings > Controls shows it.
+    private func cycleFastForward() {
+        let current = isFastForwardHeld ? activeFastForwardSpeed : nil
+        guard let next = INDSSpeedPreferences.nextFastForwardSpeed(after: current) else {
+            setFastForwardHold(false)
+            return
+        }
+        INDSSpeedPreferences.fastForwardSpeed = next
+        setFastForwardHold(true, speed: next)
+        warnIfSpeedClamped()
     }
 
     /// Hides/shows the touch overlay opposite a gamepad's connection state

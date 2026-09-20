@@ -80,6 +80,7 @@
 		8DBF4BFC4DE61BF985550F23 /* NOTICES.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4FF202E13D8BAA3947A37FC2 /* NOTICES.txt */; };
 		8FD34C6471E67D87EBDDDF81 /* 7zArcIn.c in Sources */ = {isa = PBXBuildFile; fileRef = 44497849F70DBBB6CB1AC685 /* 7zArcIn.c */; };
 		900D59A822F56C2E53B3C24F /* BIOSSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB281A6629714C604286E2F /* BIOSSetupView.swift */; };
+		93327EEADB6D2C3100E72AF7 /* INDSSpeedPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF93AF9A9B668F16F548652 /* INDSSpeedPreferences.swift */; };
 		938D8A2423FA8CCA7E67E3ED /* NDSHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E7016BB1B280EC4B4EF169 /* NDSHeader.swift */; };
 		951CBA995A5BF2A1918ACCA5 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3BCE58A586A486147D93F9 /* AppearanceSettingsView.swift */; };
 		9608F0EAFDF1A987E12EFB60 /* ScreensSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5A1654FBF63E78AD0A4A90 /* ScreensSettingsView.swift */; };
@@ -250,6 +251,7 @@
 		A991E1D084A864C4E5992455 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AC2ED674FBDC904651E8EA9E /* ButtonMappingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingView.swift; sourceTree = "<group>"; };
 		AC98B95B098222B202A26D90 /* ROMGridCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ROMGridCell.swift; sourceTree = "<group>"; };
+		AEF93AF9A9B668F16F548652 /* INDSSpeedPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = INDSSpeedPreferences.swift; sourceTree = "<group>"; };
 		B4B2F616B4DA20E61FFAB807 /* 7zCrc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = 7zCrc.c; sourceTree = "<group>"; };
 		B4E6BCDFFB9BA55C5E8E9C0D /* INDSButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = INDSButtonStyle.swift; sourceTree = "<group>"; };
 		B5F4E073693E71160ED123DC /* THIRD_PARTY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = THIRD_PARTY.md; sourceTree = "<group>"; };
@@ -501,6 +503,7 @@
 				E702B9DB47C1592FC6A1B103 /* INDSConsolePreferences.swift */,
 				1B3706BB5B202BDAD36D7642 /* INDSRTCPreferences.swift */,
 				49D337D1C81BF653BCDBE43A /* INDSSavingPreferences.swift */,
+				AEF93AF9A9B668F16F548652 /* INDSSpeedPreferences.swift */,
 				832C9E7B82057B4070014001 /* INDSTurboPreferences.swift */,
 			);
 			path = Support;
@@ -897,6 +900,7 @@
 				C255D295ABFF60D2571C01FF /* INDSConsolePreferences.swift in Sources */,
 				CBDE78B663229C673670C084 /* INDSRTCPreferences.swift in Sources */,
 				A9655D665D23578FAC99F041 /* INDSSavingPreferences.swift in Sources */,
+				93327EEADB6D2C3100E72AF7 /* INDSSpeedPreferences.swift in Sources */,
 				22B1D937B8B434AFF81888F3 /* INDSTurboPreferences.swift in Sources */,
 				BAFEFD231C0D3E3837FA20A0 /* SplashScreenView.swift in Sources */,
 				B02B467150A889372451E36C /* WelcomeView.swift in Sources */,

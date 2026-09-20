@@ -34,6 +34,7 @@ struct ControlsSettingsView: View {
     @State private var hapticsEnabled: Bool
     @State private var hapticStrength: INDSHapticStrength
     @State private var turboButtons: Set<INDSButton>
+    @State private var fastForwardSpeed: Double
 
     init() {
         let defaults = UserDefaults.standard
@@ -42,6 +43,7 @@ struct ControlsSettingsView: View {
         _hapticsEnabled = State(initialValue: INDSHaptics.isEnabled)
         _hapticStrength = State(initialValue: INDSHaptics.strength)
         _turboButtons = State(initialValue: INDSTurboPreferences.buttons)
+        _fastForwardSpeed = State(initialValue: INDSSpeedPreferences.fastForwardSpeed)
     }
 
     var body: some View {
@@ -110,6 +112,22 @@ struct ControlsSettingsView: View {
                 Text("Turbo")
             } footer: {
                 Text("A turbo button fires by itself while you hold it. Works with the on-screen controls, a controller and a keyboard.")
+            }
+
+            Section {
+                Picker("Speed", selection: $fastForwardSpeed) {
+                    ForEach(INDSSpeedPreferences.fastForwardSpeeds, id: \.self) { speed in
+                        Text(INDSSpeedPreferences.label(speed)).tag(speed)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: fastForwardSpeed) { _, newValue in
+                    INDSSpeedPreferences.fastForwardSpeed = newValue
+                }
+            } header: {
+                Text("Fast forward")
+            } footer: {
+                Text("How fast the game runs while Fast Forward is on, both from the Speed button on screen and from a controller. Tapping the on-screen button steps through these rates. A heavy 3D game may not reach the fastest one on every device.")
             }
 
             Section {

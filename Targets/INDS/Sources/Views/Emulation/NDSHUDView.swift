@@ -27,7 +27,7 @@ final class NDSHUDView: UIView {
     var onCycleLayoutTapped: (() -> Void)?
     var onErrorBackTapped: (() -> Void)?
     /// Fires with the new state on every tap of the Speed pill.
-    var onFastForwardToggled: ((Bool) -> Void)?
+    var onFastForwardTapped: (() -> Void)?
 
     private let pauseButton = NDSHUDView.makeCircleButton(
         systemName: "pause.fill",
@@ -37,12 +37,19 @@ final class NDSHUDView: UIView {
         title: NSLocalizedString("Layout", comment: "HUD button caption: cycles the screen layout"))
     /// Touch users' only route to fast forward — before this it existed solely
     /// as a gamepad hotkey that ships unassigned, so on a phone the feature was
-    /// unreachable. Toggle, not hold (see `INDSControllerButtonID.fastForward`).
+    /// unreachable. A latch that steps through the rates on each tap, not a
+    /// hold (see `INDSControllerButtonID.fastForward`): while it is on, the
+    /// caption is the rate itself, which is also the only place the rate is
+    /// visible during play.
     private let fastForwardButton = NDSHUDView.makeCircleButton(
         systemName: "forward.fill",
-        title: NSLocalizedString("Speed", comment: "HUD button caption: toggles fast forward"))
+        title: NDSHUDView.fastForwardCaption)
 
-    private var isFastForwardOn = false
+    private static let fastForwardCaption = NSLocalizedString(
+        "Speed", comment: "HUD button caption: cycles fast forward speed")
+
+    /// nil = off; otherwise the rate currently running.
+    private var fastForwardSpeed: Double?
 
     private let toastLabel = NDSHUDView.makeToastLabel()
     private var toastHideWorkItem: DispatchWorkItem?
@@ -380,21 +387,23 @@ final class NDSHUDView: UIView {
 
     @objc private func fastForwardTapped() {
         INDSHaptics.light()
-        setFastForwardActive(!isFastForwardOn)
-        onFastForwardToggled?(isFastForwardOn)
+        // Which rate comes next is not the HUD's call — the owner of the
+        // stored setting decides, and tells us back through
+        // `setFastForwardSpeed(_:)`.
+        onFastForwardTapped?()
     }
 
     /// Also the entry point for the gamepad hold, so the pill always reflects
-    /// the real speed state no matter which input turned it on.
-    func setFastForwardActive(_ active: Bool) {
-        guard isFastForwardOn != active else { return }
-        isFastForwardOn = active
+    /// the real speed state no matter which input turned it on. nil = off.
+    func setFastForwardSpeed(_ speed: Double?) {
+        guard fastForwardSpeed != speed else { return }
+        fastForwardSpeed = speed
         var config = fastForwardButton.configuration
-        config?.baseForegroundColor = active ? .systemYellow : .white
+        config?.baseForegroundColor = speed == nil ? .white : .systemYellow
+        config?.title = speed.map(INDSSpeedPreferences.label) ?? Self.fastForwardCaption
         fastForwardButton.configuration = config
-        fastForwardButton.accessibilityValue = active
-            ? NSLocalizedString("On", comment: "Fast forward state")
-            : NSLocalizedString("Off", comment: "Fast forward state")
+        fastForwardButton.accessibilityValue = speed.map(INDSSpeedPreferences.label)
+            ?? NSLocalizedString("Off", comment: "Fast forward state")
     }
 
     @objc private func errorBackTapped() {

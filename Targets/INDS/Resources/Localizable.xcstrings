@@ -8064,6 +8064,71 @@
         }
       }
     },
+    "How fast the game runs while Fast Forward is on, both from the Speed button on screen and from a controller. Tapping the on-screen button steps through these rates. A heavy 3D game may not reach the fastest one on every device." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "How fast the game runs while Fast Forward is on, both from the Speed button on screen and from a controller. Tapping the on-screen button steps through these rates. A heavy 3D game may not reach the fastest one on every device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A qué velocidad corre el juego mientras el avance rápido está activado, tanto desde el botón Velocidad en pantalla como desde un mando. Cada toque en el botón en pantalla pasa a la velocidad siguiente. Un juego 3D exigente puede no alcanzar la más alta en todos los dispositivos."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie schnell das Spiel läuft, solange der Schnellvorlauf an ist – über die Taste „Geschwindigkeit“ auf dem Bildschirm und über einen Controller. Jedes Tippen auf die Taste schaltet eine Stufe weiter. Ein aufwendiges 3D-Spiel erreicht die höchste Stufe nicht auf jedem Gerät."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La vitesse du jeu quand l’avance rapide est active, aussi bien depuis le bouton Vitesse à l’écran que depuis une manette. Chaque appui sur le bouton à l’écran passe à la vitesse suivante. Un jeu 3D lourd n’atteindra pas la plus rapide sur tous les appareils."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A che velocità gira il gioco mentre l’avanzamento rapido è attivo, sia dal pulsante Velocità sullo schermo sia da un controller. Ogni tocco sul pulsante passa alla velocità successiva. Un gioco 3D pesante potrebbe non raggiungere la più alta su tutti i dispositivi."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A que velocidade corre o jogo com o avanço rápido ligado, tanto a partir do botão Velocidade no ecrã como de um comando. Cada toque no botão no ecrã passa à velocidade seguinte. Um jogo 3D exigente pode não atingir a mais alta em todos os dispositivos."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скорость игры при включённом ускорении — и с экранной кнопки «Скорость», и с контроллера. Каждое касание экранной кнопки переключает на следующую скорость. Тяжёлая 3D-игра может не выйти на самую высокую скорость на любом устройстве."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "早送り中にゲームが動く速度です。画面の「速度」ボタンからでもコントローラーからでも同じ速度になります。画面のボタンをタップするたびに次の速度に切り替わります。負荷の高い3Dゲームでは、端末によっては最速まで出ないことがあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빨리 감기가 켜져 있는 동안 게임이 도는 속도입니다. 화면의 ‘속도’ 버튼과 컨트롤러 모두 같은 속도를 씁니다. 화면 버튼을 누를 때마다 다음 속도로 넘어갑니다. 무거운 3D 게임에서는 기기에 따라 가장 빠른 속도까지 나오지 않을 수 있습니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快进开启时游戏运行的速度，屏幕上的「速度」按钮和手柄都用这一档。每点一次屏幕按钮就切换到下一档。较吃性能的 3D 游戏在部分设备上达不到最快的一档。"
+          }
+        }
+      }
+    },
     "I'll explore first" : {
       "localizations" : {
         "de" : {
