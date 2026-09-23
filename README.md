@@ -1,6 +1,6 @@
 # eNDS
 
-A DS emulator for iPhone and iPad, built on the
+A retro game emulator for iPhone and iPad, built on the
 [melonDS](https://github.com/melonDS-emu/melonDS) emulation core.
 
 This repository contains the complete source code of the eNDS app as it is
@@ -105,7 +105,7 @@ it is not a lock.
   DeSmuME; this one is a SwiftUI/UIKit frontend over melonDS, and every line
   of it is in this repository for comparison.
 - Parts of the on-screen controller, layout editor and purchase UI were
-  ported from **iGBA**, the author's Game Boy Advance emulator, and the
+  ported from **iGBA**, the author's other emulator, and the
   comment headers of those files say so. That code is the author's own and
   is published here under the GPLv3.
 - eNDS does not include any games and does not link to ROM sites. Play only
